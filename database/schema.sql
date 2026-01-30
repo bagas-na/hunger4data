@@ -24,5 +24,7 @@ CREATE TABLE payment_events (
     event_type VARCHAR(32) NOT NULL, -- created, pending, paid, failed, expired
     source VARCHAR(16) NOT NULL, -- system, webhook
 
+    provider_event_id VARCHAR(255) UNIQUE,
+
     created_at TIMESTAMP NOT NULL DEFAULT now()
 );
