@@ -14,7 +14,7 @@ type jwt_const struct {
 	exp_time time.Duration
 }
 
-func NewJwt(secret string) jwt_const {
+func NewJwtPass(secret string) jwt_const {
 	return jwt_const{secret: []byte(secret)}
 }
 
