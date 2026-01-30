@@ -13,19 +13,48 @@ type UserRepo interface {
 	DeleteUser(username string) error
 }
 
-type MysqlRepository struct {
+type GORMRepository struct {
 	db *gorm.DB
 }
 
 func NewUserRepo(db *gorm.DB) UserRepo {
-	return &MysqlRepository{
+	return &GORMRepository{
 		db: db,
 	}
 }
 
-func (r *MysqlRepository) CreateUser(u service.Users) error {
+func (r *GORMRepository) CreateUser(u service.Users) error {
 
 	err := r.db.Create(&u).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *GORMRepository) GetByUsername(username string) (*service.Users, error) {
+	var user service.Users
+	result := r.db.Where("username = ? ", username).First(&user)
+	if result.Error != nil {
+		return &service.Users{}, result.Error
+	}
+	return &user, nil
+}
+
+func (r *GORMRepository) UpdateUser(username string, user service.Users) error {
+
+	err := r.db.Where("username = ?", username).Updates(user).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *GORMRepository) DeleteUser(username string) error {
+	var user service.Users
+	err := r.db.Delete(user, "username = ?", username).Error
 	if err != nil {
 		return err
 	}
@@ -49,32 +78,3 @@ func (r *MysqlRepository) CreateUser(u service.Users) error {
 
 // 	return &user, nil
 // }
-
-func (r *MysqlRepository) GetByUsername(username string) (*service.Users, error) {
-	var user service.Users
-	result := r.db.Where("username = ? ", username).First(&user)
-	if result.Error != nil {
-		return &service.Users{}, result.Error
-	}
-	return &user, nil
-}
-
-func (r *MysqlRepository) UpdateUser(username string, user service.Users) error {
-
-	err := r.db.Where("username = ?", username).Updates(user).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *MysqlRepository) DeleteUser(username string) error {
-	var user service.Users
-	err := r.db.Delete(user, "username = ?", username).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
