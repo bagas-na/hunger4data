@@ -36,10 +36,10 @@ func LoadConfig() *Config {
 
 	return &Config{
 		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "3306"),
-		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "go_grpc_test"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "1"),
+		DBName:     getEnv("DB_NAME", "test"),
 		JWTSecret:  getEnv("JWT_SECRET", "secret"),
 		GRPCPort:   getEnv("GRPC_PORT", "50051"),
 		RESTPort:   getEnv("REST_PORT", "8080"),
@@ -90,6 +90,10 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
+	err = db.AutoMigrate(&service.Users{})
+	if err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
 	userRepo := repo.NewUserRepo(db)
 
 	jwtManager := crypto.NewJwtPass(cfg.JWTSecret)

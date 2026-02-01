@@ -2,6 +2,7 @@ package repo
 
 import (
 	"authenticator/internal/service"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -37,7 +38,10 @@ func (r *GORMRepository) GetByUsername(username string) (*service.Users, error) 
 	var user service.Users
 	result := r.db.Where("username = ? ", username).First(&user)
 	if result.Error != nil {
-		return &service.Users{}, result.Error
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
 	}
 	return &user, nil
 }
