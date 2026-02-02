@@ -18,7 +18,7 @@ func NewPaymentRepo(db *gorm.DB) *PaymentRepo {
 	}
 }
 
-func (r *PaymentRepo) FindByID(ctx context.Context, id uuid.UUID) (*Payment, error) {
+func (r *PaymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payment, error) {
 	var payment Payment
 	err := r.db.WithContext(ctx).First(&payment, "id = ?", id).Error
 	return &payment, err
@@ -78,27 +78,28 @@ func (r *PaymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) (
 	return payments, err
 }
 
-func (r *PaymentRepo) UpdatePaymentProviderObject(ctx context.Context, id uuid.UUID, providerObjectID string) (*Payment, error) {
+// func (r *PaymentRepo) UpdatePaymentProviderObject(ctx context.Context, id uuid.UUID, providerObjectID string) (*Payment, error) {
 
-	payment, err := r.updatePayment(
-		ctx,
-		id,
-		"",
-		"created",        // event type
-		providerObjectID, // provider object
-		"app",            // source
-	)
+// 	payment, err := r.updatePayment(
+// 		ctx,
+// 		id,
+// 		"",
+// 		"created",
+// 		providerObjectID,
+// 		"app",
+// 	)
 
-	return payment, err
-}
+// 	return payment, err
+// }
 
-func (r *PaymentRepo) updatePayment(
+func (r *PaymentRepo) UpdatePayment(
 	ctx context.Context,
 	id uuid.UUID,
-	status string,
-	eventType string,
+	status PaymentStatus,
+	eventType PaymentEventType,
 	sessionID string,
 	source string,
+	providerEventID string,
 ) (*Payment, error) {
 
 	eventID := uuid.New()
@@ -125,11 +126,12 @@ func (r *PaymentRepo) updatePayment(
 		}
 
 		newEvent := PaymentEvent{
-			ID:        eventID,
-			PaymentID: payment.ID,
-			EventType: eventType,
-			Source:    source,
-			CreatedAt: time.Now(),
+			ID:              eventID,
+			PaymentID:       payment.ID,
+			EventType:       eventType,
+			Source:          source,
+			ProviderEventID: providerEventID,
+			CreatedAt:       time.Now(),
 		}
 
 		if err := tx.Create(&newEvent).Error; err != nil {
