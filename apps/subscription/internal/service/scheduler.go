@@ -31,6 +31,15 @@ func fetchAndSync(rdb *redis.Client) error {
 	return rdb.Set(context.Background(), "countries:latest", binaryData, 24*time.Hour).Err()
 }
 
+func StartSyncWithoutScheduler(rdb *redis.Client) {
+	err := fetchAndSync(rdb)
+	if err != nil {
+		log.Printf("Cron Error: Failed to sync data: %v", err)
+	} else {
+		log.Println("Cron: Sync successful!")
+	}
+}
+
 func StartSyncScheduler(rdb *redis.Client) {
 	c := cron.New()
 	_, err := c.AddFunc("0 */12 * * *", func() {

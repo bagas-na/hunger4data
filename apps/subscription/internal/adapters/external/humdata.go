@@ -26,6 +26,7 @@ type HAPIResponse struct {
 	Data []model.Country `json:"data"`
 }
 
+// Redis sync
 func GetHumData() HAPIResponse {
 	authInfo := "hunger4data:hunger4data@email.com"
 	appIdentifier := base64.StdEncoding.EncodeToString([]byte(authInfo))
@@ -77,6 +78,7 @@ func GetHumData() HAPIResponse {
 	return finalResponse
 }
 
+// GRPC -> Rest
 func GetHumDataRedis(rdb *redis.Client) (*pb.Get_Countries_Response, error) {
 	ctx := context.Background()
 	cacheKey := "countries:latest"

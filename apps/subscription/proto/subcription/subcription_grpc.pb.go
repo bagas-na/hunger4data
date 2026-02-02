@@ -4,11 +4,10 @@
 // - protoc             v6.33.4
 // source: proto/subcription/subcription.proto
 
-package pb
+package proto
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Subscription_Service_Get_Countries_FullMethodName       = "/subscribe.Subscription_Service/Get_Countries"
-	Subscription_Service_Create_Subscription_FullMethodName = "/subscribe.Subscription_Service/Create_Subscription"
-	Subscription_Service_Update_Subscription_FullMethodName = "/subscribe.Subscription_Service/Update_Subscription"
-	Subscription_Service_Delete_Subscription_FullMethodName = "/subscribe.Subscription_Service/Delete_Subscription"
-	Subscription_Service_Get_Subscription__FullMethodName   = "/subscribe.Subscription_Service/Get_Subscription_"
+	Subscription_Service_Get_Countries_FullMethodName          = "/subscribe.Subscription_Service/Get_Countries"
+	Subscription_Service_Create_Subscription_FullMethodName    = "/subscribe.Subscription_Service/Create_Subscription"
+	Subscription_Service_Update_Subscription_FullMethodName    = "/subscribe.Subscription_Service/Update_Subscription"
+	Subscription_Service_Delete_Subscription_FullMethodName    = "/subscribe.Subscription_Service/Delete_Subscription"
+	Subscription_Service_Get_Subscription_By_ID_FullMethodName = "/subscribe.Subscription_Service/Get_Subscription_By_ID"
 )
 
 // Subscription_ServiceClient is the client API for Subscription_Service service.
@@ -35,7 +34,7 @@ type Subscription_ServiceClient interface {
 	Create_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
 	Update_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
 	Delete_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
-	Get_Subscription_(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Get_Subscription_Response, error)
+	Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_Response, error)
 }
 
 type subscription_ServiceClient struct {
@@ -86,10 +85,10 @@ func (c *subscription_ServiceClient) Delete_Subscription(ctx context.Context, in
 	return out, nil
 }
 
-func (c *subscription_ServiceClient) Get_Subscription_(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Get_Subscription_Response, error) {
+func (c *subscription_ServiceClient) Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Get_Subscription_Response)
-	err := c.cc.Invoke(ctx, Subscription_Service_Get_Subscription__FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Subscription_Service_Get_Subscription_By_ID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +103,7 @@ type Subscription_ServiceServer interface {
 	Create_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
 	Update_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
 	Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
-	Get_Subscription_(context.Context, *Empty) (*Get_Subscription_Response, error)
+	Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_Response, error)
 	mustEmbedUnimplementedSubscription_ServiceServer()
 }
 
@@ -127,8 +126,8 @@ func (UnimplementedSubscription_ServiceServer) Update_Subscription(context.Conte
 func (UnimplementedSubscription_ServiceServer) Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete_Subscription not implemented")
 }
-func (UnimplementedSubscription_ServiceServer) Get_Subscription_(context.Context, *Empty) (*Get_Subscription_Response, error) {
-	return nil, status.Error(codes.Unimplemented, "method Get_Subscription_ not implemented")
+func (UnimplementedSubscription_ServiceServer) Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_Response, error) {
+	return nil, status.Error(codes.Unimplemented, "method Get_Subscription_By_ID not implemented")
 }
 func (UnimplementedSubscription_ServiceServer) mustEmbedUnimplementedSubscription_ServiceServer() {}
 func (UnimplementedSubscription_ServiceServer) testEmbeddedByValue()                              {}
@@ -223,20 +222,20 @@ func _Subscription_Service_Delete_Subscription_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Subscription_Service_Get_Subscription__Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+func _Subscription_Service_Get_Subscription_By_ID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Subscription_Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(Subscription_ServiceServer).Get_Subscription_(ctx, in)
+		return srv.(Subscription_ServiceServer).Get_Subscription_By_ID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Subscription_Service_Get_Subscription__FullMethodName,
+		FullMethod: Subscription_Service_Get_Subscription_By_ID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Subscription_ServiceServer).Get_Subscription_(ctx, req.(*Empty))
+		return srv.(Subscription_ServiceServer).Get_Subscription_By_ID(ctx, req.(*Subscription_Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -265,8 +264,8 @@ var Subscription_Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Subscription_Service_Delete_Subscription_Handler,
 		},
 		{
-			MethodName: "Get_Subscription_",
-			Handler:    _Subscription_Service_Get_Subscription__Handler,
+			MethodName: "Get_Subscription_By_ID",
+			Handler:    _Subscription_Service_Get_Subscription_By_ID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

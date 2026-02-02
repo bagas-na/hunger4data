@@ -5,7 +5,7 @@ option go_package = "./proto";
 message Subscription {
   int64 id = 1;
   int64 id_user = 2;
-  string id_country = 3;
+  int64 id_country = 3;
 }
 
 message Country {
@@ -18,7 +18,7 @@ service Subscription_Service {
   rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Get_Subscription_(Empty) returns (Get_Subscription_Response);
+  rpc Get_Subscription_By_ID(Subscription_Request) returns (Get_Subscription_Response);
 }
 
 message Empty {}
@@ -29,8 +29,10 @@ message Get_Countries_Response {
 }
 
 message Subscription_Request {
-  Subscription subscription = 1;
-  string message = 2;
+  int64 id = 1;
+  int64 id_user = 2;
+  int64 id_country = 3;
+  string message = 4;
 }
 
 message Get_Subscription_Response {

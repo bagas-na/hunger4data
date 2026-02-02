@@ -1,12 +1,12 @@
 package model
 
 type Subscription struct {
-	Id         int64
-	Id_user    int64  `json:"id_user"`
-	Id_country string `json:"id_country"`
+	Id         int64 `gorm:"primaryKey"`
+	Id_user    int64 `json:"id_user" gorm:"not null"`
+	Id_country int64 `json:"id_country" gorm:"not null"`
 }
 
 type Country struct {
-	Id   int64
-	Name string `json:"location_name"`
+	Id   int64  `gorm:"primaryKey"`
+	Name string `json:"location_name" gorm:"not null"`
 }
