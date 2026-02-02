@@ -1,20 +1,27 @@
 package httpHandler
 
 import (
-	"fmt"
+	"context"
+	"encoding/json"
+	"io"
 	"net/http"
+	"payment-service/internal/service"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stripe/stripe-go/v84"
 )
 
-func StripeWebhookHandler(webhookSecret string) echo.HandlerFunc {
+func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		event := stripe.Event{}
+		ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+		defer cancel()
 
-		if err := c.Bind(&event); err != nil {
+		payload, err := io.ReadAll(c.Request().Body)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "invalid argument",
+				"message": "failed to read request body",
 				"detail":  err.Error(),
 			})
 		}
@@ -22,49 +29,67 @@ func StripeWebhookHandler(webhookSecret string) echo.HandlerFunc {
 		sig := c.Request().Header.Get("Stripe-Signature")
 		if sig == "" {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "empty stripe signature",
+				"message": "missing Stripe-Signature header",
 			})
 		}
 
+		event, err := stripe.ConstructEvent(payload, sig, webhookSecret)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "invalid stripe signature",
+			})
+		}
 		switch event.Type {
-		case "checkout.session.async_payment_failed":
+
+		case "checkout.session.completed", "checkout.session.expired":
 			{
-				fmt.Println("checkout.session.async_payment_failed")
-			}
-		case "checkout.session.async_payment_succeeded":
-			{
-				fmt.Println("checkout.session.async_payment_succeeded")
-			}
-		case "checkout.session.completed":
-			{
-				fmt.Println("checkout.session.completed")
-			}
-		case "checkout.session.expired":
-			{
-				fmt.Println("checkout.session.expired")
-			}
-		case "payment_intent.canceled":
-			{
-				fmt.Println("payment_intent.canceled")
-			}
-		case "payment_intent.created":
-			{
-				fmt.Println("payment_intent.created")
-			}
-		case "payment_intent.payment_failed":
-			{
-				fmt.Println("payment_intent.payment_failed")
-			}
-		case "payment_intent.processing":
-			{
-				fmt.Println("payment_intent.processing")
-			}
-		case "payment_intent.succeeded":
-			{
-				fmt.Println("payment_intent.succeeded")
+				var session stripe.CheckoutSession
+				if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]any{
+						"message": "unable to unmarshal CheckoutSession",
+					})
+				}
+
+				paymentID, err := uuid.Parse(session.ClientReferenceID)
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]any{
+						"message": "invalid ClientReferenceID",
+					})
+				}
+
+				if event.Type == "checkout.session.completed" {
+					_, err = svc.UpdatePaymentToPaid(ctx, paymentID, event.ID)
+				} else {
+					_, err = svc.UpdatePaymentToExpired(ctx, paymentID, event.ID)
+				}
+
+				if err != nil {
+					return err
+				}
 			}
 
+		case "payment_intent.payment_failed":
+			{
+				var pi stripe.PaymentIntent
+				if err := json.Unmarshal(event.Data.Raw, &pi); err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]any{
+						"message": "unable to unmarshal PaymentIntent",
+					})
+				}
+
+				paymentID, err := uuid.Parse(pi.Metadata["payment_id"])
+				if err != nil {
+					return c.JSON(http.StatusBadRequest, map[string]any{
+						"message": "invalid payment_id metadata",
+					})
+				}
+
+				if _, err := svc.UpdatePaymentToFailed(ctx, paymentID, event.ID); err != nil {
+					return err
+				}
+			}
 		}
+
 		return c.NoContent(http.StatusOK)
 	}
 }

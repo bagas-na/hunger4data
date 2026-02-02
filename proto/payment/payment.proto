@@ -21,8 +21,8 @@ message Payment {
   string provider_session_id = 8;
   string status = 9;
 
-  google.protobuf.Timestamp created_at = 10;
-  google.protobuf.Timestamp updated_at = 11;
+  string created_at = 10;
+  string updated_at = 11;
 }
 
 

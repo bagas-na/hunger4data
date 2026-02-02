@@ -9,7 +9,7 @@ package paymentv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -34,8 +34,8 @@ type Payment struct {
 	Provider          string                 `protobuf:"bytes,7,opt,name=provider,proto3" json:"provider,omitempty"`
 	ProviderSessionId string                 `protobuf:"bytes,8,opt,name=provider_session_id,json=providerSessionId,proto3" json:"provider_session_id,omitempty"`
 	Status            string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
-	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt         string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -133,18 +133,18 @@ func (x *Payment) GetStatus() string {
 	return ""
 }
 
-func (x *Payment) GetCreatedAt() *timestamppb.Timestamp {
+func (x *Payment) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
-	return nil
+	return ""
 }
 
-func (x *Payment) GetUpdatedAt() *timestamppb.Timestamp {
+func (x *Payment) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
 	}
-	return nil
+	return ""
 }
 
 // --- Payment Create - DTO
@@ -540,7 +540,7 @@ var File_payment_proto protoreflect.FileDescriptor
 const file_payment_proto_rawDesc = "" +
 	"\n" +
 	"\rpayment.proto\x12\n" +
-	"payment.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8a\x03\n" +
+	"payment.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd2\x02\n" +
 	"\aPayment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
@@ -551,12 +551,12 @@ const file_payment_proto_rawDesc = "" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12\x1a\n" +
 	"\bprovider\x18\a \x01(\tR\bprovider\x12.\n" +
 	"\x13provider_session_id\x18\b \x01(\tR\x11providerSessionId\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status\x129\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x82\x01\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x82\x01\n" +
 	"\x14CreatePaymentRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
@@ -608,27 +608,24 @@ var file_payment_proto_goTypes = []any{
 	(*ListPaymentsResponse)(nil),          // 6: payment.v1.ListPaymentsResponse
 	(*ListPendingPaymentsRequest)(nil),    // 7: payment.v1.ListPendingPaymentsRequest
 	(*ListPendingPaymentsResponse)(nil),   // 8: payment.v1.ListPendingPaymentsResponse
-	(*timestamppb.Timestamp)(nil),         // 9: google.protobuf.Timestamp
 }
 var file_payment_proto_depIdxs = []int32{
-	9, // 0: payment.v1.Payment.created_at:type_name -> google.protobuf.Timestamp
-	9, // 1: payment.v1.Payment.updated_at:type_name -> google.protobuf.Timestamp
-	0, // 2: payment.v1.CreatePaymentResponse.payment:type_name -> payment.v1.Payment
-	0, // 3: payment.v1.ListPaymentsResponse.payments:type_name -> payment.v1.Payment
-	0, // 4: payment.v1.ListPendingPaymentsResponse.payments:type_name -> payment.v1.Payment
-	1, // 5: payment.v1.PaymentService.CreatePayment:input_type -> payment.v1.CreatePaymentRequest
-	3, // 6: payment.v1.PaymentService.GetPaymentCheckoutURL:input_type -> payment.v1.GetPaymentCheckoutURLRequest
-	5, // 7: payment.v1.PaymentService.ListPayments:input_type -> payment.v1.ListPaymentsRequest
-	7, // 8: payment.v1.PaymentService.ListPendingPayments:input_type -> payment.v1.ListPendingPaymentsRequest
-	2, // 9: payment.v1.PaymentService.CreatePayment:output_type -> payment.v1.CreatePaymentResponse
-	4, // 10: payment.v1.PaymentService.GetPaymentCheckoutURL:output_type -> payment.v1.GetPaymentCheckoutURLResponse
-	6, // 11: payment.v1.PaymentService.ListPayments:output_type -> payment.v1.ListPaymentsResponse
-	8, // 12: payment.v1.PaymentService.ListPendingPayments:output_type -> payment.v1.ListPendingPaymentsResponse
-	9, // [9:13] is the sub-list for method output_type
-	5, // [5:9] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0, // 0: payment.v1.CreatePaymentResponse.payment:type_name -> payment.v1.Payment
+	0, // 1: payment.v1.ListPaymentsResponse.payments:type_name -> payment.v1.Payment
+	0, // 2: payment.v1.ListPendingPaymentsResponse.payments:type_name -> payment.v1.Payment
+	1, // 3: payment.v1.PaymentService.CreatePayment:input_type -> payment.v1.CreatePaymentRequest
+	3, // 4: payment.v1.PaymentService.GetPaymentCheckoutURL:input_type -> payment.v1.GetPaymentCheckoutURLRequest
+	5, // 5: payment.v1.PaymentService.ListPayments:input_type -> payment.v1.ListPaymentsRequest
+	7, // 6: payment.v1.PaymentService.ListPendingPayments:input_type -> payment.v1.ListPendingPaymentsRequest
+	2, // 7: payment.v1.PaymentService.CreatePayment:output_type -> payment.v1.CreatePaymentResponse
+	4, // 8: payment.v1.PaymentService.GetPaymentCheckoutURL:output_type -> payment.v1.GetPaymentCheckoutURLResponse
+	6, // 9: payment.v1.PaymentService.ListPayments:output_type -> payment.v1.ListPaymentsResponse
+	8, // 10: payment.v1.PaymentService.ListPendingPayments:output_type -> payment.v1.ListPendingPaymentsResponse
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_payment_proto_init() }
