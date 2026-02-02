@@ -24,12 +24,12 @@ func NewPaymentGRPCServer(svc *service.PaymentService) *PaymentGRPCServer {
 func (s *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.CreatePaymentRequest) (*paymentv1.CreatePaymentResponse, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid user_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
 	countryID, err := uuid.Parse(req.CountryId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid country_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid country_id")
 	}
 
 	payment, checkoutURL, err := s.svc.CreatePaymentAndCheckout(
@@ -40,7 +40,7 @@ func (s *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 		req.Currency,
 	)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &paymentv1.CreatePaymentResponse{
@@ -52,12 +52,12 @@ func (s *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 func (s *PaymentGRPCServer) GetPaymentCheckoutURL(ctx context.Context, req *paymentv1.GetPaymentCheckoutURLRequest) (*paymentv1.GetPaymentCheckoutURLResponse, error) {
 	paymentID, err := uuid.Parse(req.PaymentId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid payment_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid payment_id")
 	}
 
 	url, err := s.svc.GetCheckoutURL(ctx, paymentID)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, err.Error())
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	return &paymentv1.GetPaymentCheckoutURLResponse{
@@ -68,12 +68,12 @@ func (s *PaymentGRPCServer) GetPaymentCheckoutURL(ctx context.Context, req *paym
 func (s *PaymentGRPCServer) ListPayments(ctx context.Context, req *paymentv1.ListPaymentsRequest) (*paymentv1.ListPaymentsResponse, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid user_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
 	payments, err := s.svc.ListPaymentsByUser(ctx, userID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp := &paymentv1.ListPaymentsResponse{}
@@ -87,12 +87,12 @@ func (s *PaymentGRPCServer) ListPayments(ctx context.Context, req *paymentv1.Lis
 func (s *PaymentGRPCServer) ListPendingPayments(ctx context.Context, req *paymentv1.ListPendingPaymentsRequest) (*paymentv1.ListPendingPaymentsResponse, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid user_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
 	payments, err := s.svc.ListActivePaymentsByUser(ctx, userID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	resp := &paymentv1.ListPendingPaymentsResponse{}
