@@ -1,0 +1,45 @@
+syntax = "proto3";
+package subscribe;
+option go_package = "./proto";
+
+message Subscription {
+  int64 id = 1;
+  int64 id_user = 2;
+  int64 id_country = 3;
+}
+
+message Country {
+  int64 id = 1;
+  string name  = 2;
+}
+
+service Subscription_Service {
+  rpc Get_Countries(Empty) returns (Get_Countries_Response);
+  rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
+  rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
+  rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
+  rpc Get_Subscription_By_ID(Subscription_Request) returns (Get_Subscription_Response);
+}
+
+message Empty {}
+
+message Get_Countries_Response {
+  repeated Country countries = 1;
+  string message = 2;
+}
+
+message Subscription_Request {
+  int64 id = 1;
+  int64 id_user = 2;
+  int64 id_country = 3;
+  string message = 4;
+}
+
+message Get_Subscription_Response {
+  Subscription subscription = 1;
+  string message = 2;
+}
+
+message Subscription_Response {
+  string message = 1;
+}
