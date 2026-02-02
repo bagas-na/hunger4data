@@ -14,6 +14,10 @@ type PaymentService interface {
 	GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error)
 	ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
 	ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
+	UpdatePaymentToPending(ctx context.Context, paymentID uuid.UUID, providerSessionID string) (*db.Payment, error)
+	UpdatePaymentToPaid(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error)
+	UpdatePaymentToFailed(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error)
+	UpdatePaymentToExpired(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error)
 }
 
 type paymentService struct {
@@ -75,7 +79,7 @@ func (s *paymentService) CreatePaymentAndCheckout(
 		Amount:          amount,
 		Currency:        currency,
 		Provider:        "stripe",
-		Status:          "pending",
+		Status:          db.StatusCreated,
 	}
 
 	newPayment, err := s.repo.CreatePayment(ctx, payment)
@@ -97,15 +101,6 @@ func (s *paymentService) CreatePaymentAndCheckout(
 		return nil, "", err
 	}
 
-	newPayment, err = s.repo.UpdatePaymentProviderObject(
-		ctx,
-		newPayment.ID,
-		session.PaymentIntentID,
-	)
-	if err != nil {
-		return nil, "", err
-	}
-
 	return newPayment, session.URL, nil
 }
 
@@ -114,7 +109,7 @@ func (s *paymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID
 		return "", errors.New("paymentID is required")
 	}
 
-	payment, err := s.repo.FindByID(ctx, paymentID)
+	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
 	if err != nil {
 		return "", err
 	}
@@ -147,4 +142,105 @@ func (s *paymentService) ListActivePaymentsByUser(ctx context.Context, userID uu
 	}
 
 	return s.repo.ListPendingByUser(ctx, userID)
+}
+
+func (s *paymentService) UpdatePaymentToPending(ctx context.Context, paymentID uuid.UUID, providerSessionID string) (*db.Payment, error) {
+	if providerSessionID == "" {
+		return nil, errors.New("providerSessionID is required")
+	}
+
+	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if payment.Status != db.StatusCreated {
+		return nil, errors.New("payment not in created state")
+	}
+
+	return s.repo.UpdatePayment(
+		ctx,
+		paymentID,
+		db.StatusPending,
+		db.EventPending,
+		providerSessionID,
+		"app",
+		"",
+	)
+}
+
+func (s *paymentService) UpdatePaymentToPaid(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error) {
+	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if payment.Status == db.StatusPaid {
+		return payment, nil
+	}
+
+	if payment.Status != db.StatusPending {
+		return nil, errors.New("payment not pending")
+	}
+
+	return s.repo.UpdatePayment(
+		ctx,
+		paymentID,
+		db.StatusPaid,
+		db.EventPaid,
+		"",
+		"webhook",
+		providerEventID,
+	)
+}
+
+func (s *paymentService) UpdatePaymentToFailed(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error) {
+
+	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if payment.Status == db.StatusFailed {
+		return payment, nil
+	}
+
+	if payment.Status != db.StatusPending {
+		return nil, errors.New("payment not pending")
+	}
+
+	return s.repo.UpdatePayment(
+		ctx,
+		paymentID,
+		db.StatusFailed,
+		db.EventFailed,
+		"",
+		"webhook",
+		providerEventID,
+	)
+}
+
+func (s *paymentService) UpdatePaymentToExpired(ctx context.Context, paymentID uuid.UUID, providerEventID string) (*db.Payment, error) {
+	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if payment.Status == db.StatusExpired {
+		return payment, nil
+	}
+
+	if payment.Status != db.StatusPending {
+		return nil, errors.New("payment not pending")
+	}
+
+	return s.repo.UpdatePayment(
+		ctx,
+		paymentID,
+		db.StatusExpired,
+		db.EventExpired,
+		"",
+		"webhook",
+		providerEventID,
+	)
 }
