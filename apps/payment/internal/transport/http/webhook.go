@@ -3,6 +3,7 @@ package httpHandler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"payment-service/internal/service"
@@ -39,6 +40,7 @@ func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo
 				"message": "invalid stripe signature",
 			})
 		}
+
 		switch event.Type {
 
 		case "checkout.session.completed", "checkout.session.expired":
@@ -59,8 +61,10 @@ func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo
 
 				if event.Type == "checkout.session.completed" {
 					_, err = svc.UpdatePaymentToPaid(ctx, paymentID, event.ID)
+					fmt.Printf("\nUPDATING PAYMENT %q TO [PAID] (event: %q)\n\n", paymentID, event.ID)
 				} else {
 					_, err = svc.UpdatePaymentToExpired(ctx, paymentID, event.ID)
+					fmt.Printf("\nUPDATING PAYMENT %q TO [EXPIRED] (event: %q)\n\n", paymentID, event.ID)
 				}
 
 				if err != nil {
@@ -87,6 +91,7 @@ func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo
 				if _, err := svc.UpdatePaymentToFailed(ctx, paymentID, event.ID); err != nil {
 					return err
 				}
+				fmt.Printf("\nUPDATING PAYMENT %q TO [FAILED] (event: %q)\n\n", paymentID, event.ID)
 			}
 		}
 

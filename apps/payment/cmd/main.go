@@ -32,7 +32,7 @@ func main() {
 	paymentService := service.NewPaymentService(paymentRepo, stripeAdapter)
 
 	go startGRPCServer(cfg.GRPCPort, paymentService)
-	go startHTTPServer(cfg.WebhookPort, cfg.STRIPE_WEBHOOK_SECRET)
+	go startHTTPServer(cfg.WebhookPort, paymentService, cfg.STRIPE_WEBHOOK_SECRET)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
@@ -58,13 +58,13 @@ func startGRPCServer(grpcPort string, svc service.PaymentService) {
 	}
 }
 
-func startHTTPServer(webhookPort string, webhookSecret string) {
+func startHTTPServer(webhookPort string, svc service.PaymentService, webhookSecret string) {
 	e := echo.New()
 	e.HideBanner = true
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	e.POST("/webhooks/stripe", httpHandler.StripeWebhookHandler(webhookSecret))
+	e.POST("/webhooks/stripe", httpHandler.StripeWebhookHandler(webhookSecret, svc))
 
 	log.Println("HTTP listening on", webhookPort)
 	log.Fatal(e.Start(":" + webhookPort))

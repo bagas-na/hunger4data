@@ -101,6 +101,11 @@ func (s *paymentService) CreatePaymentAndCheckout(
 		return nil, "", err
 	}
 
+	newPayment, err = s.UpdatePaymentToPending(ctx, newPayment.ID, session.ID)
+	if err != nil {
+		return nil, "", err
+	}
+
 	return newPayment, session.URL, nil
 }
 

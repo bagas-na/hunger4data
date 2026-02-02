@@ -41,7 +41,7 @@ func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, 
 		newEvent := PaymentEvent{
 			ID:        eventID,
 			PaymentID: newPayment.ID,
-			EventType: "created",
+			EventType: EventCreated,
 			Source:    "app",
 			CreatedAt: time.Now(),
 		}
