@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func mapPayment(p *db.Payment) *paymentv1.Payment {
+func mapPaymentToProto(p *db.Payment) *paymentv1.Payment {
 	return &paymentv1.Payment{
 		Id:                p.ID.String(),
 		UserId:            p.UserID.String(),

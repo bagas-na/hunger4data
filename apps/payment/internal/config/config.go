@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	WebhookPort            string
 	GRPCPort               string
 	DBDSN                  string
 	STRIPE_SECRET_KEY      string
@@ -31,6 +32,7 @@ func Load() *Config {
 	}
 
 	return &Config{
+		WebhookPort:            getEnv("WEBHOOK_PORT", "3000"),
 		GRPCPort:               getEnv("GRPC_PORT", "9000"),
 		DBDSN:                  getEnv("DB_DSN", "postgresql://postgres:postgres@localhost:5432/postgres"),
 		STRIPE_SECRET_KEY:      getEnv("STRIPE_SECRET_KEY", ""),

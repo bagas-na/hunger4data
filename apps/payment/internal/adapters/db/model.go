@@ -34,7 +34,7 @@ type PaymentEvent struct {
 	EventType string `gorm:"size:32;not null"` // created, pending, paid, failed, expired
 	Source    string `gorm:"size:16;not null"` // app, webhook
 
-	ProviderEventID string `gorm:"uniqueIndex"`
+	ProviderEventID string //`gorm:"uniqueIndex"`
 
 	CreatedAt time.Time
 }

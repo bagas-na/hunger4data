@@ -9,15 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type PaymentService struct {
+type PaymentService interface {
+	CreatePaymentAndCheckout(ctx context.Context, userID uuid.UUID, countryID uuid.UUID, amount int64, currency string) (*db.Payment, string, error)
+	GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error)
+	ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
+	ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
+}
+
+type paymentService struct {
 	repo       *db.PaymentRepo
 	stripe     *stripeAdapter.StripeAdapter
 	successURL string
 	cancelURL  string
 }
 
-func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter) *PaymentService {
-	return &PaymentService{
+func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter) PaymentService {
+	return &paymentService{
 		repo:       repo,
 		stripe:     client,
 		successURL: "https://example.com/success",
@@ -49,7 +56,7 @@ func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter
 // 	return s.repo.CreatePayment(ctx, payment)
 // }
 
-func (s *PaymentService) CreatePaymentAndCheckout(
+func (s *paymentService) CreatePaymentAndCheckout(
 	ctx context.Context,
 	userID uuid.UUID,
 	countryID uuid.UUID,
@@ -102,7 +109,7 @@ func (s *PaymentService) CreatePaymentAndCheckout(
 	return newPayment, session.URL, nil
 }
 
-func (s *PaymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error) {
+func (s *paymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error) {
 	if paymentID == uuid.Nil {
 		return "", errors.New("paymentID is required")
 	}
@@ -126,7 +133,7 @@ func (s *PaymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID
 	)
 }
 
-func (s *PaymentService) ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
+func (s *paymentService) ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
 	if userID == uuid.Nil {
 		return nil, errors.New("userID is required")
 	}
@@ -134,7 +141,7 @@ func (s *PaymentService) ListPaymentsByUser(ctx context.Context, userID uuid.UUI
 	return s.repo.ListByUser(ctx, userID)
 }
 
-func (s *PaymentService) ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
+func (s *paymentService) ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
 	if userID == uuid.Nil {
 		return nil, errors.New("userID is required")
 	}
