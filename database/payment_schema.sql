@@ -25,6 +25,7 @@ CREATE TABLE payment_events (
     source VARCHAR(16) NOT NULL, -- system, webhook
 
     provider_event_id VARCHAR(255) UNIQUE,
+    payload JSON,
 
     created_at TIMESTAMP NOT NULL DEFAULT now()
 );
