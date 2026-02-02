@@ -8,8 +8,11 @@ import (
 )
 
 type Config struct {
-	HttpPort string
-	DBDSN    string
+	HttpPort               string
+	DBDSN                  string
+	STRIPE_SECRET_KEY      string
+	STRIPE_PUBLISHABLE_KEY string
+	STRIPE_WEBHOOK_SECRET  string
 }
 
 func Load() *Config {
@@ -28,15 +31,18 @@ func Load() *Config {
 	}
 
 	return &Config{
-		HttpPort: getEnv("PORT", "9000"),
-		DBDSN:    getEnv("DB_DSN", "postgresql://postgres:postgres@localhost:5432/postgres"),
+		HttpPort:               getEnv("PORT", "9000"),
+		DBDSN:                  getEnv("DB_DSN", "postgresql://postgres:postgres@localhost:5432/postgres"),
+		STRIPE_SECRET_KEY:      getEnv("STRIPE_SECRET_KEY", ""),
+		STRIPE_PUBLISHABLE_KEY: getEnv("STRIPE_PUBLISHABLE_KEY", ""),
+		STRIPE_WEBHOOK_SECRET:  getEnv("STRIPE_WEBHOOK_SECRET", ""),
 	}
 }
 
 func getEnv(key, fallback string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		fmt.Printf("Missing env var: %s. Using fallback value: %s\n", key, fallback)
+		fmt.Printf("Missing env var: %s. Using fallback value: %q\n", key, fallback)
 	}
 	return val
 }
