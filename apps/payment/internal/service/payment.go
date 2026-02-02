@@ -102,6 +102,30 @@ func (s *PaymentService) CreatePaymentAndCheckout(
 	return newPayment, session.URL, nil
 }
 
+func (s *PaymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error) {
+	if paymentID == uuid.Nil {
+		return "", errors.New("paymentID is required")
+	}
+
+	payment, err := s.repo.FindByID(ctx, paymentID)
+	if err != nil {
+		return "", err
+	}
+
+	if payment.Provider != "stripe" {
+		return "", errors.New("payment is not handled by stripe")
+	}
+
+	if payment.ProviderSessionID == "" {
+		return "", errors.New("checkout session not created for this payment")
+	}
+
+	return s.stripe.GetCheckoutSessionURL(
+		ctx,
+		payment.ProviderSessionID,
+	)
+}
+
 func (s *PaymentService) ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
 	if userID == uuid.Nil {
 		return nil, errors.New("userID is required")

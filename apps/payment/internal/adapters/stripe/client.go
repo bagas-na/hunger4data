@@ -2,6 +2,7 @@ package stripeAdapter
 
 import (
 	"context"
+	"errors"
 
 	"github.com/stripe/stripe-go/v84"
 )
@@ -61,11 +62,7 @@ type CheckoutSessionResult struct {
 	URL             string
 }
 
-func (a *StripeAdapter) CreateCheckoutSession(
-	ctx context.Context,
-	input CreateCheckoutSessionInput,
-) (*CheckoutSessionResult, error) {
-
+func (a *StripeAdapter) CreateCheckoutSession(ctx context.Context, input CreateCheckoutSessionInput) (*CheckoutSessionResult, error) {
 	params := &stripe.CheckoutSessionCreateParams{
 		Mode:       stripe.String("payment"),
 		SuccessURL: stripe.String(input.SuccessURL),
@@ -109,4 +106,17 @@ func (a *StripeAdapter) CreateCheckoutSession(
 		PaymentIntentID: piID,
 		URL:             s.URL,
 	}, nil
+}
+
+func (a *StripeAdapter) GetCheckoutSessionURL(ctx context.Context, sessionID string) (string, error) {
+	s, err := a.client.V1CheckoutSessions.Retrieve(ctx, sessionID, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if s.URL == "" {
+		return "", errors.New("checkout session has no URL")
+	}
+
+	return s.URL, nil
 }
