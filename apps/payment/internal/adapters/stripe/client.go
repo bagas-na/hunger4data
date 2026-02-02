@@ -56,8 +56,9 @@ type CreateCheckoutSessionInput struct {
 }
 
 type CheckoutSessionResult struct {
-	ID  string
-	URL string
+	ID              string
+	PaymentIntentID string
+	URL             string
 }
 
 func (a *StripeAdapter) CreateCheckoutSession(
@@ -87,6 +88,10 @@ func (a *StripeAdapter) CreateCheckoutSession(
 				Quantity: stripe.Int64(1),
 			},
 		},
+
+		Expand: []*string{
+			stripe.String("payment_intent"),
+		},
 	}
 
 	s, err := a.client.V1CheckoutSessions.Create(ctx, params)
@@ -94,8 +99,14 @@ func (a *StripeAdapter) CreateCheckoutSession(
 		return nil, err
 	}
 
+	var piID string
+	if s.PaymentIntent != nil {
+		piID = s.PaymentIntent.ID
+	}
+
 	return &CheckoutSessionResult{
-		ID:  s.ID,
-		URL: s.URL,
+		ID:              s.ID,
+		PaymentIntentID: piID,
+		URL:             s.URL,
 	}, nil
 }

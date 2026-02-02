@@ -4,28 +4,61 @@ import (
 	"context"
 	"errors"
 	"payment-service/internal/adapters/db"
+	stripeAdapter "payment-service/internal/adapters/stripe"
 
 	"github.com/google/uuid"
 )
 
 type PaymentService struct {
-	repo *db.PaymentRepo
+	repo       *db.PaymentRepo
+	stripe     *stripeAdapter.StripeAdapter
+	successURL string
+	cancelURL  string
 }
 
-func NewPaymentService(repo *db.PaymentRepo) *PaymentService {
-	return &PaymentService{repo: repo}
+func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter) *PaymentService {
+	return &PaymentService{
+		repo:       repo,
+		stripe:     client,
+		successURL: "https://example.com/success",
+		cancelURL:  "https://example.com/cancel",
+	}
 }
 
-func (s *PaymentService) CreatePayment(
+// func (s *PaymentService) CreatePaymentDBOnly(
+// 	ctx context.Context,
+// 	userID uuid.UUID,
+// 	countryID uuid.UUID,
+// 	amount int64,
+// 	currency string,
+// ) (*db.Payment, error) {
+
+// 	if amount <= 0 {
+// 		return nil, errors.New("amount must be positive")
+// 	}
+
+// 	payment := &db.Payment{
+// 		UserID:          userID,
+// 		CountryID:       countryID,
+// 		TransactionType: "payment",
+// 		Amount:          amount,
+// 		Currency:        currency,
+// 		Provider:        "internal",
+// 	}
+
+// 	return s.repo.CreatePayment(ctx, payment)
+// }
+
+func (s *PaymentService) CreatePaymentAndCheckout(
 	ctx context.Context,
 	userID uuid.UUID,
 	countryID uuid.UUID,
 	amount int64,
 	currency string,
-) (*db.Payment, error) {
+) (*db.Payment, string, error) {
 
 	if amount <= 0 {
-		return nil, errors.New("amount must be positive")
+		return nil, "", errors.New("amount must be positive")
 	}
 
 	payment := &db.Payment{
@@ -34,16 +67,53 @@ func (s *PaymentService) CreatePayment(
 		TransactionType: "payment",
 		Amount:          amount,
 		Currency:        currency,
-		Provider:        "internal",
+		Provider:        "stripe",
+		Status:          "pending",
 	}
 
-	return s.repo.CreatePayment(ctx, payment)
+	newPayment, err := s.repo.CreatePayment(ctx, payment)
+	if err != nil {
+		return nil, "", err
+	}
+
+	session, err := s.stripe.CreateCheckoutSession(
+		ctx,
+		stripeAdapter.CreateCheckoutSessionInput{
+			Amount:     amount,
+			Currency:   currency,
+			PaymentID:  newPayment.ID.String(),
+			SuccessURL: s.successURL,
+			CancelURL:  s.cancelURL,
+		},
+	)
+	if err != nil {
+		return nil, "", err
+	}
+
+	newPayment, err = s.repo.UpdatePaymentProviderObject(
+		ctx,
+		newPayment.ID,
+		session.PaymentIntentID,
+	)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return newPayment, session.URL, nil
 }
 
-func (s *PaymentService) GetPayment(
-	ctx context.Context,
-	id uuid.UUID,
-) (*db.Payment, error) {
+func (s *PaymentService) ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
+	if userID == uuid.Nil {
+		return nil, errors.New("userID is required")
+	}
 
-	return s.repo.FindByID(ctx, id)
+	return s.repo.ListByUser(ctx, userID)
+}
+
+func (s *PaymentService) ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error) {
+	if userID == uuid.Nil {
+		return nil, errors.New("userID is required")
+	}
+
+	return s.repo.ListPendingByUser(ctx, userID)
 }

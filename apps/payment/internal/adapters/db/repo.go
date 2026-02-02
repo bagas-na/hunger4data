@@ -30,7 +30,6 @@ func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, 
 
 	newPayment := *p
 	newPayment.ID = paymentID
-	newPayment.Status = "pending"
 	newPayment.CreatedAt = time.Now()
 	newPayment.UpdatedAt = time.Now()
 
@@ -61,12 +60,44 @@ func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, 
 	return &newPayment, nil
 }
 
-func (r *PaymentRepo) UpdatePayment(
+func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
+	var payments []Payment
+	err := r.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Find(&payments).Error
+	return payments, err
+}
+
+func (r *PaymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
+	var payments []Payment
+	err := r.db.WithContext(ctx).
+		Where("user_id = ? AND status = ?", userID, "pending").
+		Order("created_at DESC").
+		Find(&payments).Error
+	return payments, err
+}
+
+func (r *PaymentRepo) UpdatePaymentProviderObject(ctx context.Context, id uuid.UUID, providerObjectID string) (*Payment, error) {
+
+	payment, err := r.updatePayment(
+		ctx,
+		id,
+		"",
+		"created",        // event type
+		providerObjectID, // provider object
+		"app",            // source
+	)
+
+	return payment, err
+}
+
+func (r *PaymentRepo) updatePayment(
 	ctx context.Context,
 	id uuid.UUID,
 	status string,
 	eventType string,
-	objectStr string,
+	sessionID string,
 	source string,
 ) (*Payment, error) {
 
@@ -83,8 +114,8 @@ func (r *PaymentRepo) UpdatePayment(
 			payment.Status = status
 		}
 
-		if objectStr != "" {
-			payment.ProviderObjectID = objectStr
+		if sessionID != "" {
+			payment.ProviderSessionID = sessionID
 		}
 
 		payment.UpdatedAt = time.Now()
