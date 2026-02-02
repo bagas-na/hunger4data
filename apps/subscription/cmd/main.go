@@ -104,11 +104,7 @@ func main() {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
 
-	service.StartSyncScheduler(rdb)
-	err = db.AutoMigrate(&model.Country{})
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
+	service.StartSyncWithoutScheduler(rdb)
 	err = db.AutoMigrate(&model.Subscription{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)

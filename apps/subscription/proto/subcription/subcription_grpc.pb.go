@@ -34,7 +34,7 @@ type Subscription_ServiceClient interface {
 	Create_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
 	Update_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
 	Delete_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
-	Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_Response, error)
+	Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_BY_ID_Response, error)
 }
 
 type subscription_ServiceClient struct {
@@ -85,9 +85,9 @@ func (c *subscription_ServiceClient) Delete_Subscription(ctx context.Context, in
 	return out, nil
 }
 
-func (c *subscription_ServiceClient) Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_Response, error) {
+func (c *subscription_ServiceClient) Get_Subscription_By_ID(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscription_BY_ID_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Get_Subscription_Response)
+	out := new(Get_Subscription_BY_ID_Response)
 	err := c.cc.Invoke(ctx, Subscription_Service_Get_Subscription_By_ID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ type Subscription_ServiceServer interface {
 	Create_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
 	Update_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
 	Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
-	Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_Response, error)
+	Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_BY_ID_Response, error)
 	mustEmbedUnimplementedSubscription_ServiceServer()
 }
 
@@ -126,7 +126,7 @@ func (UnimplementedSubscription_ServiceServer) Update_Subscription(context.Conte
 func (UnimplementedSubscription_ServiceServer) Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete_Subscription not implemented")
 }
-func (UnimplementedSubscription_ServiceServer) Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_Response, error) {
+func (UnimplementedSubscription_ServiceServer) Get_Subscription_By_ID(context.Context, *Subscription_Request) (*Get_Subscription_BY_ID_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method Get_Subscription_By_ID not implemented")
 }
 func (UnimplementedSubscription_ServiceServer) mustEmbedUnimplementedSubscription_ServiceServer() {}

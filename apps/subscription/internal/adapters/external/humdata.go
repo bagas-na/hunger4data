@@ -78,7 +78,7 @@ func GetHumData() HAPIResponse {
 	return finalResponse
 }
 
-// GRPC -> Rest
+// Redis -> Grpc -> Json
 func GetHumDataRedis(rdb *redis.Client) (*pb.Get_Countries_Response, error) {
 	ctx := context.Background()
 	cacheKey := "countries:latest"

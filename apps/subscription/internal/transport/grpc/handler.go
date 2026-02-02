@@ -83,7 +83,7 @@ func (h *subscriptionHandler) GetSubByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": resp.Message,
+		"data": resp.Subscription,
 	})
 }
 

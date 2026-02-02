@@ -9,7 +9,7 @@ import (
 
 type SubscriptionRepo interface {
 	CreateSubcription(u model.Subscription) error
-	GetBySubscriptionUserID(id int) (*model.Subscription, error)
+	GetBySubscriptionUserID(id int) ([]model.Subscription, error)
 	UpdateSubscription(id int, subs model.Subscription) error
 	DeleteSubscription(id int) error
 }
@@ -33,16 +33,16 @@ func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
 	return nil
 }
 
-func (r *GORMRepository) GetBySubscriptionUserID(id int) (*model.Subscription, error) {
-	var sub model.Subscription
-	result := r.db.Where("id_user = ? ", id).First(&sub)
+func (r *GORMRepository) GetBySubscriptionUserID(id int) ([]model.Subscription, error) {
+	var sub []model.Subscription
+	result := r.db.Where("id_user = ? ", id).Find(&sub)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, result.Error
 	}
-	return &sub, nil
+	return sub, nil
 }
 
 func (r *GORMRepository) UpdateSubscription(id int, subs model.Subscription) error {

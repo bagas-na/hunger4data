@@ -289,6 +289,58 @@ func (x *Subscription_Request) GetMessage() string {
 	return ""
 }
 
+type Get_Subscription_BY_ID_Response struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subscription  []*Subscription        `protobuf:"bytes,1,rep,name=subscription,proto3" json:"subscription,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Get_Subscription_BY_ID_Response) Reset() {
+	*x = Get_Subscription_BY_ID_Response{}
+	mi := &file_proto_subcription_subcription_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Get_Subscription_BY_ID_Response) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Get_Subscription_BY_ID_Response) ProtoMessage() {}
+
+func (x *Get_Subscription_BY_ID_Response) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_subcription_subcription_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Get_Subscription_BY_ID_Response.ProtoReflect.Descriptor instead.
+func (*Get_Subscription_BY_ID_Response) Descriptor() ([]byte, []int) {
+	return file_proto_subcription_subcription_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Get_Subscription_BY_ID_Response) GetSubscription() []*Subscription {
+	if x != nil {
+		return x.Subscription
+	}
+	return nil
+}
+
+func (x *Get_Subscription_BY_ID_Response) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type Get_Subscription_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Subscription  *Subscription          `protobuf:"bytes,1,opt,name=subscription,proto3" json:"subscription,omitempty"`
@@ -299,7 +351,7 @@ type Get_Subscription_Response struct {
 
 func (x *Get_Subscription_Response) Reset() {
 	*x = Get_Subscription_Response{}
-	mi := &file_proto_subcription_subcription_proto_msgTypes[5]
+	mi := &file_proto_subcription_subcription_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -311,7 +363,7 @@ func (x *Get_Subscription_Response) String() string {
 func (*Get_Subscription_Response) ProtoMessage() {}
 
 func (x *Get_Subscription_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_subcription_subcription_proto_msgTypes[5]
+	mi := &file_proto_subcription_subcription_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -324,7 +376,7 @@ func (x *Get_Subscription_Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Get_Subscription_Response.ProtoReflect.Descriptor instead.
 func (*Get_Subscription_Response) Descriptor() ([]byte, []int) {
-	return file_proto_subcription_subcription_proto_rawDescGZIP(), []int{5}
+	return file_proto_subcription_subcription_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Get_Subscription_Response) GetSubscription() *Subscription {
@@ -350,7 +402,7 @@ type Subscription_Response struct {
 
 func (x *Subscription_Response) Reset() {
 	*x = Subscription_Response{}
-	mi := &file_proto_subcription_subcription_proto_msgTypes[6]
+	mi := &file_proto_subcription_subcription_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -362,7 +414,7 @@ func (x *Subscription_Response) String() string {
 func (*Subscription_Response) ProtoMessage() {}
 
 func (x *Subscription_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_subcription_subcription_proto_msgTypes[6]
+	mi := &file_proto_subcription_subcription_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,7 +427,7 @@ func (x *Subscription_Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Subscription_Response.ProtoReflect.Descriptor instead.
 func (*Subscription_Response) Descriptor() ([]byte, []int) {
-	return file_proto_subcription_subcription_proto_rawDescGZIP(), []int{6}
+	return file_proto_subcription_subcription_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Subscription_Response) GetMessage() string {
@@ -407,18 +459,21 @@ const file_proto_subcription_subcription_proto_rawDesc = "" +
 	"\aid_user\x18\x02 \x01(\x03R\x06idUser\x12\x1d\n" +
 	"\n" +
 	"id_country\x18\x03 \x01(\x03R\tidCountry\x12\x18\n" +
-	"\amessage\x18\x04 \x01(\tR\amessage\"r\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\"x\n" +
+	"\x1fGet_Subscription_BY_ID_Response\x12;\n" +
+	"\fsubscription\x18\x01 \x03(\v2\x17.subscribe.SubscriptionR\fsubscription\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"r\n" +
 	"\x19Get_Subscription_Response\x12;\n" +
 	"\fsubscription\x18\x01 \x01(\v2\x17.subscribe.SubscriptionR\fsubscription\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"1\n" +
 	"\x15Subscription_Response\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xcb\x03\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xd1\x03\n" +
 	"\x14Subscription_Service\x12D\n" +
 	"\rGet_Countries\x12\x10.subscribe.Empty\x1a!.subscribe.Get_Countries_Response\x12X\n" +
 	"\x13Create_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12X\n" +
 	"\x13Update_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12X\n" +
-	"\x13Delete_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12_\n" +
-	"\x16Get_Subscription_By_ID\x12\x1f.subscribe.Subscription_Request\x1a$.subscribe.Get_Subscription_ResponseB\tZ\a./protob\x06proto3"
+	"\x13Delete_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12e\n" +
+	"\x16Get_Subscription_By_ID\x12\x1f.subscribe.Subscription_Request\x1a*.subscribe.Get_Subscription_BY_ID_ResponseB\tZ\a./protob\x06proto3"
 
 var (
 	file_proto_subcription_subcription_proto_rawDescOnce sync.Once
@@ -432,34 +487,36 @@ func file_proto_subcription_subcription_proto_rawDescGZIP() []byte {
 	return file_proto_subcription_subcription_proto_rawDescData
 }
 
-var file_proto_subcription_subcription_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_proto_subcription_subcription_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_proto_subcription_subcription_proto_goTypes = []any{
-	(*Subscription)(nil),              // 0: subscribe.Subscription
-	(*Country)(nil),                   // 1: subscribe.Country
-	(*Empty)(nil),                     // 2: subscribe.Empty
-	(*Get_Countries_Response)(nil),    // 3: subscribe.Get_Countries_Response
-	(*Subscription_Request)(nil),      // 4: subscribe.Subscription_Request
-	(*Get_Subscription_Response)(nil), // 5: subscribe.Get_Subscription_Response
-	(*Subscription_Response)(nil),     // 6: subscribe.Subscription_Response
+	(*Subscription)(nil),                    // 0: subscribe.Subscription
+	(*Country)(nil),                         // 1: subscribe.Country
+	(*Empty)(nil),                           // 2: subscribe.Empty
+	(*Get_Countries_Response)(nil),          // 3: subscribe.Get_Countries_Response
+	(*Subscription_Request)(nil),            // 4: subscribe.Subscription_Request
+	(*Get_Subscription_BY_ID_Response)(nil), // 5: subscribe.Get_Subscription_BY_ID_Response
+	(*Get_Subscription_Response)(nil),       // 6: subscribe.Get_Subscription_Response
+	(*Subscription_Response)(nil),           // 7: subscribe.Subscription_Response
 }
 var file_proto_subcription_subcription_proto_depIdxs = []int32{
 	1, // 0: subscribe.Get_Countries_Response.countries:type_name -> subscribe.Country
-	0, // 1: subscribe.Get_Subscription_Response.subscription:type_name -> subscribe.Subscription
-	2, // 2: subscribe.Subscription_Service.Get_Countries:input_type -> subscribe.Empty
-	4, // 3: subscribe.Subscription_Service.Create_Subscription:input_type -> subscribe.Subscription_Request
-	4, // 4: subscribe.Subscription_Service.Update_Subscription:input_type -> subscribe.Subscription_Request
-	4, // 5: subscribe.Subscription_Service.Delete_Subscription:input_type -> subscribe.Subscription_Request
-	4, // 6: subscribe.Subscription_Service.Get_Subscription_By_ID:input_type -> subscribe.Subscription_Request
-	3, // 7: subscribe.Subscription_Service.Get_Countries:output_type -> subscribe.Get_Countries_Response
-	6, // 8: subscribe.Subscription_Service.Create_Subscription:output_type -> subscribe.Subscription_Response
-	6, // 9: subscribe.Subscription_Service.Update_Subscription:output_type -> subscribe.Subscription_Response
-	6, // 10: subscribe.Subscription_Service.Delete_Subscription:output_type -> subscribe.Subscription_Response
-	5, // 11: subscribe.Subscription_Service.Get_Subscription_By_ID:output_type -> subscribe.Get_Subscription_Response
-	7, // [7:12] is the sub-list for method output_type
-	2, // [2:7] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 1: subscribe.Get_Subscription_BY_ID_Response.subscription:type_name -> subscribe.Subscription
+	0, // 2: subscribe.Get_Subscription_Response.subscription:type_name -> subscribe.Subscription
+	2, // 3: subscribe.Subscription_Service.Get_Countries:input_type -> subscribe.Empty
+	4, // 4: subscribe.Subscription_Service.Create_Subscription:input_type -> subscribe.Subscription_Request
+	4, // 5: subscribe.Subscription_Service.Update_Subscription:input_type -> subscribe.Subscription_Request
+	4, // 6: subscribe.Subscription_Service.Delete_Subscription:input_type -> subscribe.Subscription_Request
+	4, // 7: subscribe.Subscription_Service.Get_Subscription_By_ID:input_type -> subscribe.Subscription_Request
+	3, // 8: subscribe.Subscription_Service.Get_Countries:output_type -> subscribe.Get_Countries_Response
+	7, // 9: subscribe.Subscription_Service.Create_Subscription:output_type -> subscribe.Subscription_Response
+	7, // 10: subscribe.Subscription_Service.Update_Subscription:output_type -> subscribe.Subscription_Response
+	7, // 11: subscribe.Subscription_Service.Delete_Subscription:output_type -> subscribe.Subscription_Response
+	5, // 12: subscribe.Subscription_Service.Get_Subscription_By_ID:output_type -> subscribe.Get_Subscription_BY_ID_Response
+	8, // [8:13] is the sub-list for method output_type
+	3, // [3:8] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_subcription_subcription_proto_init() }
@@ -473,7 +530,7 @@ func file_proto_subcription_subcription_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_subcription_subcription_proto_rawDesc), len(file_proto_subcription_subcription_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

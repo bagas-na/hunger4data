@@ -13,6 +13,7 @@ import (
 )
 
 // type SubscriptionServ interface {
+// 	Get_Countries(ctx context.Context, req *pb.Empty) (*pb.Get_Countries_Response, error)
 // 	Create(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error)
 // 	GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_Response, error)
 // 	Update(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error)
@@ -58,16 +59,23 @@ func (s *SubService) Create(ctx context.Context, req *pb.Subscription_Request) (
 
 }
 
-func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_Response, error) {
+func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
 	if req.IdUser == 0 {
-		return &pb.Get_Subscription_Response{Message: "user id is required"}, status.Error(codes.InvalidArgument, "user id is required")
+		return &pb.Get_Subscription_BY_ID_Response{Message: "user id is required"}, status.Error(codes.InvalidArgument, "user id is required")
 	}
 	data, err := s.repo.GetBySubscriptionUserID(int(req.IdUser))
 	if err != nil {
-		return &pb.Get_Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, "Error Creating subscription")
+		return &pb.Get_Subscription_BY_ID_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, "Error Creating subscription")
 	}
-
-	return &pb.Get_Subscription_Response{Subscription: &pb.Subscription{Id: data.Id, IdUser: data.Id_user, IdCountry: data.Id_country}, Message: "Succes Creating"}, nil
+	protoSubs := []*pb.Subscription{}
+	for _, sub := range data {
+		protoSubs = append(protoSubs, &pb.Subscription{
+			Id:        sub.Id,
+			IdUser:    sub.Id_user,
+			IdCountry: sub.Id_country,
+		})
+	}
+	return &pb.Get_Subscription_BY_ID_Response{Subscription: protoSubs, Message: "Succes Creating"}, nil
 
 }
 
