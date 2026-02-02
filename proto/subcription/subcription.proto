@@ -11,7 +11,6 @@ message Subscription {
 message Country {
   int64 id = 1;
   string name  = 2;
-  string category = 3;
 }
 
 service Subscription_Service {
@@ -25,7 +24,7 @@ service Subscription_Service {
 message Empty {}
 
 message Get_Countries_Response {
-  Country countries = 1;
+  repeated Country countries = 1;
   string message = 2;
 }
 

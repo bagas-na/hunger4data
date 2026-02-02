@@ -1,13 +1,12 @@
 package service
 
 type Subscription struct {
-	id         int64
-	id_user    int64
-	id_country string
+	Id         int64
+	Id_user    int64
+	Id_country string
 }
 
 type Country struct {
-	id       int64
-	name     string
-	category string
+	Id   int64
+	Name string `json:"location_name"`
 }

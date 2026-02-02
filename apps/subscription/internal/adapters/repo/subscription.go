@@ -18,7 +18,6 @@ func NewUserRepo(db *gorm.DB) GORMRepository {
 }
 
 func (r *GORMRepository) CreateSubcription(u service.Subscription) error {
-
 	err := r.db.Create(&u).Error
 	if err != nil {
 		return err
@@ -40,7 +39,6 @@ func (r *GORMRepository) GetBySubscriptionID(id int) (*service.Subscription, err
 }
 
 func (r *GORMRepository) UpdateSubscription(id int, subs service.Subscription) error {
-
 	err := r.db.Where("id = ?", id).Updates(subs).Error
 	if err != nil {
 		return err
