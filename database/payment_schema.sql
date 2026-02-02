@@ -9,7 +9,7 @@ CREATE TABLE payments (
     currency CHAR(3) NOT NULL DEFAULT 'IDR',
 
     provider VARCHAR(32) NOT NULL,
-    provider_object_id VARCHAR(255),
+    provider_session_id VARCHAR(255),
 
     status VARCHAR(32) NOT NULL,
 

@@ -16,8 +16,8 @@ type Payment struct {
 	Amount   int64  `gorm:"not null"`
 	Currency string `gorm:"size:3;not null"`
 
-	Provider         string `gorm:"size:32;not null"`
-	ProviderObjectID string `gorm:"size:255"`
+	Provider          string `gorm:"size:32;not null"`
+	ProviderSessionID string `gorm:"size:255"`
 
 	Status string `gorm:"varchar(32);not null"` // pending, paid, failed, expired
 
