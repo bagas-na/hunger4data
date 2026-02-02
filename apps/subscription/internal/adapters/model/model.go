@@ -1,9 +1,9 @@
-package service
+package model
 
 type Subscription struct {
 	Id         int64
-	Id_user    int64
-	Id_country string
+	Id_user    int64  `json:"id_user"`
+	Id_country string `json:"id_country"`
 }
 
 type Country struct {

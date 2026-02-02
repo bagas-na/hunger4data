@@ -1,14 +1,20 @@
 package external
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"subscription/internal/service"
+	"subscription/internal/adapters/model"
+	pb "subscription/proto/subcription"
+
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/proto"
 )
 
 /*
@@ -17,7 +23,7 @@ import (
 	  -H 'accept: application/json'
 */
 type HAPIResponse struct {
-	Data []service.Country `json:"data"`
+	Data []model.Country `json:"data"`
 }
 
 func GetHumData() HAPIResponse {
@@ -27,7 +33,7 @@ func GetHumData() HAPIResponse {
 	apiURL := "https://hapi.humdata.org/api/v2/food-security-nutrition-poverty/food-security"
 	limit := 100
 	offset := 0
-	latestByCountry := make(map[string]service.Country)
+	latestByCountry := make(map[string]model.Country)
 
 	for {
 		params := url.Values{}
@@ -69,4 +75,27 @@ func GetHumData() HAPIResponse {
 		finalResponse.Data = append(finalResponse.Data, country)
 	}
 	return finalResponse
+}
+
+func GetHumDataRedis(rdb *redis.Client) (*pb.Get_Countries_Response, error) {
+	ctx := context.Background()
+	cacheKey := "countries:latest"
+	cachedBytes, err := rdb.Get(ctx, cacheKey).Bytes()
+
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, errors.New("cache empty")
+		}
+		return nil, err
+	}
+
+	response := &pb.Get_Countries_Response{
+		Message: "Success",
+	}
+
+	if err := proto.Unmarshal(cachedBytes, response); err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

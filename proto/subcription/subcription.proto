@@ -18,7 +18,7 @@ service Subscription_Service {
   rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Get_Subscription_(Subscription_Request) returns (LoginResponse);
+  rpc Get_Subscription_(Empty) returns (Get_Subscription_Response);
 }
 
 message Empty {}

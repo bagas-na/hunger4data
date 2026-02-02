@@ -2,7 +2,7 @@ package repo
 
 import (
 	"errors"
-	"subscription/internal/service"
+	"subscription/internal/adapters/model"
 
 	"gorm.io/gorm"
 )
@@ -17,7 +17,7 @@ func NewUserRepo(db *gorm.DB) GORMRepository {
 	}
 }
 
-func (r *GORMRepository) CreateSubcription(u service.Subscription) error {
+func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
 	err := r.db.Create(&u).Error
 	if err != nil {
 		return err
@@ -26,8 +26,8 @@ func (r *GORMRepository) CreateSubcription(u service.Subscription) error {
 	return nil
 }
 
-func (r *GORMRepository) GetBySubscriptionID(id int) (*service.Subscription, error) {
-	var sub service.Subscription
+func (r *GORMRepository) GetBySubscriptionID(id int) (*model.Subscription, error) {
+	var sub model.Subscription
 	result := r.db.Where("id = ? ", id).First(&sub)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -38,7 +38,7 @@ func (r *GORMRepository) GetBySubscriptionID(id int) (*service.Subscription, err
 	return &sub, nil
 }
 
-func (r *GORMRepository) UpdateSubscription(id int, subs service.Subscription) error {
+func (r *GORMRepository) UpdateSubscription(id int, subs model.Subscription) error {
 	err := r.db.Where("id = ?", id).Updates(subs).Error
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (r *GORMRepository) UpdateSubscription(id int, subs service.Subscription) e
 }
 
 func (r *GORMRepository) DeleteUser(id int) error {
-	var user service.Subscription
+	var user model.Subscription
 	err := r.db.Delete(user, "id = ?", id).Error
 	if err != nil {
 		return err
