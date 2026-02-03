@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	pb "hunger4data/pb/subcription"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"subscription/internal/adapters/model"
-	pb "subscription/proto/subcription"
 
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"

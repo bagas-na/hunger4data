@@ -1,6 +1,10 @@
-go 1.25.3
+go 1.25.4
 
 use (
+	./apps/api-gateway
+	./apps/authenticator
+	./apps/notification
 	./apps/payment
+	./apps/subscription
 	./proto
 )

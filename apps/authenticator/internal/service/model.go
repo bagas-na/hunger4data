@@ -3,11 +3,12 @@ package service
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Users struct {
-	Id         int            `gorm:"primaryKey" json:"id"`
+	Id         uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	Username   string         `gorm:"unique;not null" json:"username"`
 	Password   string         `gorm:"not null" json:"password"`
 	Role       string         `gorm:"type:varchar(20);default:'user'" json:"role"`

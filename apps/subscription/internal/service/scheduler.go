@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	pb "hunger4data/pb/subcription"
 	"log"
 	"subscription/internal/adapters/external"
-	pb "subscription/proto/subcription"
+
 	"time"
 
 	"github.com/redis/go-redis/v9"

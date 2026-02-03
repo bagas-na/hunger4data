@@ -1,9 +1,11 @@
 package model
 
+import "github.com/google/uuid"
+
 type Subscription struct {
-	Id         int64 `gorm:"primaryKey"`
-	Id_user    int64 `json:"id_user" gorm:"not null"`
-	Id_country int64 `json:"id_country" gorm:"not null"`
+	Id         uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Id_user    uuid.UUID `json:"id_user" gorm:"type:uuid;not null"`
+	Id_country uuid.UUID `json:"id_country" gorm:"type:uuid;not null"`
 }
 
 type Country struct {
