@@ -2,11 +2,11 @@ package crypto
 
 import (
 	"errors"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type jwt_const struct {
@@ -19,17 +19,16 @@ func NewJwtPass(secret string) jwt_const {
 }
 
 type authClaims struct {
-	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
-	Role     string `json:"Role"`
+	UserID   uuid.UUID `json:"user_id"`
+	Username string    `json:"username"`
+	Role     string    `json:"Role"`
 	jwt.RegisteredClaims
 }
 
-func (s *jwt_const) GenerateToken(user_ID int, username string, role string) (string, error) {
-	user_ID_stringfy := strconv.Itoa(user_ID)
+func (s *jwt_const) GenerateToken(user_ID uuid.UUID, username string, role string) (string, error) {
 	username = strings.TrimSpace(username)
 	role = strings.TrimSpace(role)
-	if user_ID_stringfy == "" || username == "" || role == "" {
+	if user_ID == uuid.Nil || username == "" || role == "" {
 		return "", errors.New("Error one of the fields is empty")
 	}
 
@@ -40,7 +39,6 @@ func (s *jwt_const) GenerateToken(user_ID int, username string, role string) (st
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.exp_time)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Subject:   user_ID_stringfy,
 		},
 	}
 

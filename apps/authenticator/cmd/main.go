@@ -4,8 +4,8 @@ import (
 	"authenticator/internal/adapters/crypto"
 	"authenticator/internal/adapters/repo"
 	"authenticator/internal/service"
-	proto "authenticator/proto/authenticator"
 	"fmt"
+	authenticatorv1 "hunger4data/pb/authenticator"
 	"log"
 	"net"
 	"os"
@@ -101,7 +101,7 @@ func main() {
 	authService := service.NewAuthService(userRepo, &jwtManager)
 	grpcServer := grpc.NewServer()
 
-	proto.RegisterAuthServiceServer(grpcServer, &authService)
+	authenticatorv1.RegisterAuthServiceServer(grpcServer, &authService)
 	listener, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("failed to listen on port %s: %v", cfg.GRPCPort, err)

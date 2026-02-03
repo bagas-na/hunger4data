@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
+	pb "hunger4data/pb/subcription"
 	"subscription/internal/adapters/external"
 	"subscription/internal/adapters/model"
 	"subscription/internal/adapters/repo"
-	pb "subscription/proto/subcription"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,12 +44,14 @@ func (s *SubService) Get_Countries(ctx context.Context, req *pb.Empty) (*pb.Get_
 }
 
 func (s *SubService) Create(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	if req.IdCountry == 0 && req.IdUser == 0 {
+	if req.IdCountry == "" && req.IdUser == "" {
 		return &pb.Subscription_Response{Message: "user id and country id  are required"}, status.Error(codes.InvalidArgument, "user id and country id  are required")
 	}
+	iduser, _ := uuid.Parse(req.IdUser)
+	idcountry, _ := uuid.Parse(req.IdCountry)
 	subs := model.Subscription{
-		Id_user:    req.IdUser,
-		Id_country: req.IdCountry,
+		Id_user:    iduser,
+		Id_country: idcountry,
 	}
 	err := s.repo.CreateSubcription(subs)
 	if err != nil {
@@ -58,28 +61,39 @@ func (s *SubService) Create(ctx context.Context, req *pb.Subscription_Request) (
 
 }
 
-func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_Response, error) {
-	if req.IdUser == 0 {
-		return &pb.Get_Subscription_Response{Message: "user id is required"}, status.Error(codes.InvalidArgument, "user id is required")
+func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
+	if req.IdUser == "" {
+		return &pb.Get_Subscription_BY_ID_Response{Message: "user id is required"}, status.Error(codes.InvalidArgument, "user id is required")
 	}
-	data, err := s.repo.GetBySubscriptionUserID(int(req.IdUser))
+	iduser, _ := uuid.Parse(req.IdUser)
+	data, err := s.repo.GetBySubscriptionUserID(iduser)
 	if err != nil {
-		return &pb.Get_Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, "Error Creating subscription")
+		return &pb.Get_Subscription_BY_ID_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, "Error Creating subscription")
 	}
-
-	return &pb.Get_Subscription_Response{Subscription: &pb.Subscription{Id: data.Id, IdUser: data.Id_user, IdCountry: data.Id_country}, Message: "Succes Creating"}, nil
+	protoSubs := []*pb.Subscription{}
+	for _, sub := range data {
+		protoSubs = append(protoSubs, &pb.Subscription{
+			Id:        sub.Id.String(),
+			IdUser:    sub.Id_user.String(),
+			IdCountry: sub.Id_country.String(),
+		})
+	}
+	return &pb.Get_Subscription_BY_ID_Response{Subscription: protoSubs, Message: "Succes Creating"}, nil
 
 }
 
 func (s *SubService) Update(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	if req.Id == 0 {
+	if req.Id == "" {
 		return &pb.Subscription_Response{Message: "id is required"}, status.Error(codes.InvalidArgument, "id is required")
 	}
+	iduser, _ := uuid.Parse(req.IdUser)
+	idcountry, _ := uuid.Parse(req.IdCountry)
 	subs := model.Subscription{
-		Id_user:    req.IdUser,
-		Id_country: req.IdCountry,
+		Id_user:    iduser,
+		Id_country: idcountry,
 	}
-	err := s.repo.UpdateSubscription(int(req.Id), subs)
+	id, _ := uuid.Parse(req.Id)
+	err := s.repo.UpdateSubscription(id, subs)
 	if err != nil {
 		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, "Error Updating subscription")
 	}
@@ -88,10 +102,11 @@ func (s *SubService) Update(ctx context.Context, req *pb.Subscription_Request) (
 }
 
 func (s *SubService) Delete(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	if req.Id == 0 {
+	if req.Id == "" {
 		return &pb.Subscription_Response{Message: "id is required"}, status.Error(codes.InvalidArgument, "id is required")
 	}
-	err := s.repo.DeleteSubscription(int(req.Id))
+	id, _ := uuid.Parse(req.Id)
+	err := s.repo.DeleteSubscription(id)
 	if err != nil {
 		return &pb.Subscription_Response{Message: "Error Deleting subscription"}, status.Error(codes.Internal, "Error Deleting subscription")
 	}

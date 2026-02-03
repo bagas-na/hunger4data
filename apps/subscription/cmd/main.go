@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	pb "hunger4data/pb/subcription"
 	"log"
 	"net"
 	"os"
 	"subscription/internal/adapters/model"
 	"subscription/internal/adapters/repo"
 	"subscription/internal/service"
-	proto "subscription/proto/subcription"
+
 	"time"
 
 	"github.com/joho/godotenv"
@@ -68,8 +69,6 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-
-	// 3. Access the underlying generic sql.DB to set pool settings
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
@@ -79,7 +78,6 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(25)
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
-	// Test connection
 	log.Println("PostgreSQL connected successfully via GORM")
 	return db, nil
 }
@@ -118,7 +116,7 @@ func main() {
 	subscriptionService := service.NewSubService(userRepo, rdb)
 	grpcServer := grpc.NewServer()
 
-	proto.RegisterSubscription_ServiceServer(grpcServer, &subscriptionService)
+	pb.RegisterSubscription_ServiceServer(grpcServer, &subscriptionService)
 	listener, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("failed to listen on port %s: %v", cfg.GRPCPort, err)

@@ -1,11 +1,11 @@
 syntax = "proto3";
 package subscribe;
-option go_package = "./proto";
+option go_package = "./pb";
 
 message Subscription {
-  int64 id = 1;
-  int64 id_user = 2;
-  int64 id_country = 3;
+  string id = 1;
+  string id_user = 2;
+  string id_country = 3;
 }
 
 message Country {
@@ -18,7 +18,7 @@ service Subscription_Service {
   rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Get_Subscription_By_ID(Subscription_Request) returns (Get_Subscription_Response);
+  rpc Get_Subscription_By_ID(Subscription_Request) returns (Get_Subscription_BY_ID_Response);
 }
 
 message Empty {}
@@ -29,10 +29,15 @@ message Get_Countries_Response {
 }
 
 message Subscription_Request {
-  int64 id = 1;
-  int64 id_user = 2;
-  int64 id_country = 3;
+  string id = 1;
+  string id_user = 2;
+  string id_country = 3;
   string message = 4;
+}
+
+message Get_Subscription_BY_ID_Response {
+  repeated Subscription subscription = 1;
+  string message = 2;
 }
 
 message Get_Subscription_Response {

@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"authenticator/internal/service"
-	proto "authenticator/proto/authenticator"
 	"context"
+	authenticatorv1 "hunger4data/pb/authenticator"
 	"net/http"
 	"time"
 
@@ -11,10 +11,10 @@ import (
 )
 
 type AuthHandler struct {
-	authclient proto.AuthServiceClient
+	authclient authenticatorv1.AuthServiceClient
 }
 
-func NewHandAuth(authclient proto.AuthServiceClient) *AuthHandler {
+func NewHandAuth(authclient authenticatorv1.AuthServiceClient) *AuthHandler {
 	return &AuthHandler{
 		authclient: authclient,
 	}
@@ -30,7 +30,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	ctx := context.TODO()
 
-	resp, err := h.authclient.Login(ctx, &proto.LoginRequest{
+	resp, err := h.authclient.Login(ctx, &authenticatorv1.LoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -56,7 +56,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	resp, err := h.authclient.Register(ctx, &proto.RegisterRequest{
+	resp, err := h.authclient.Register(ctx, &authenticatorv1.RegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})

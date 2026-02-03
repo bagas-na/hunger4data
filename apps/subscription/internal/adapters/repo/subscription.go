@@ -4,14 +4,15 @@ import (
 	"errors"
 	"subscription/internal/adapters/model"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type SubscriptionRepo interface {
 	CreateSubcription(u model.Subscription) error
-	GetBySubscriptionUserID(id int) (*model.Subscription, error)
-	UpdateSubscription(id int, subs model.Subscription) error
-	DeleteSubscription(id int) error
+	GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error)
+	UpdateSubscription(id uuid.UUID, subs model.Subscription) error
+	DeleteSubscription(id uuid.UUID) error
 }
 
 type GORMRepository struct {
@@ -33,19 +34,19 @@ func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
 	return nil
 }
 
-func (r *GORMRepository) GetBySubscriptionUserID(id int) (*model.Subscription, error) {
-	var sub model.Subscription
-	result := r.db.Where("id_user = ? ", id).First(&sub)
+func (r *GORMRepository) GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error) {
+	var sub []model.Subscription
+	result := r.db.Where("id_user = ? ", id).Find(&sub)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, result.Error
 	}
-	return &sub, nil
+	return sub, nil
 }
 
-func (r *GORMRepository) UpdateSubscription(id int, subs model.Subscription) error {
+func (r *GORMRepository) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
 	err := r.db.Where("id = ?", id).Updates(subs).Error
 	if err != nil {
 		return err
@@ -54,7 +55,7 @@ func (r *GORMRepository) UpdateSubscription(id int, subs model.Subscription) err
 	return nil
 }
 
-func (r *GORMRepository) DeleteSubscription(id int) error {
+func (r *GORMRepository) DeleteSubscription(id uuid.UUID) error {
 	var subs model.Subscription
 	err := r.db.Delete(subs, "id = ?", id).Error
 	if err != nil {
