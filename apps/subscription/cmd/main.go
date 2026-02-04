@@ -22,14 +22,10 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
-	GRPCPort   string
-	RESTPort   string
+	DBDSN     string
+	JWTSecret string
+	GRPCPort  string
+	RESTPort  string
 }
 
 func LoadConfig() *Config {
@@ -39,14 +35,10 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "1"),
-		DBName:     getEnv("DB_NAME", "test"),
-		JWTSecret:  getEnv("JWT_SECRET", "secret"),
-		GRPCPort:   getEnv("GRPC_PORT", "50052"),
-		RESTPort:   getEnv("REST_PORT", "8080"),
+		DBDSN:     getEnv("DB_DSN", ""),
+		JWTSecret: getEnv("JWT_SECRET", "secret"),
+		GRPCPort:  getEnv("GRPC_PORT", "50052"),
+		RESTPort:  getEnv("REST_PORT", "8080"),
 	}
 }
 
@@ -58,15 +50,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		cfg.DBHost,
-		cfg.DBUser,
-		cfg.DBPassword,
-		cfg.DBName,
-		cfg.DBPort,
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}

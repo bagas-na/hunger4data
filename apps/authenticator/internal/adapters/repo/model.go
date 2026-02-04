@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Users struct {
+type User struct {
 	Id         uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
 	Username   string         `gorm:"unique;not null" json:"username"`
 	Password   string         `gorm:"not null" json:"password"`

@@ -3,13 +3,14 @@ package repo
 import (
 	"errors"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
 type UserRepo interface {
-	CreateUser(u Users) error
-	GetByUsername(username string) (*Users, error)
-	UpdateUser(username string, user Users) error
+	CreateUser(u User) error
+	GetByUsername(username string) (*User, error)
+	UpdateUser(username string, user User) error
 	DeleteUser(username string) error
 }
 
@@ -23,29 +24,28 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 	}
 }
 
-func (r *GORMRepository) CreateUser(u Users) error {
-
+func (r *GORMRepository) CreateUser(u User) error {
 	err := r.db.Create(&u).Error
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr); pgErr.Code == "23505" {
+			return gorm.ErrDuplicatedKey
+		}
 		return err
 	}
 
 	return nil
 }
 
-func (r *GORMRepository) GetByUsername(username string) (*Users, error) {
-	var user Users
-	result := r.db.Where("username = ? ", username).First(&user)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
+func (r *GORMRepository) GetByUsername(username string) (*User, error) {
+	var user User
+	if err := r.db.Where("username = ? ", username).First(&user).Error; err != nil {
+		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *GORMRepository) UpdateUser(username string, user Users) error {
+func (r *GORMRepository) UpdateUser(username string, user User) error {
 
 	err := r.db.Where("username = ?", username).Updates(user).Error
 	if err != nil {
@@ -56,7 +56,7 @@ func (r *GORMRepository) UpdateUser(username string, user Users) error {
 }
 
 func (r *GORMRepository) DeleteUser(username string) error {
-	var user Users
+	var user User
 	err := r.db.Delete(user, "username = ?", username).Error
 	if err != nil {
 		return err

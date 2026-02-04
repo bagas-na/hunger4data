@@ -13,6 +13,7 @@ type Config struct {
 	GRPCPortSUBSCRIPTION string
 	GRPCPortNOTIFICATION string
 	RESTPort             string
+	JWTSecret            string
 }
 
 func Load() *Config {
@@ -31,11 +32,12 @@ func Load() *Config {
 	}
 
 	return &Config{
-		GRPCPortAUTH:         getEnv("GRPC_PORTAUTH", "50051"),
-		GRPCPortNOTIFICATION: getEnv("GRPC_PORT", "50052"),
-		GRPCPortPAYMENT:      getEnv("GRPC_PORT", "9000"),
-		GRPCPortSUBSCRIPTION: getEnv("GRPC_PORTSUBSCRIPTION", "50054"),
+		GRPCPortAUTH:         getEnv("GRPC_PORT_AUTH", "50051"),
+		GRPCPortNOTIFICATION: getEnv("GRPC_PORT_NOTIFICATION", "50052"),
+		GRPCPortPAYMENT:      getEnv("GRPC_PORT_PAYMENT", "9000"),
+		GRPCPortSUBSCRIPTION: getEnv("GRPC_PORT_SUBSCRIPTION", "50054"),
 		RESTPort:             getEnv("RESTPort", "8080"),
+		JWTSecret:            getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
 	}
 }
 

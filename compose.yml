@@ -8,11 +8,12 @@ services:
     ports:
       - "${AUTH_GRPC_PORT}:${AUTH_GRPC_PORT}"
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      DB_DSN: ${DB_DSN}
+      # DB_HOST: ${DB_HOST}
+      # DB_PORT: ${DB_PORT}
+      # DB_USER: ${DB_USER}
+      # DB_PASSWORD: ${DB_PASSWORD}
+      # DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${AUTH_GRPC_PORT}
       REST_PORT: ${AUTH_REST_PORT}

@@ -31,16 +31,16 @@ func AuthRouting(e *echo.Echo, auth *service.AuthHandler) {
 	g.POST("/login", auth.Login)
 }
 
-func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler) {
+func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret string) {
 	g := e.Group("/subscription")
 	g.GET("/getcountries", subscription.GetCountries)
-	g.POST("/createsub", subscription.CreateSub)
+	g.POST("/createsub", subscription.CreateSub, JWTMiddleware(secret))
 	g.GET("/getsubbyid/:id", subscription.GetSubByID)
 	g.PUT("/updatesub", subscription.UpdateSub)
 	g.DELETE("/deletesub", subscription.DeleteSub)
 }
 
-func PaymentRouting(e *echo.Echo, payment PaymentHandler) {
+func PaymentRouting(e *echo.Echo, payment PaymentHandler, secret string) {
 	g := e.Group("/payments")
 	g.POST("/", payment.CreatePayment)
 	g.GET("/checkout/:id", payment.GetPaymentCheckoutURL)
@@ -48,7 +48,7 @@ func PaymentRouting(e *echo.Echo, payment PaymentHandler) {
 	g.GET("/payments/pending", payment.ListPendingPayments)
 }
 
-func NotificationRouting(e *echo.Echo, notification NotificationHandler) {
+func NotificationRouting(e *echo.Echo, notification NotificationHandler, secret string) {
 	g := e.Group("/notification")
 	g.POST("/", notification.SendTransactionEmail)
 }

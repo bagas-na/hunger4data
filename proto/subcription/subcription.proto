@@ -1,6 +1,6 @@
 syntax = "proto3";
-package subscribe;
-option go_package = "./subscriptionv1";
+package subscribe.v1;
+option go_package = "hunger4data/pb/subscriptionv;subscriptionv1";
 
 message Subscription {
   string id = 1;
