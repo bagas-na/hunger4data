@@ -24,8 +24,14 @@ func NewSubRepo(db *gorm.DB) SubscriptionRepo {
 	}
 }
 
-func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
-	err := r.db.Create(&u).Error
+func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
+	newSub := model.Subscription{
+		Id:          uuid.New(),
+		UserId:      subs.UserId,
+		CountryCode: subs.CountryCode,
+	}
+
+	err := r.db.Create(&newSub).Error
 	if err != nil {
 		return err
 	}
@@ -35,7 +41,7 @@ func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
 
 func (r *GORMRepository) GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error) {
 	var sub []model.Subscription
-	result := r.db.Where("id_user = ? ", id).Find(&sub).Error
+	result := r.db.Where("user_id = ? ", id).Find(&sub).Error
 	if result != nil {
 		return nil, result
 	}

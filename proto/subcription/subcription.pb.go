@@ -24,8 +24,8 @@ const (
 type Subscription struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	IdUser        string                 `protobuf:"bytes,2,opt,name=id_user,json=idUser,proto3" json:"id_user,omitempty"`
-	IdCountry     string                 `protobuf:"bytes,3,opt,name=id_country,json=idCountry,proto3" json:"id_country,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CountryCode   string                 `protobuf:"bytes,3,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,16 +67,16 @@ func (x *Subscription) GetId() string {
 	return ""
 }
 
-func (x *Subscription) GetIdUser() string {
+func (x *Subscription) GetUserId() string {
 	if x != nil {
-		return x.IdUser
+		return x.UserId
 	}
 	return ""
 }
 
-func (x *Subscription) GetIdCountry() string {
+func (x *Subscription) GetCountryCode() string {
 	if x != nil {
-		return x.IdCountry
+		return x.CountryCode
 	}
 	return ""
 }
@@ -88,6 +88,7 @@ type Country struct {
 	IpcPhase                  string                 `protobuf:"bytes,3,opt,name=ipc_phase,json=ipcPhase,proto3" json:"ipc_phase,omitempty"`
 	PopulationInPhase         int64                  `protobuf:"varint,4,opt,name=population_in_phase,json=populationInPhase,proto3" json:"population_in_phase,omitempty"`
 	PopulationFractionInPhase float64                `protobuf:"fixed64,5,opt,name=population_fraction_in_phase,json=populationFractionInPhase,proto3" json:"population_fraction_in_phase,omitempty"`
+	LocationCode              string                 `protobuf:"bytes,6,opt,name=location_code,json=locationCode,proto3" json:"location_code,omitempty"`
 	unknownFields             protoimpl.UnknownFields
 	sizeCache                 protoimpl.SizeCache
 }
@@ -155,6 +156,13 @@ func (x *Country) GetPopulationFractionInPhase() float64 {
 		return x.PopulationFractionInPhase
 	}
 	return 0
+}
+
+func (x *Country) GetLocationCode() string {
+	if x != nil {
+		return x.LocationCode
+	}
+	return ""
 }
 
 type Empty struct {
@@ -248,8 +256,8 @@ func (x *Get_Countries_Response) GetMessage() string {
 type Subscription_Request struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	IdUser        string                 `protobuf:"bytes,2,opt,name=id_user,json=idUser,proto3" json:"id_user,omitempty"`
-	IdCountry     string                 `protobuf:"bytes,3,opt,name=id_country,json=idCountry,proto3" json:"id_country,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CountryCode   string                 `protobuf:"bytes,3,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
 	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -292,16 +300,16 @@ func (x *Subscription_Request) GetId() string {
 	return ""
 }
 
-func (x *Subscription_Request) GetIdUser() string {
+func (x *Subscription_Request) GetUserId() string {
 	if x != nil {
-		return x.IdUser
+		return x.UserId
 	}
 	return ""
 }
 
-func (x *Subscription_Request) GetIdCountry() string {
+func (x *Subscription_Request) GetCountryCode() string {
 	if x != nil {
-		return x.IdCountry
+		return x.CountryCode
 	}
 	return ""
 }
@@ -465,27 +473,26 @@ var File_subcription_subcription_proto protoreflect.FileDescriptor
 
 const file_subcription_subcription_proto_rawDesc = "" +
 	"\n" +
-	"\x1dsubcription/subcription.proto\x12\fsubscribe.v1\"V\n" +
+	"\x1dsubcription/subcription.proto\x12\fsubscribe.v1\"Z\n" +
 	"\fSubscription\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\aid_user\x18\x02 \x01(\tR\x06idUser\x12\x1d\n" +
-	"\n" +
-	"id_country\x18\x03 \x01(\tR\tidCountry\"\xbb\x01\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\fcountry_code\x18\x03 \x01(\tR\vcountryCode\"\xe0\x01\n" +
 	"\aCountry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
 	"\tipc_phase\x18\x03 \x01(\tR\bipcPhase\x12.\n" +
 	"\x13population_in_phase\x18\x04 \x01(\x03R\x11populationInPhase\x12?\n" +
-	"\x1cpopulation_fraction_in_phase\x18\x05 \x01(\x01R\x19populationFractionInPhase\"\a\n" +
+	"\x1cpopulation_fraction_in_phase\x18\x05 \x01(\x01R\x19populationFractionInPhase\x12#\n" +
+	"\rlocation_code\x18\x06 \x01(\tR\flocationCode\"\a\n" +
 	"\x05Empty\"g\n" +
 	"\x16Get_Countries_Response\x123\n" +
 	"\tcountries\x18\x01 \x03(\v2\x15.subscribe.v1.CountryR\tcountries\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"x\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"|\n" +
 	"\x14Subscription_Request\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\aid_user\x18\x02 \x01(\tR\x06idUser\x12\x1d\n" +
-	"\n" +
-	"id_country\x18\x03 \x01(\tR\tidCountry\x12\x18\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\fcountry_code\x18\x03 \x01(\tR\vcountryCode\x12\x18\n" +
 	"\amessage\x18\x04 \x01(\tR\amessage\"{\n" +
 	"\x1fGet_Subscription_BY_ID_Response\x12>\n" +
 	"\fsubscription\x18\x01 \x03(\v2\x1a.subscribe.v1.SubscriptionR\fsubscription\x12\x18\n" +

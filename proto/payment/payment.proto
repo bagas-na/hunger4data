@@ -8,7 +8,7 @@ option go_package = "hunger4data/pb/payment;paymentv1";
 message Payment {
   string id = 1;
   string user_id = 2;
-  string country_id = 3;
+  string country_code = 3;
 
   string transaction_type = 4; // payment, refund
   int64 amount = 5;
@@ -26,7 +26,7 @@ message Payment {
 // --- Payment Create - DTO
 message CreatePaymentRequest {
   string user_id = 1;
-  string country_id = 2;
+  string country_code = 2;
   int64 amount = 3;
   string currency = 4;
 }  

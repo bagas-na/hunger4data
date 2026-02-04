@@ -4,8 +4,8 @@ option go_package = "hunger4data/pb/subscriptionv;subscriptionv1";
 
 message Subscription {
   string id = 1;
-  string id_user = 2;
-  string id_country = 3;
+  string user_id = 2;
+  string country_code = 3;
 }
 
 message Country {
@@ -14,6 +14,7 @@ message Country {
   string ipc_phase = 3;
   int64 population_in_phase = 4;
   double population_fraction_in_phase = 5;
+  string location_code = 6;
 }
 
 service Subscription_Service {
@@ -33,8 +34,8 @@ message Get_Countries_Response {
 
 message Subscription_Request {
   string id = 1;
-  string id_user = 2;
-  string id_country = 3;
+  string user_id = 2;
+  string country_code = 3;
   string message = 4;
 }
 

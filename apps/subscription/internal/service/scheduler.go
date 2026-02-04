@@ -25,6 +25,7 @@ func fetchAndSync(rdb *redis.Client) error {
 			Id:                        c.Id,
 			Name:                      c.Name,
 			IpcPhase:                  c.IpcPhase,
+			LocationCode:              c.LocationCode,
 			PopulationInPhase:         c.PopulationInPhase,
 			PopulationFractionInPhase: c.PopulationFractionInPhase,
 		}

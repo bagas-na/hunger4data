@@ -182,13 +182,19 @@ func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 }
 
 func (h *subscriptionHandler) CreateSub(c echo.Context) error {
+	ctx := context.TODO()
+
+	userId := c.Get("user_id").(string)
+
 	req := &pb.Subscription_Request{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request body",
 		})
 	}
-	ctx := context.TODO()
+
+	req.UserId = userId
+
 	resp, err := h.subscriptionclient.Create_Subscription(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
@@ -206,7 +212,7 @@ func (h *subscriptionHandler) GetSubByID(c echo.Context) error {
 	}
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Get_Subscription_By_ID(ctx, &pb.Subscription_Request{
-		IdUser: id,
+		UserId: id,
 	})
 
 	if err != nil {
@@ -231,9 +237,9 @@ func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
 	}
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
-		Id:        id,
-		IdUser:    req.IdUser,
-		IdCountry: req.IdCountry,
+		Id:          id,
+		UserId:      req.UserId,
+		CountryCode: req.CountryCode,
 	})
 	if err != nil {
 		return utils.MapGRPCError(c, err)

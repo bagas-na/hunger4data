@@ -26,7 +26,7 @@ type Payment struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId            string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	CountryId         string                 `protobuf:"bytes,3,opt,name=country_id,json=countryId,proto3" json:"country_id,omitempty"`
+	CountryCode       string                 `protobuf:"bytes,3,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
 	TransactionType   string                 `protobuf:"bytes,4,opt,name=transaction_type,json=transactionType,proto3" json:"transaction_type,omitempty"` // payment, refund
 	Amount            int64                  `protobuf:"varint,5,opt,name=amount,proto3" json:"amount,omitempty"`
 	Currency          string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
@@ -83,9 +83,9 @@ func (x *Payment) GetUserId() string {
 	return ""
 }
 
-func (x *Payment) GetCountryId() string {
+func (x *Payment) GetCountryCode() string {
 	if x != nil {
-		return x.CountryId
+		return x.CountryCode
 	}
 	return ""
 }
@@ -150,7 +150,7 @@ func (x *Payment) GetUpdatedAt() string {
 type CreatePaymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	CountryId     string                 `protobuf:"bytes,2,opt,name=country_id,json=countryId,proto3" json:"country_id,omitempty"`
+	CountryCode   string                 `protobuf:"bytes,2,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
 	Amount        int64                  `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	Currency      string                 `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -194,9 +194,9 @@ func (x *CreatePaymentRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CreatePaymentRequest) GetCountryId() string {
+func (x *CreatePaymentRequest) GetCountryCode() string {
 	if x != nil {
-		return x.CountryId
+		return x.CountryCode
 	}
 	return ""
 }
@@ -539,12 +539,11 @@ var File_payment_payment_proto protoreflect.FileDescriptor
 const file_payment_payment_proto_rawDesc = "" +
 	"\n" +
 	"\x15payment/payment.proto\x12\n" +
-	"payment.v1\"\xd2\x02\n" +
+	"payment.v1\"\xd6\x02\n" +
 	"\aPayment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
-	"\n" +
-	"country_id\x18\x03 \x01(\tR\tcountryId\x12)\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\fcountry_code\x18\x03 \x01(\tR\vcountryCode\x12)\n" +
 	"\x10transaction_type\x18\x04 \x01(\tR\x0ftransactionType\x12\x16\n" +
 	"\x06amount\x18\x05 \x01(\x03R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12\x1a\n" +
@@ -555,11 +554,10 @@ const file_payment_payment_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x82\x01\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x86\x01\n" +
 	"\x14CreatePaymentRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
-	"\n" +
-	"country_id\x18\x02 \x01(\tR\tcountryId\x12\x16\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
+	"\fcountry_code\x18\x02 \x01(\tR\vcountryCode\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x03R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x04 \x01(\tR\bcurrency\"i\n" +
 	"\x15CreatePaymentResponse\x12-\n" +
