@@ -35,9 +35,9 @@ func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret 
 	g := e.Group("/subscription")
 	g.GET("/getcountries", subscription.GetCountries)
 	g.POST("/createsub", subscription.CreateSub, JWTMiddleware(secret))
-	g.GET("/getsubbyid/:id", subscription.GetSubByID)
-	g.PUT("/updatesub", subscription.UpdateSub)
-	g.DELETE("/deletesub", subscription.DeleteSub)
+	g.GET("/getsubbyid/:id", subscription.GetSubByID, JWTMiddleware(secret))
+	g.PUT("/updatesub", subscription.UpdateSub, JWTMiddleware(secret))
+	g.DELETE("/deletesub", subscription.DeleteSub, JWTMiddleware(secret))
 }
 
 func PaymentRouting(e *echo.Echo, payment PaymentHandler, secret string) {

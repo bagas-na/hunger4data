@@ -22,6 +22,7 @@ import (
 )
 
 type Config struct {
+	RedisAddr string
 	DBDSN     string
 	JWTSecret string
 	GRPCPort  string
@@ -29,12 +30,22 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+	env := os.Getenv("ENV")
+
+	// Default to production if ENV is not set
+	if env == "" {
+		env = "production"
+	}
+
+	// Use godotenv only in development
+	if env == "development" || env == "dev" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println("Failed to load .env file. Using existing and/or default ENV values")
+		}
 	}
 
 	return &Config{
+		RedisAddr: getEnv("REDIS_ADDR", "127.0.0.1:6379"),
 		DBDSN:     getEnv("DB_DSN", ""),
 		JWTSecret: getEnv("JWT_SECRET", "secret"),
 		GRPCPort:  getEnv("GRPC_PORT", "50052"),
@@ -76,7 +87,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     cfg.RedisAddr,
 		Password: "",
 		DB:       0,
 	})

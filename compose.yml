@@ -9,11 +9,6 @@ services:
       - "${AUTH_GRPC_PORT}:${AUTH_GRPC_PORT}"
     environment:
       DB_DSN: ${DB_DSN}
-      # DB_HOST: ${DB_HOST}
-      # DB_PORT: ${DB_PORT}
-      # DB_USER: ${DB_USER}
-      # DB_PASSWORD: ${DB_PASSWORD}
-      # DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${AUTH_GRPC_PORT}
       REST_PORT: ${AUTH_REST_PORT}
@@ -70,13 +65,24 @@ services:
     ports:
       - "${SUBSCRIPTION_GRPC_PORT}:${SUBSCRIPTION_GRPC_PORT}"
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      DB_DSN: ${DB_DSN}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${SUBSCRIPTION_GRPC_PORT}
       REST_PORT: ${SUBSCRIPTION_REST_PORT}
-      REDIS_ADDR: ${REDIS_ADDR}
+      REDIS_ADDR: redis:6379
     restart: unless-stopped
+    networks:
+      - cache-redis
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - "./healthchecks:/healthchecks"
+    healthcheck:
+      test: /healthchecks/redis.sh
+      interval: "5s"
+    networks:
+      - cache-redis
+
+networks:
+  cache-redis:
