@@ -60,3 +60,22 @@ services:
       REST_PORT: ${REST_PORT}
       REDIS_ADDR: ${REDIS_ADDR}
     restart: unless-stopped
+
+  authenticator-service:
+    build:
+      context: .
+      dockerfile: apps/authenticator/Dockerfile
+    image: authenticator-service:latest
+    container_name: authenticator-service
+    ports:
+      - "${AUTH_GRPC_PORT}:${AUTH_GRPC_PORT}"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      GRPC_PORT: ${AUTH_GRPC_PORT}
+      REST_PORT: ${REST_PORT}
+    restart: unless-stopped

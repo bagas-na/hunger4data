@@ -54,7 +54,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
 		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPassword,
@@ -92,8 +92,10 @@ func main() {
 
 	err = db.AutoMigrate(&service.Users{})
 	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
+		log.Fatalf("user automigration failed: %v", err)
 	}
+	fmt.Println("user automigration complete")
+
 	userRepo := repo.NewUserRepo(db)
 
 	jwtManager := crypto.NewJwtPass(cfg.JWTSecret)
