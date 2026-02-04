@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "hunger4data/pb/payment;paymentv1";
+
+import "google/protobuf/timestamp.proto";
+
+
+// --- Payment - Model
+message Payment {
+  string id = 1;
+  string user_id = 2;
+  string country_id = 3;
+
+  string transaction_type = 4; // payment, refund
+  int64 amount = 5;
+  string currency = 6;
+
+  string provider = 7;
+  string provider_session_id = 8;
+  string status = 9;
+
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+
+// --- Payment Create - DTO
+message CreatePaymentRequest {
+  string user_id = 1;
+  string country_id = 2;
+  int64 amount = 3;
+  string currency = 4;
+}  
+
+message CreatePaymentResponse {
+  Payment payment = 1;
+  string checkout_url = 2; // Stripe client secret
+}
+
+
+// --- Payment Checkout URL - DTO
+message GetPaymentCheckoutURLRequest {
+  string payment_id = 1;
+}
+
+message GetPaymentCheckoutURLResponse {
+  string checkout_url = 1;
+}
+
+
+// --- Payment List All - DTO
+message ListPaymentsRequest {
+  string user_id = 1;
+}
+
+message ListPaymentsResponse {
+  repeated Payment payments = 1;
+}
+
+
+// --- Payment List Pending - DTO
+message ListPendingPaymentsRequest {
+  string user_id = 1;
+}
+
+message ListPendingPaymentsResponse {
+  repeated Payment payments = 1;
+}
+
+
+// --- Payment Service
+service PaymentService {
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+  rpc GetPaymentCheckoutURL(GetPaymentCheckoutURLRequest)    returns (GetPaymentCheckoutURLResponse);
+
+  rpc ListPayments(ListPaymentsRequest) returns (ListPaymentsResponse);
+  rpc ListPendingPayments(ListPendingPaymentsRequest) returns (ListPendingPaymentsResponse);
+}
