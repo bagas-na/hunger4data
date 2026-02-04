@@ -7,7 +7,7 @@ services:
     container_name: notification-service
 
     ports:
-      - "50053:50053" # Remove for real production use
+      - "50053:50053"
 
     environment:
       GRPC_PORT: 50053
@@ -15,5 +15,28 @@ services:
       MAILER_SEND_API_KEY: ${MAILER_SEND_API_KEY}
       MAILER_EMAIL_DOMAIN: ${MAILER_EMAIL_DOMAIN}
       MAILER_EMAIL_USERNAME: ${MAILER_EMAIL_USERNAME}
+
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/payment/Dockerfile
+    image: payment-service:latest
+    container_name: payment-service
+
+    # Expose both transports for testing
+    ports:
+      - "50054:50054" # gRPC
+      - "3000:3000" # Stripe webhook
+
+    environment:
+      GRPC_PORT: 50054
+      WEBHOOK_PORT: 3000
+
+      DB_DSN: ${DB_DSN}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
 
     restart: unless-stopped
