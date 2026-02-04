@@ -1,0 +1,81 @@
+services:
+  authenticator-service:
+    build:
+      context: .
+      dockerfile: apps/authenticator/Dockerfile
+    image: authenticator-service:latest
+    container_name: authenticator-service
+    ports:
+      - "${AUTH_GRPC_PORT}:${AUTH_GRPC_PORT}"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      GRPC_PORT: ${AUTH_GRPC_PORT}
+      REST_PORT: ${AUTH_REST_PORT}
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification/Dockerfile
+    image: notification-service:latest
+    container_name: notification-service
+
+    ports:
+      - "${NOTIFICATION_GRPC_PORT}:${NOTIFICATION_GRPC_PORT}"
+
+    environment:
+      GRPC_PORT: ${NOTIFICATION_GRPC_PORT}
+      DB_DSN: ${DB_DSN}
+      MAILER_SEND_API_KEY: ${MAILER_SEND_API_KEY}
+      MAILER_EMAIL_DOMAIN: ${MAILER_EMAIL_DOMAIN}
+      MAILER_EMAIL_USERNAME: ${MAILER_EMAIL_USERNAME}
+
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/payment/Dockerfile
+    image: payment-service:latest
+    container_name: payment-service
+
+    # Expose both transports for testing
+    ports:
+      - "${PAYMENT_GRPC_PORT}:${PAYMENT_GRPC_PORT}" # gRPC
+      - "${PAYMENT_WEBHOOK_PORT}:${PAYMENT_WEBHOOK_PORT}" # Stripe webhook
+
+    environment:
+      GRPC_PORT: ${PAYMENT_GRPC_PORT}
+      WEBHOOK_PORT: ${PAYMENT_WEBHOOK_PORT}
+
+      DB_DSN: ${DB_DSN}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+
+    restart: unless-stopped
+
+  subscription-service:
+    build:
+      context: .
+      dockerfile: apps/subscription/Dockerfile
+    image: subscription-service:latest
+    container_name: subscription-service
+    ports:
+      - "${SUBSCRIPTION_GRPC_PORT}:${SUBSCRIPTION_GRPC_PORT}"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      GRPC_PORT: ${SUBSCRIPTION_GRPC_PORT}
+      REST_PORT: ${SUBSCRIPTION_REST_PORT}
+      REDIS_ADDR: ${REDIS_ADDR}
+    restart: unless-stopped

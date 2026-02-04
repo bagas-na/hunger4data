@@ -29,6 +29,7 @@ type Config struct {
 	JWTSecret  string
 	GRPCPort   string
 	RESTPort   string
+	RedisAddr  string
 }
 
 func LoadConfig() *Config {
@@ -46,6 +47,7 @@ func LoadConfig() *Config {
 		JWTSecret:  getEnv("JWT_SECRET", "secret"),
 		GRPCPort:   getEnv("GRPC_PORT", "50051"),
 		RESTPort:   getEnv("REST_PORT", "8080"),
+		RedisAddr:  getEnv("REDIS_ADDR", "8080"),
 	}
 }
 
@@ -57,7 +59,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
 		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPassword,
@@ -73,6 +75,16 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
+
+	if err := db.AutoMigrate(&model.Country{}); err != nil {
+		fmt.Println("country automigration failed")
+	}
+	fmt.Println("country automigration complete")
+
+	if err := db.AutoMigrate(&model.Subscription{}); err != nil {
+		fmt.Println("subscription automigration failed")
+	}
+	fmt.Println("subscription automigration complete")
 
 	sqlDB.SetMaxOpenConns(25)
 	sqlDB.SetMaxIdleConns(25)
@@ -91,7 +103,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     cfg.RedisAddr,
 		Password: "",
 		DB:       0,
 	})
