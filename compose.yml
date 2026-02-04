@@ -7,10 +7,10 @@ services:
     container_name: notification-service
 
     ports:
-      - "50053:50053"
+      - "${NOTIFICATION_GRPC_PORT}:${NOTIFICATION_GRPC_PORT}"
 
     environment:
-      GRPC_PORT: 50053
+      GRPC_PORT: ${NOTIFICATION_GRPC_PORT}
       DB_DSN: ${DB_DSN}
       MAILER_SEND_API_KEY: ${MAILER_SEND_API_KEY}
       MAILER_EMAIL_DOMAIN: ${MAILER_EMAIL_DOMAIN}
@@ -27,16 +27,36 @@ services:
 
     # Expose both transports for testing
     ports:
-      - "50054:50054" # gRPC
-      - "3000:3000" # Stripe webhook
+      - "${PAYMENT_GRPC_PORT}:${PAYMENT_GRPC_PORT}" # gRPC
+      - "${PAYMENT_WEBHOOK_PORT}:${PAYMENT_WEBHOOK_PORT}" # Stripe webhook
 
     environment:
-      GRPC_PORT: 50054
-      WEBHOOK_PORT: 3000
+      GRPC_PORT: ${PAYMENT_GRPC_PORT}
+      WEBHOOK_PORT: ${PAYMENT_WEBHOOK_PORT}
 
       DB_DSN: ${DB_DSN}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
 
+    restart: unless-stopped
+
+  subscription-service:
+    build:
+      context: .
+      dockerfile: apps/subscription/Dockerfile
+    image: subscription-service:latest
+    container_name: subscription-service
+    ports:
+      - "${SUBSCRIPTION_GRPC_PORT}:${SUBSCRIPTION_GRPC_PORT}"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      GRPC_PORT: ${SUBSCRIPTION_GRPC_PORT}
+      REST_PORT: ${REST_PORT}
+      REDIS_ADDR: ${REDIS_ADDR}
     restart: unless-stopped
