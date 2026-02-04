@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "hunger4data/pb/notification;notifyv1";
+
+message SendEmailRequest {
+  string to = 1;
+  string subject = 2;
+  string body = 3;
+}
+
+message SendEmailResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+service EmailService {
+  rpc SendTransactionEmail (SendEmailRequest) returns (SendEmailResponse);
+}
