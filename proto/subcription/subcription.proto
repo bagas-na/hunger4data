@@ -11,6 +11,9 @@ message Subscription {
 message Country {
   int64 id = 1;
   string name  = 2;
+  string ipc_phase = 3;
+  int64 population_in_phase = 4;
+  double population_fraction_in_phase = 5;
 }
 
 service Subscription_Service {

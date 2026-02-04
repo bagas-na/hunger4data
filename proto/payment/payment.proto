@@ -4,9 +4,6 @@ package payment.v1;
 
 option go_package = "hunger4data/pb/payment;paymentv1";
 
-import "google/protobuf/timestamp.proto";
-
-
 // --- Payment - Model
 message Payment {
   string id = 1;

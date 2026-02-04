@@ -87,6 +87,7 @@ func main() {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
 
+	service.StartSyncWithoutScheduler(rdb)
 	service.StartSyncScheduler(rdb)
 	err = db.AutoMigrate(&model.Subscription{})
 	if err != nil {

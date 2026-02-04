@@ -9,7 +9,6 @@ package paymentv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -540,7 +539,7 @@ var File_payment_payment_proto protoreflect.FileDescriptor
 const file_payment_payment_proto_rawDesc = "" +
 	"\n" +
 	"\x15payment/payment.proto\x12\n" +
-	"payment.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd2\x02\n" +
+	"payment.v1\"\xd2\x02\n" +
 	"\aPayment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +

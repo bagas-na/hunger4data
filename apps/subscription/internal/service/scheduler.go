@@ -22,8 +22,11 @@ func fetchAndSync(rdb *redis.Client) error {
 
 	for _, c := range rawHapiData.Data {
 		pCountry := &pb.Country{
-			Id:   c.Id,
-			Name: c.Name,
+			Id:                        c.Id,
+			Name:                      c.Name,
+			IpcPhase:                  c.IpcPhase,
+			PopulationInPhase:         c.PopulationInPhase,
+			PopulationFractionInPhase: c.PopulationFractionInPhase,
 		}
 		protoResponse.Countries = append(protoResponse.Countries, pCountry)
 	}

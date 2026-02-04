@@ -9,6 +9,9 @@ type Subscription struct {
 }
 
 type Country struct {
-	Id   int64  `gorm:"primaryKey"`
-	Name string `json:"location_name" gorm:"not null"`
+	Id                        int64   `gorm:"primaryKey"`
+	Name                      string  `json:"location_name" gorm:"not null"`
+	IpcPhase                  string  `json:"ipc_phase,omitempty"`
+	PopulationInPhase         int64   `json:"population_in_phase,omitempty"`
+	PopulationFractionInPhase float64 `json:"population_fraction_in_phase,omitempty"`
 }

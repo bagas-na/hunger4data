@@ -82,11 +82,14 @@ func (x *Subscription) GetIdCountry() string {
 }
 
 type Country struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"open.v1"`
+	Id                        int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	IpcPhase                  string                 `protobuf:"bytes,3,opt,name=ipc_phase,json=ipcPhase,proto3" json:"ipc_phase,omitempty"`
+	PopulationInPhase         int64                  `protobuf:"varint,4,opt,name=population_in_phase,json=populationInPhase,proto3" json:"population_in_phase,omitempty"`
+	PopulationFractionInPhase float64                `protobuf:"fixed64,5,opt,name=population_fraction_in_phase,json=populationFractionInPhase,proto3" json:"population_fraction_in_phase,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *Country) Reset() {
@@ -131,6 +134,27 @@ func (x *Country) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *Country) GetIpcPhase() string {
+	if x != nil {
+		return x.IpcPhase
+	}
+	return ""
+}
+
+func (x *Country) GetPopulationInPhase() int64 {
+	if x != nil {
+		return x.PopulationInPhase
+	}
+	return 0
+}
+
+func (x *Country) GetPopulationFractionInPhase() float64 {
+	if x != nil {
+		return x.PopulationFractionInPhase
+	}
+	return 0
 }
 
 type Empty struct {
@@ -446,10 +470,13 @@ const file_subcription_subcription_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\aid_user\x18\x02 \x01(\tR\x06idUser\x12\x1d\n" +
 	"\n" +
-	"id_country\x18\x03 \x01(\tR\tidCountry\"-\n" +
+	"id_country\x18\x03 \x01(\tR\tidCountry\"\xbb\x01\n" +
 	"\aCountry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\a\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\tipc_phase\x18\x03 \x01(\tR\bipcPhase\x12.\n" +
+	"\x13population_in_phase\x18\x04 \x01(\x03R\x11populationInPhase\x12?\n" +
+	"\x1cpopulation_fraction_in_phase\x18\x05 \x01(\x01R\x19populationFractionInPhase\"\a\n" +
 	"\x05Empty\"g\n" +
 	"\x16Get_Countries_Response\x123\n" +
 	"\tcountries\x18\x01 \x03(\v2\x15.subscribe.v1.CountryR\tcountries\x12\x18\n" +

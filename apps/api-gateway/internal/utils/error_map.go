@@ -42,6 +42,7 @@ func MapGRPCError(c echo.Context, err error) error {
 	default: // 500
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "internal server error",
+			"detail":  err.Error(),
 		})
 	}
 }
