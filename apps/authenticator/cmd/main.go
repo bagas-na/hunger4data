@@ -19,31 +19,52 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
-	GRPCPort   string
-	RESTPort   string
+	DBDSN string
+	// DBHost     string
+	// DBPort     string
+	// DBUser     string
+	// DBPassword string
+	// DBName     string
+	JWTSecret   string
+	JWTDuration time.Duration
+	GRPCPort    string
+	RESTPort    string
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
+	env := os.Getenv("ENV")
+
+	// Default to production if ENV is not set
+	if env == "" {
+		env = "production"
+	}
+
+	// Use godotenv only in development
+	if env == "development" || env == "dev" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println("Failed to load .env file. Using existing and/or default ENV values")
+		}
+	}
+
+	durString := getEnv("JWT_DURATION", "60m")
+
+	duration, err := time.ParseDuration(durString)
 	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+		fmt.Printf("%q is not a valid duration. Using default value of 60m", durString)
+		duration = 60 * time.Minute
 	}
 
 	return &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "1"),
-		DBName:     getEnv("DB_NAME", "test"),
-		JWTSecret:  getEnv("JWT_SECRET", "secret"),
-		GRPCPort:   getEnv("GRPC_PORT", "50051"),
-		RESTPort:   getEnv("REST_PORT", "8080"),
+		DBDSN: getEnv("DB_DSN", ""),
+		// DBHost:     getEnv("DB_HOST", "localhost"),
+		// DBPort:     getEnv("DB_PORT", "5432"),
+		// DBUser:     getEnv("DB_USER", "postgres"),
+		// DBPassword: getEnv("DB_PASSWORD", "1"),
+		// DBName:     getEnv("DB_NAME", "test"),
+		JWTSecret:   getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
+		JWTDuration: duration,
+		GRPCPort:    getEnv("GRPC_PORT", "50051"),
+		RESTPort:    getEnv("REST_PORT", "8080"),
 	}
 }
 
@@ -55,28 +76,30 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
-		cfg.DBHost,
-		cfg.DBUser,
-		cfg.DBPassword,
-		cfg.DBName,
-		cfg.DBPort,
-	)
+	fmt.Printf("Value of cfg:\n%#v", cfg)
+	// dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
+	// 	cfg.DBHost,
+	// 	cfg.DBUser,
+	// 	cfg.DBPassword,
+	// 	cfg.DBName,
+	// 	cfg.DBPort,
+	// )
+	dsn := cfg.DBDSN
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// 3. Access the underlying generic sql.DB to set pool settings
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
-	}
+	// // 3. Access the underlying generic sql.DB to set pool settings
+	// sqlDB, err := db.DB()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	// }
 
-	sqlDB.SetMaxOpenConns(25)
-	sqlDB.SetMaxIdleConns(25)
-	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+	// sqlDB.SetMaxOpenConns(25)
+	// sqlDB.SetMaxIdleConns(25)
+	// sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
 	// Test connection
 	log.Println("PostgreSQL connected successfully via GORM")
@@ -91,7 +114,7 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	err = db.AutoMigrate(&repo.Users{})
+	err = db.AutoMigrate(&repo.User{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
@@ -99,8 +122,8 @@ func main() {
 
 	userRepo := repo.NewUserRepo(db)
 
-	_ = crypto.NewJwtPass(cfg.JWTSecret)
-	authserv := service.NewAuthService(userRepo)
+	cf := crypto.NewJwtPass(cfg.JWTSecret, cfg.JWTDuration)
+	authserv := service.NewAuthService(userRepo, cf)
 	authhand := handler.NewHandService(authserv)
 	grpcServer := grpc.NewServer()
 

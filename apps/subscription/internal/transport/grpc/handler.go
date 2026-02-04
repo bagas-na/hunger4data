@@ -37,23 +37,22 @@ func (s *SubService) Get_Countries(ctx context.Context, req *pb.Empty) (*pb.Get_
 	return data, nil
 }
 
-func (s *SubService) Create(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	iduser, _ := uuid.Parse(req.IdUser)
-	idcountry, _ := uuid.Parse(req.IdCountry)
+func (s *SubService) Create_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+	userId, _ := uuid.Parse(req.UserId)
 	subs := model.Subscription{
-		Id_user:    iduser,
-		Id_country: idcountry,
+		UserId:      userId,
+		CountryCode: req.CountryCode,
 	}
 	err := s.serv.CreateSubcription(subs)
 	if err != nil {
 		return &pb.Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
-	return &pb.Subscription_Response{Message: "user id and country id  are required"}, nil
 
+	return &pb.Subscription_Response{Message: "Subscription successful"}, nil
 }
 
-func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
-	iduser, _ := uuid.Parse(req.IdUser)
+func (s *SubService) Get_Subscription_By_ID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
+	iduser, _ := uuid.Parse(req.UserId)
 	data, err := s.serv.GetSubscriptionByID(iduser)
 	if err != nil {
 		return &pb.Get_Subscription_BY_ID_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
@@ -61,19 +60,18 @@ func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) 
 	protoSubs := []*pb.Subscription{}
 	for _, sub := range data {
 		protoSubs = append(protoSubs, &pb.Subscription{
-			Id:        sub.Id.String(),
-			IdUser:    sub.Id_user.String(),
-			IdCountry: sub.Id_country.String(),
+			Id:          sub.Id.String(),
+			UserId:      sub.UserId.String(),
+			CountryCode: sub.CountryCode,
 		})
 	}
 	return &pb.Get_Subscription_BY_ID_Response{Subscription: protoSubs, Message: "Success Getting Subscription"}, nil
 
 }
 
-func (s *SubService) Update(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	idcountry, _ := uuid.Parse(req.IdCountry)
+func (s *SubService) Update_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
 	subs := model.Subscription{
-		Id_country: idcountry,
+		CountryCode: req.CountryCode,
 	}
 	id, _ := uuid.Parse(req.Id)
 	err := s.serv.UpdateSubscription(id, subs)
@@ -84,7 +82,7 @@ func (s *SubService) Update(ctx context.Context, req *pb.Subscription_Request) (
 
 }
 
-func (s *SubService) Delete(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
 	id, _ := uuid.Parse(req.Id)
 	err := s.serv.DeleteSubscription(id)
 	if err != nil {

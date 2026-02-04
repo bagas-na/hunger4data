@@ -4,12 +4,15 @@ import (
 	"authenticator/internal/adapters/crypto"
 	"authenticator/internal/adapters/repo"
 	"errors"
+	"net/mail"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AuthFunc interface {
 	Login(username string, password string) (string, error)
-	Register(username string, password string) error
+	Register(username string, password string) (*repo.User, error)
 }
 
 type AuthService struct {
@@ -17,8 +20,11 @@ type AuthService struct {
 	jwt  crypto.Cryptofuncs
 }
 
-func NewAuthService(repo repo.UserRepo) AuthFunc {
-	return &AuthService{repo: repo}
+func NewAuthService(repo repo.UserRepo, jwt crypto.Cryptofuncs) AuthFunc {
+	return &AuthService{
+		repo: repo,
+		jwt:  jwt,
+	}
 }
 
 func (s *AuthService) Login(username string, password string) (string, error) {
@@ -32,26 +38,28 @@ func (s *AuthService) Login(username string, password string) (string, error) {
 	if s.jwt.PassCompare(user.Password, password) {
 		return "", errors.New("Wrong password")
 	}
-	token, err := s.jwt.GenerateToken(user.Id, user.Username, user.Role)
+	token, err := s.jwt.GenerateToken(user.Id)
 	if err != nil {
 		return "", err
 	}
 	return token, nil
 }
 
-func (s *AuthService) Register(username string, password string) error {
-	existingUser, _ := s.repo.GetByUsername(username)
-	if existingUser != nil {
-		return errors.New("Username already exists")
-	}
-	if username == "" || password == "" {
-		return errors.New("Needs username and password")
-	}
+var ErrInvalidEmail = errors.New("invalid email")
+
+func (s *AuthService) Register(username string, password string) (*repo.User, error) {
 	passhashed, err := s.jwt.PassHash(password)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	user := repo.Users{
+
+	addr, err := mail.ParseAddress(username)
+	if err != nil || addr.Address != username {
+		return nil, ErrInvalidEmail
+	}
+
+	user := repo.User{
+		Id:         uuid.New(),
 		Username:   username,
 		Password:   passhashed,
 		Role:       "user",
@@ -60,7 +68,7 @@ func (s *AuthService) Register(username string, password string) error {
 	}
 	err = s.repo.CreateUser(user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &user, nil
 }

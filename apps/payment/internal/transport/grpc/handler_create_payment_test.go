@@ -18,25 +18,25 @@ func TestCreatePayment_Success(t *testing.T) {
 	mockSvc := new(MockPaymentService)
 
 	userID := uuid.New()
-	countryID := uuid.New()
+	countryCode := "AFG"
 	paymentID := uuid.New()
 
 	mockSvc.On(
 		"CreatePaymentAndCheckout",
 		userID,
-		countryID,
+		countryCode,
 		int64(1000),
 		"USD",
 	).Return(
 		&db.Payment{
-			ID:        paymentID,
-			UserID:    userID,
-			CountryID: countryID,
-			Amount:    1000,
-			Currency:  "USD",
-			Status:    "pending",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			ID:          paymentID,
+			UserID:      userID,
+			CountryCode: countryCode,
+			Amount:      1000,
+			Currency:    "USD",
+			Status:      "pending",
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		},
 		"https://checkout.stripe.com/test",
 		nil,
@@ -48,10 +48,10 @@ func TestCreatePayment_Success(t *testing.T) {
 	client := paymentv1.NewPaymentServiceClient(conn)
 
 	resp, err := client.CreatePayment(context.Background(), &paymentv1.CreatePaymentRequest{
-		UserId:    userID.String(),
-		CountryId: countryID.String(),
-		Amount:    1000,
-		Currency:  "USD",
+		UserId:      userID.String(),
+		CountryCode: countryCode,
+		Amount:      1000,
+		Currency:    "USD",
 	})
 
 	assert.NoError(t, err)
@@ -70,10 +70,10 @@ func TestCreatePayment_InvalidUserID(t *testing.T) {
 	client := paymentv1.NewPaymentServiceClient(conn)
 
 	_, err := client.CreatePayment(context.Background(), &paymentv1.CreatePaymentRequest{
-		UserId:    "not-a-uuid",
-		CountryId: uuid.New().String(),
-		Amount:    1000,
-		Currency:  "USD",
+		UserId:      "not-a-uuid",
+		CountryCode: uuid.New().String(),
+		Amount:      1000,
+		Currency:    "USD",
 	})
 
 	st, _ := status.FromError(err)
@@ -106,10 +106,10 @@ func TestCreatePayment_ServiceError(t *testing.T) {
 	client := paymentv1.NewPaymentServiceClient(conn)
 
 	_, err := client.CreatePayment(context.Background(), &paymentv1.CreatePaymentRequest{
-		UserId:    userID.String(),
-		CountryId: countryID.String(),
-		Amount:    1000,
-		Currency:  "USD",
+		UserId:      userID.String(),
+		CountryCode: countryID.String(),
+		Amount:      1000,
+		Currency:    "USD",
 	})
 
 	st, _ := status.FromError(err)

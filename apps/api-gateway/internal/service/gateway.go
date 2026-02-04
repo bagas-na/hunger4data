@@ -1,6 +1,7 @@
 package service
 
 import (
+	"api-gateway/internal/utils"
 	"context"
 	authenticatorv1 "hunger4data/pb/authenticator"
 	notifyv1 "hunger4data/pb/notification"
@@ -8,6 +9,7 @@ import (
 	pb "hunger4data/pb/subcription"
 	subscriptionv1 "hunger4data/pb/subcription"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -29,7 +31,7 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 	}
 	resp, err := h.paymentclient.CreatePayment(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.MapGRPCError(c, err)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -44,7 +46,7 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 	}
 	resp, err := h.paymentclient.GetPaymentCheckoutURL(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.MapGRPCError(c, err)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -56,7 +58,7 @@ func (h *PaymentHandler) ListPayments(c echo.Context) error {
 	}
 	resp, err := h.paymentclient.ListPayments(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.MapGRPCError(c, err)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -68,7 +70,7 @@ func (h *PaymentHandler) ListPendingPayments(c echo.Context) error {
 	}
 	resp, err := h.paymentclient.ListPendingPayments(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.MapGRPCError(c, err)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -90,7 +92,7 @@ func (h *NotificationHandler) SendTransactionEmail(c echo.Context) error {
 	}
 	resp, err := h.notificationclient.SendTransactionEmail(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return utils.MapGRPCError(c, err)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -117,9 +119,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	resp, err := h.authclient.Login(ctx, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "error logging in",
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -128,6 +128,9 @@ func (h *AuthHandler) Login(c echo.Context) error {
 }
 
 func (h *AuthHandler) Register(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &authenticatorv1.RegisterRequest{}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -135,13 +138,15 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		})
 	}
 
-	ctx := context.TODO()
+	if req.Username == "" || req.Password == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "missing username or password",
+		})
+	}
 
 	resp, err := h.authclient.Register(ctx, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "error registering",
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
@@ -168,9 +173,7 @@ func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Get_Countries(ctx, &pb.Empty{})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": resp.Message,
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -179,18 +182,22 @@ func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 }
 
 func (h *subscriptionHandler) CreateSub(c echo.Context) error {
+	ctx := context.TODO()
+
+	userId := c.Get("user_id").(string)
+
 	req := &pb.Subscription_Request{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request body",
 		})
 	}
-	ctx := context.TODO()
+
+	req.UserId = userId
+
 	resp, err := h.subscriptionclient.Create_Subscription(ctx, req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": resp.Message,
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -205,13 +212,11 @@ func (h *subscriptionHandler) GetSubByID(c echo.Context) error {
 	}
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Get_Subscription_By_ID(ctx, &pb.Subscription_Request{
-		IdUser: id,
+		UserId: id,
 	})
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": resp.Message,
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -232,14 +237,12 @@ func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
 	}
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
-		Id:        id,
-		IdUser:    req.IdUser,
-		IdCountry: req.IdCountry,
+		Id:          id,
+		UserId:      req.UserId,
+		CountryCode: req.CountryCode,
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": resp.Message,
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -257,9 +260,7 @@ func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
 		Id: id,
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": resp.Message,
-		})
+		return utils.MapGRPCError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

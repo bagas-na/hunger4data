@@ -18,19 +18,19 @@ import (
 
 func main() {
 	cfg := config.Load()
-	grpcConnAuth, err := grpc.Dial("localhost:"+cfg.GRPCPortAUTH, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnAuth, err := grpc.NewClient("localhost:"+cfg.GRPCPortAUTH, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to gRPC server: %v", err)
 	}
-	grpcConnNotif, err := grpc.Dial("localhost:"+cfg.GRPCPortNOTIFICATION, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnNotif, err := grpc.NewClient("localhost:"+cfg.GRPCPortNOTIFICATION, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to gRPC server: %v", err)
 	}
-	grpcConnPayment, err := grpc.Dial("localhost:"+cfg.GRPCPortPAYMENT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnPayment, err := grpc.NewClient("localhost:"+cfg.GRPCPortPAYMENT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to gRPC server: %v", err)
 	}
-	grpcConnSubscription, err := grpc.Dial("localhost:"+cfg.GRPCPortSUBSCRIPTION, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnSubscription, err := grpc.NewClient("localhost:"+cfg.GRPCPortSUBSCRIPTION, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to gRPC server: %v", err)
 	}
@@ -40,7 +40,8 @@ func main() {
 	defer grpcConnSubscription.Close()
 
 	e := echo.New()
-	e.Use(echomw.Logger())
+	e.HideBanner = true
+	e.Use(echomw.RequestLogger())
 	e.Use(echomw.Recover())
 
 	authclient := authenticatorv1.NewAuthServiceClient(grpcConnAuth)
@@ -49,15 +50,15 @@ func main() {
 
 	notifclient := notifyv1.NewEmailServiceClient(grpcConnNotif)
 	notifhand := service.NewNotifyHand(notifclient)
-	http.NotificationRouting(e, notifhand)
+	http.NotificationRouting(e, notifhand, cfg.JWTSecret)
 
 	paymentclient := paymentv1.NewPaymentServiceClient(grpcConnPayment)
 	paymenthand := service.NewPaymentHand(paymentclient)
-	http.PaymentRouting(e, paymenthand)
+	http.PaymentRouting(e, paymenthand, cfg.JWTSecret)
 
 	subscriptionclient := subscriptionv1.NewSubscription_ServiceClient(grpcConnSubscription)
 	subscriptionhand := service.NewHandSubs(subscriptionclient)
-	http.SubscriptionRouting(e, subscriptionhand)
+	http.SubscriptionRouting(e, subscriptionhand, cfg.JWTSecret)
 
 	log.Printf("REST server listening on :%s", cfg.RESTPort)
 	if err := e.Start(":" + cfg.RESTPort); err != nil {

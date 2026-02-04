@@ -10,7 +10,7 @@ func mapPaymentToProto(p *db.Payment) *paymentv1.Payment {
 	return &paymentv1.Payment{
 		Id:                p.ID.String(),
 		UserId:            p.UserID.String(),
-		CountryId:         p.CountryID.String(),
+		CountryCode:       p.CountryCode,
 		TransactionType:   p.TransactionType,
 		Amount:            p.Amount,
 		Currency:          p.Currency,

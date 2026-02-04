@@ -7,9 +7,9 @@ import (
 )
 
 type Payment struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserID    uuid.UUID `gorm:"type:uuid;not null"`
-	CountryID uuid.UUID `gorm:"type:uuid;not null"`
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserID      uuid.UUID `gorm:"type:uuid;not null"`
+	CountryCode string    `gorm:"not null"`
 
 	TransactionType string `gorm:"size:32;not null"` // payment, refund
 

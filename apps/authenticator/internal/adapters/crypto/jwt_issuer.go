@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,7 +9,7 @@ import (
 )
 
 type Cryptofuncs interface {
-	GenerateToken(user_ID uuid.UUID, username string, role string) (string, error)
+	GenerateToken(user_ID uuid.UUID) (string, error)
 	PassHash(pass string) (string, error)
 	PassCompare(pass string, hash string) bool
 }
@@ -20,34 +19,35 @@ type jwt_const struct {
 	exp_time time.Duration
 }
 
-func NewJwtPass(secret string) Cryptofuncs {
-	return &jwt_const{secret: []byte(secret)}
+func NewJwtPass(secret string, jwtDuration time.Duration) Cryptofuncs {
+	return &jwt_const{
+		secret:   []byte(secret),
+		exp_time: jwtDuration,
+	}
 }
 
-type authClaims struct {
-	UserID   uuid.UUID `json:"user_id"`
-	Username string    `json:"username"`
-	Role     string    `json:"Role"`
-	jwt.RegisteredClaims
-}
+// type authClaims struct {
+// 	UserID   uuid.UUID `json:"user_id"`
+// 	Username string    `json:"username"`
+// 	Role     string    `json:"Role"`
+// 	jwt.RegisteredClaims
+// }
 
-func (s *jwt_const) GenerateToken(user_ID uuid.UUID, username string, role string) (string, error) {
-	username = strings.TrimSpace(username)
-	role = strings.TrimSpace(role)
-	if user_ID == uuid.Nil || username == "" || role == "" {
-		return "", errors.New("Error one of the fields is empty")
+func (s *jwt_const) GenerateToken(user_ID uuid.UUID) (string, error) {
+	// username = strings.TrimSpace(username)
+	// role = strings.TrimSpace(role)
+	if user_ID == uuid.Nil {
+		return "", errors.New("User id must not be empty")
 	}
 
-	claim := authClaims{
-		UserID:   user_ID,
-		Username: username,
-		Role:     role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.exp_time)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+	claims := jwt.RegisteredClaims{
+		Subject:   user_ID.String(),
+		Issuer:    "auth-service",
+		Audience:  []string{"bookms"},
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.exp_time)),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	return token.SignedString(s.secret)
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
+		SignedString(s.secret)
 }

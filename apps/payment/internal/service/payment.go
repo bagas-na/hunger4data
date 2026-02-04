@@ -10,7 +10,7 @@ import (
 )
 
 type PaymentService interface {
-	CreatePaymentAndCheckout(ctx context.Context, userID uuid.UUID, countryID uuid.UUID, amount int64, currency string) (*db.Payment, string, error)
+	CreatePaymentAndCheckout(ctx context.Context, userID uuid.UUID, countryCode string, amount int64, currency string) (*db.Payment, string, error)
 	GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error)
 	ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
 	ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
@@ -63,7 +63,7 @@ func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter
 func (s *paymentService) CreatePaymentAndCheckout(
 	ctx context.Context,
 	userID uuid.UUID,
-	countryID uuid.UUID,
+	countryCode string,
 	amount int64,
 	currency string,
 ) (*db.Payment, string, error) {
@@ -74,7 +74,7 @@ func (s *paymentService) CreatePaymentAndCheckout(
 
 	payment := &db.Payment{
 		UserID:          userID,
-		CountryID:       countryID,
+		CountryCode:     countryCode,
 		TransactionType: "payment",
 		Amount:          amount,
 		Currency:        currency,

@@ -27,15 +27,15 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
-	countryID, err := uuid.Parse(req.CountryId)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid country_id")
+	if len(req.CountryCode) != 3 {
+		return nil, status.Error(codes.InvalidArgument, "invalid country_code")
 	}
+	countryCode := req.CountryCode
 
 	payment, checkoutURL, err := h.svc.CreatePaymentAndCheckout(
 		ctx,
 		userID,
-		countryID,
+		countryCode,
 		req.Amount,
 		req.Currency,
 	)

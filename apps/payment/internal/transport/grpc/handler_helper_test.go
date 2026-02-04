@@ -25,12 +25,12 @@ type MockPaymentService struct {
 func (m *MockPaymentService) CreatePaymentAndCheckout(
 	ctx context.Context,
 	userID uuid.UUID,
-	countryID uuid.UUID,
+	countryCode string,
 	amount int64,
 	currency string,
 ) (*db.Payment, string, error) {
 
-	args := m.Called(userID, countryID, amount, currency)
+	args := m.Called(userID, countryCode, amount, currency)
 	return args.Get(0).(*db.Payment), args.String(1), args.Error(2)
 }
 

@@ -24,8 +24,12 @@ func NewSubService(repo repo.SubscriptionRepo) SubServ {
 }
 
 func (s *SubService) CreateSubcription(subs model.Subscription) error {
-	if subs.Id_country == uuid.Nil && subs.Id_user == uuid.Nil {
-		return errors.New("need id country and user id")
+	if subs.UserId == uuid.Nil {
+		return errors.New("Must have user_id in jwt")
+	}
+
+	if subs.CountryCode == "" || len(subs.CountryCode) != 3 {
+		return errors.New("Must have country_code (3 letters)")
 	}
 
 	err := s.repo.CreateSubcription(subs)
@@ -48,9 +52,14 @@ func (s *SubService) GetSubscriptionByID(id uuid.UUID) ([]model.Subscription, er
 }
 
 func (s *SubService) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
-	if id == uuid.Nil || subs.Id_country == uuid.Nil {
-		return errors.New("needs subscription id and id country")
+	if subs.UserId == uuid.Nil {
+		return errors.New("Must have user_id in jwt")
 	}
+
+	if subs.CountryCode == "" {
+		return errors.New("Must have country_code (3 letters)")
+	}
+
 	err := s.repo.UpdateSubscription(id, subs)
 	if err != nil {
 		return errors.New("Failed to update subscription")

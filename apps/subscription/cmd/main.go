@@ -22,31 +22,34 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
-	GRPCPort   string
-	RESTPort   string
+	RedisAddr string
+	DBDSN     string
+	JWTSecret string
+	GRPCPort  string
+	RESTPort  string
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+	env := os.Getenv("ENV")
+
+	// Default to production if ENV is not set
+	if env == "" {
+		env = "production"
+	}
+
+	// Use godotenv only in development
+	if env == "development" || env == "dev" {
+		if err := godotenv.Load(); err != nil {
+			fmt.Println("Failed to load .env file. Using existing and/or default ENV values")
+		}
 	}
 
 	return &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "1"),
-		DBName:     getEnv("DB_NAME", "test"),
-		JWTSecret:  getEnv("JWT_SECRET", "secret"),
-		GRPCPort:   getEnv("GRPC_PORT", "50052"),
-		RESTPort:   getEnv("REST_PORT", "8080"),
+		RedisAddr: getEnv("REDIS_ADDR", "127.0.0.1:6379"),
+		DBDSN:     getEnv("DB_DSN", ""),
+		JWTSecret: getEnv("JWT_SECRET", "secret"),
+		GRPCPort:  getEnv("GRPC_PORT", "50052"),
+		RESTPort:  getEnv("REST_PORT", "8080"),
 	}
 }
 
@@ -58,15 +61,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		cfg.DBHost,
-		cfg.DBUser,
-		cfg.DBPassword,
-		cfg.DBName,
-		cfg.DBPort,
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -92,7 +87,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     cfg.RedisAddr,
 		Password: "",
 		DB:       0,
 	})
@@ -103,6 +98,7 @@ func main() {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
 
+	service.StartSyncWithoutScheduler(rdb)
 	service.StartSyncScheduler(rdb)
 	err = db.AutoMigrate(&model.Subscription{})
 	if err != nil {
