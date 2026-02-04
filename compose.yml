@@ -1,0 +1,19 @@
+services:
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification/Dockerfile
+    image: notification-service:latest
+    container_name: notification-service
+
+    ports:
+      - "50053:50053" # Remove for real production use
+
+    environment:
+      GRPC_PORT: 50053
+      DB_DSN: ${DB_DSN}
+      MAILER_SEND_API_KEY: ${MAILER_SEND_API_KEY}
+      MAILER_EMAIL_DOMAIN: ${MAILER_EMAIL_DOMAIN}
+      MAILER_EMAIL_USERNAME: ${MAILER_EMAIL_USERNAME}
+
+    restart: unless-stopped
