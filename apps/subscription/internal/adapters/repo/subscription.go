@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"errors"
 	"subscription/internal/adapters/model"
 
 	"github.com/google/uuid"
@@ -36,12 +35,9 @@ func (r *GORMRepository) CreateSubcription(u model.Subscription) error {
 
 func (r *GORMRepository) GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error) {
 	var sub []model.Subscription
-	result := r.db.Where("id_user = ? ", id).Find(&sub)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
+	result := r.db.Where("id_user = ? ", id).Find(&sub).Error
+	if result != nil {
+		return nil, result
 	}
 	return sub, nil
 }

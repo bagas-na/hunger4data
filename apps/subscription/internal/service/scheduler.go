@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	 "hunger4data/pb/subcription"
+	pb "hunger4data/pb/subcription"
 	"log"
 	"subscription/internal/adapters/external"
 
@@ -16,12 +16,12 @@ import (
 func fetchAndSync(rdb *redis.Client) error {
 	rawHapiData := external.GetHumData()
 
-	protoResponse := &.Get_Countries_Response{
+	protoResponse := &pb.Get_Countries_Response{
 		Message: "Success",
 	}
 
 	for _, c := range rawHapiData.Data {
-		pCountry := &.Country{
+		pCountry := &pb.Country{
 			Id:   c.Id,
 			Name: c.Name,
 		}

@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	 "hunger4data/pb/subcription"
+	pb "hunger4data/pb/subcription"
 	"log"
 	"net"
 	"os"
 	"subscription/internal/adapters/model"
 	"subscription/internal/adapters/repo"
 	"subscription/internal/service"
+	grpcHandler "subscription/internal/transport/grpc"
 
 	"time"
 
@@ -103,20 +104,16 @@ func main() {
 	}
 
 	service.StartSyncScheduler(rdb)
-	err = db.AutoMigrate(&model.Country{})
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
 	err = db.AutoMigrate(&model.Subscription{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-	userRepo := repo.NewSubRepo(db)
-
-	subscriptionService := service.NewSubService(userRepo, rdb)
+	subsRepo := repo.NewSubRepo(db)
+	subsServ := service.NewSubService(subsRepo)
+	subscriptionService := grpcHandler.NewSubHand(subsServ, rdb)
 	grpcServer := grpc.NewServer()
 
-	.RegisterSubscription_ServiceServer(grpcServer, &subscriptionService)
+	pb.RegisterSubscription_ServiceServer(grpcServer, &subscriptionService)
 	listener, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("failed to listen on port %s: %v", cfg.GRPCPort, err)

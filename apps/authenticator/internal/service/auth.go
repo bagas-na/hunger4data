@@ -1,91 +1,66 @@
 package service
 
 import (
-	"context"
-	authenticatorv1 "hunger4data/pb/authenticator"
-
-	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"authenticator/internal/adapters/crypto"
+	"authenticator/internal/adapters/repo"
+	"errors"
+	"time"
 )
 
-type UserRepo interface {
-	CreateUser(u Users) error
-	GetByUsername(username string) (*Users, error)
-	UpdateUser(username string, user Users) error
-	DeleteUser(username string) error
-}
-
-type crypto interface {
-	GenerateToken(user_ID uuid.UUID, username string, role string) (string, error)
-	PassHash(pass string) (string, error)
-	PassCompare(pass string, hash string) bool
+type AuthFunc interface {
+	Login(username string, password string) (string, error)
+	Register(username string, password string) error
 }
 
 type AuthService struct {
-	repo UserRepo
-	authenticatorv1.UnimplementedAuthServiceServer
-	jwt crypto
+	repo repo.UserRepo
+	jwt  crypto.Cryptofuncs
 }
 
-func NewAuthService(repo UserRepo, jwt crypto) AuthService {
-	return AuthService{repo: repo, jwt: jwt}
+func NewAuthService(repo repo.UserRepo) AuthFunc {
+	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginRequest) (*authenticatorv1.LoginResponse, error) {
-
-	if req.Username == "" || req.Password == "" {
-		return &authenticatorv1.LoginResponse{}, status.Error(codes.InvalidArgument, "username and password are required")
+func (s *AuthService) Login(username string, password string) (string, error) {
+	if username == "" || password == "" {
+		return "", errors.New("Needs username and password")
 	}
-	username := req.Username
-	password := req.Password
-
-	User, err := s.repo.GetByUsername(username)
+	user, err := s.repo.GetByUsername(username)
 	if err != nil {
-		return &authenticatorv1.LoginResponse{Token: "", Message: "Error getting user is the user registered?"}, status.Error(codes.Internal, "invalid username or password")
+		return "", errors.New("Cannot find username")
 	}
-	if s.jwt.PassCompare(User.Password, password) {
-		return &authenticatorv1.LoginResponse{Token: "", Message: "Passwor error please re enter your password"}, status.Error(codes.NotFound, "invalid username or password")
+	if s.jwt.PassCompare(user.Password, password) {
+		return "", errors.New("Wrong password")
 	}
-	token, err := s.jwt.GenerateToken(User.Id, User.Username, User.Role)
+	token, err := s.jwt.GenerateToken(user.Id, user.Username, user.Role)
 	if err != nil {
-		return &authenticatorv1.LoginResponse{Token: "", Message: "Error generating token"}, status.Error(codes.Internal, "Error generating token")
+		return "", err
 	}
-	return &authenticatorv1.LoginResponse{
-		Token:   token,
-		Message: "Success you are logged in",
-	}, nil
+	return token, nil
 }
 
-func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.RegisterRequest) (*authenticatorv1.RegisterResponse, error) {
-
-	if req.Username == "" || req.Password == "" {
-		return &authenticatorv1.RegisterResponse{User: &authenticatorv1.User{}, Message: "username and password are required"}, status.Error(codes.InvalidArgument, "username and password are required")
-	}
-	username := req.Username
-	password := req.Password
+func (s *AuthService) Register(username string, password string) error {
 	existingUser, _ := s.repo.GetByUsername(username)
 	if existingUser != nil {
-		return &authenticatorv1.RegisterResponse{User: &authenticatorv1.User{}, Message: "username already exists"}, status.Error(codes.AlreadyExists, "username already exists")
+		return errors.New("Username already exists")
 	}
-
-	PasswordHashed, err := s.jwt.PassHash(password)
+	if username == "" || password == "" {
+		return errors.New("Needs username and password")
+	}
+	passhashed, err := s.jwt.PassHash(password)
 	if err != nil {
-		return &authenticatorv1.RegisterResponse{User: &authenticatorv1.User{}, Message: "Hashing error"}, status.Error(codes.Internal, "Creating user error")
+		return err
 	}
-
-	user := Users{
-		Username: username,
-		Password: PasswordHashed,
+	user := repo.Users{
+		Username:   username,
+		Password:   passhashed,
+		Role:       "user",
+		Created_At: time.Now(),
+		Updated_At: time.Now(),
 	}
-
 	err = s.repo.CreateUser(user)
 	if err != nil {
-		return &authenticatorv1.RegisterResponse{User: &authenticatorv1.User{}, Message: "Creating user error"}, status.Error(codes.AlreadyExists, "failed at creating user")
+		return err
 	}
-
-	return &authenticatorv1.RegisterResponse{
-		User:    &authenticatorv1.User{},
-		Message: "Success you are registered",
-	}, nil
+	return nil
 }

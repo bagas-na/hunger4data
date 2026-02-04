@@ -9,13 +9,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type Cryptofuncs interface {
+	GenerateToken(user_ID uuid.UUID, username string, role string) (string, error)
+	PassHash(pass string) (string, error)
+	PassCompare(pass string, hash string) bool
+}
+
 type jwt_const struct {
 	secret   []byte
 	exp_time time.Duration
 }
 
-func NewJwtPass(secret string) jwt_const {
-	return jwt_const{secret: []byte(secret)}
+func NewJwtPass(secret string) Cryptofuncs {
+	return &jwt_const{secret: []byte(secret)}
 }
 
 type authClaims struct {

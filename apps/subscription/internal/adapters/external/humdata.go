@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	 "hunger4data/pb/subcription"
+	pb "hunger4data/pb/subcription"
 	"io"
 	"log"
 	"net/http"
@@ -79,7 +79,7 @@ func GetHumData() HAPIResponse {
 }
 
 // GRPC -> Rest
-func GetHumDataRedis(rdb *redis.Client) (*.Get_Countries_Response, error) {
+func GetHumDataRedis(rdb *redis.Client) (*pb.Get_Countries_Response, error) {
 	ctx := context.Background()
 	cacheKey := "countries:latest"
 	cachedBytes, err := rdb.Get(ctx, cacheKey).Bytes()
@@ -91,7 +91,7 @@ func GetHumDataRedis(rdb *redis.Client) (*.Get_Countries_Response, error) {
 		return nil, err
 	}
 
-	response := &.Get_Countries_Response{
+	response := &pb.Get_Countries_Response{
 		Message: "Success",
 	}
 

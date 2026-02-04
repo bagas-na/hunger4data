@@ -1,16 +1,15 @@
 package repo
 
 import (
-	"authenticator/internal/service"
 	"errors"
 
 	"gorm.io/gorm"
 )
 
 type UserRepo interface {
-	CreateUser(u service.Users) error
-	GetByUsername(username string) (*service.Users, error)
-	UpdateUser(username string, user service.Users) error
+	CreateUser(u Users) error
+	GetByUsername(username string) (*Users, error)
+	UpdateUser(username string, user Users) error
 	DeleteUser(username string) error
 }
 
@@ -24,7 +23,7 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 	}
 }
 
-func (r *GORMRepository) CreateUser(u service.Users) error {
+func (r *GORMRepository) CreateUser(u Users) error {
 
 	err := r.db.Create(&u).Error
 	if err != nil {
@@ -34,8 +33,8 @@ func (r *GORMRepository) CreateUser(u service.Users) error {
 	return nil
 }
 
-func (r *GORMRepository) GetByUsername(username string) (*service.Users, error) {
-	var user service.Users
+func (r *GORMRepository) GetByUsername(username string) (*Users, error) {
+	var user Users
 	result := r.db.Where("username = ? ", username).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -46,7 +45,7 @@ func (r *GORMRepository) GetByUsername(username string) (*service.Users, error) 
 	return &user, nil
 }
 
-func (r *GORMRepository) UpdateUser(username string, user service.Users) error {
+func (r *GORMRepository) UpdateUser(username string, user Users) error {
 
 	err := r.db.Where("username = ?", username).Updates(user).Error
 	if err != nil {
@@ -57,7 +56,7 @@ func (r *GORMRepository) UpdateUser(username string, user service.Users) error {
 }
 
 func (r *GORMRepository) DeleteUser(username string) error {
-	var user service.Users
+	var user Users
 	err := r.db.Delete(user, "username = ?", username).Error
 	if err != nil {
 		return err
@@ -65,20 +64,3 @@ func (r *GORMRepository) DeleteUser(username string) error {
 
 	return nil
 }
-
-// func (r *MysqlRepository) GetByID(ctx context.Context, id int64) (*internal.Users, error) {
-// 	query := `SELECT id, username, password FROM users WHERE id = ?`
-
-// 	var user internal.Users
-// 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-// 		&user.ID,
-// 		&user.Username,
-// 		&user.Password,
-// 		&user.CreatedAt,
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &user, nil
-// }

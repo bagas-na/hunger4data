@@ -1,127 +1,95 @@
-package grpc
+package grpcHandler
 
-// type subscriptionHandler struct {
-// 	subscriptionclient pb.Subscription_ServiceClient
-// }
+import (
+	"context"
+	"fmt"
+	pb "hunger4data/pb/subcription"
+	"subscription/internal/adapters/external"
+	"subscription/internal/adapters/model"
+	"subscription/internal/service"
 
-// func NewHandAuth(subscriptionclient pb.Subscription_ServiceClient) *subscriptionHandler {
-// 	return &subscriptionHandler{
-// 		subscriptionclient: subscriptionclient,
-// 	}
-// }
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
-// func (h *subscriptionHandler) GetCountries(c echo.Context) error {
-// 	var req model.Country
-// 	if err := c.Bind(&req); err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{
-// 			"error": "invalid request body",
-// 		})
-// 	}
-// 	ctx := context.TODO()
-// 	resp, err := h.subscriptionclient.Get_Countries(ctx, &pb.Empty{})
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-// 			"message": resp.Message,
-// 		})
-// 	}
+type SubService struct {
+	serv service.SubServ
+	pb.UnimplementedSubscription_ServiceServer
+	RDB *redis.Client
+}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"data": resp.Countries,
-// 	})
-// }
+func NewSubHand(serv service.SubServ, RDB *redis.Client) SubService {
+	return SubService{serv: serv, RDB: RDB}
+}
 
-// func (h *subscriptionHandler) CreateSub(c echo.Context) error {
-// 	var req model.Subscription
-// 	if err := c.Bind(&req); err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{
-// 			"error": "invalid request body",
-// 		})
-// 	}
-// 	ctx := context.TODO()
-// 	resp, err := h.subscriptionclient.Create_Subscription(ctx, &pb.Subscription_Request{
-// 		IdUser:    req.Id_user.String(),
-// 		IdCountry: req.Id_country.String(),
-// 	})
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-// 			"message": resp.Message,
-// 		})
-// 	}
+func (s *SubService) Get_Countries(ctx context.Context, req *pb.Empty) (*pb.Get_Countries_Response, error) {
+	data, err := external.GetHumDataRedis(s.RDB)
+	if err != nil {
+		if err.Error() == "cache empty" {
+			return &pb.Get_Countries_Response{
+				Message: "Data is currently being synchronized, please try again shortly.",
+			}, nil
+		}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": resp.Message,
-// 	})
-// }
+	}
+	return data, nil
+}
 
-// func (h *subscriptionHandler) GetSubByID(c echo.Context) error {
-// 	var req model.Subscription
-// 	if err := c.Bind(&req); err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{
-// 			"error": "invalid request body",
-// 		})
-// 	}
-// 	ctx := context.TODO()
-// 	resp, err := h.subscriptionclient.Get_Subscription_By_ID(ctx, &pb.Subscription_Request{
-// 		Id:        req.Id.String(),
-// 		IdUser:    req.Id_user.String(),
-// 		IdCountry: req.Id_country.String(),
-// 	})
+func (s *SubService) Create(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+	iduser, _ := uuid.Parse(req.IdUser)
+	idcountry, _ := uuid.Parse(req.IdCountry)
+	subs := model.Subscription{
+		Id_user:    iduser,
+		Id_country: idcountry,
+	}
+	err := s.serv.CreateSubcription(subs)
+	if err != nil {
+		return &pb.Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	return &pb.Subscription_Response{Message: "user id and country id  are required"}, nil
 
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-// 			"message": resp.Message,
-// 		})
-// 	}
+}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"data": resp.Subscription,
-// 	})
-// }
+func (s *SubService) GetByID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
+	iduser, _ := uuid.Parse(req.IdUser)
+	data, err := s.serv.GetSubscriptionByID(iduser)
+	if err != nil {
+		return &pb.Get_Subscription_BY_ID_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	protoSubs := []*pb.Subscription{}
+	for _, sub := range data {
+		protoSubs = append(protoSubs, &pb.Subscription{
+			Id:        sub.Id.String(),
+			IdUser:    sub.Id_user.String(),
+			IdCountry: sub.Id_country.String(),
+		})
+	}
+	return &pb.Get_Subscription_BY_ID_Response{Subscription: protoSubs, Message: "Success Getting Subscription"}, nil
 
-// func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
-// 	var req model.Subscription
-// 	if err := c.Bind(&req); err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{
-// 			"error": "invalid request body",
-// 		})
-// 	}
-// 	ctx := context.TODO()
-// 	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
-// 		Id:        req.Id.String(),
-// 		IdUser:    req.Id_user.String(),
-// 		IdCountry: req.Id_country.String(),
-// 	})
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-// 			"message": resp.Message,
-// 		})
-// 	}
+}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": resp.Message,
-// 	})
-// }
+func (s *SubService) Update(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+	idcountry, _ := uuid.Parse(req.IdCountry)
+	subs := model.Subscription{
+		Id_country: idcountry,
+	}
+	id, _ := uuid.Parse(req.Id)
+	err := s.serv.UpdateSubscription(id, subs)
+	if err != nil {
+		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	return &pb.Subscription_Response{Message: "Success Updating"}, nil
 
-// func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
-// 	var req model.Subscription
-// 	if err := c.Bind(&req); err != nil {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{
-// 			"error": "invalid request body",
-// 		})
-// 	}
-// 	ctx := context.TODO()
-// 	resp, err := h.subscriptionclient.Delete_Subscription(ctx, &pb.Subscription_Request{
-// 		Id:        req.Id.String(),
-// 		IdUser:    req.Id_user.String(),
-// 		IdCountry: req.Id_country.String(),
-// 	})
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-// 			"message": resp.Message,
-// 		})
-// 	}
+}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": resp.Message,
-// 	})
-// }
+func (s *SubService) Delete(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+	id, _ := uuid.Parse(req.Id)
+	err := s.serv.DeleteSubscription(id)
+	if err != nil {
+		return &pb.Subscription_Response{Message: "Error Deleting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	return &pb.Subscription_Response{Message: "success deleting"}, nil
+
+}
