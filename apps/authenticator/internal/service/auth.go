@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate mockery --name AuthFunc --inpackage
 type AuthFunc interface {
 	Login(username string, password string) (string, error)
 	Register(username string, password string) (*repo.User, error)

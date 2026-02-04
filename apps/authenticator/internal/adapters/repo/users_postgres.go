@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:generate mockery --name UserRepo --inpackage
 type UserRepo interface {
 	CreateUser(u User) error
 	GetByUsername(username string) (*User, error)

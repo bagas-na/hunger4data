@@ -1,0 +1,13 @@
+
+dir: "internal/mocks"
+inpackage: false
+
+outpkg: "mockery"
+structname: "{{.InterfaceName}}_Mockery"
+filename: "{{.InterfaceName | snakecase}}_mockery.go"
+
+packages:
+  ./internal:
+    config:
+      all: true
+      recursive: true
