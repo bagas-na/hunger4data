@@ -1,6 +1,6 @@
 module hunger4data/pb
 
-go 1.25.3
+go 1.25.4
 
 require (
 	google.golang.org/grpc v1.78.0
