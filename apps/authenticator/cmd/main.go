@@ -4,6 +4,7 @@ import (
 	"authenticator/internal/adapters/crypto"
 	"authenticator/internal/adapters/repo"
 	"authenticator/internal/service"
+	handler "authenticator/internal/transport/grpc"
 	"fmt"
 	authenticatorv1 "hunger4data/pb/authenticator"
 	"log"
@@ -90,20 +91,20 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	err = db.AutoMigrate(&service.Users{})
+	err = db.AutoMigrate(&repo.Users{})
 	if err != nil {
-		log.Fatalf("user automigration failed: %v", err)
+		log.Fatalf("failed to migrate database: %v", err)
 	}
 	fmt.Println("user automigration complete")
 
 	userRepo := repo.NewUserRepo(db)
 
-	jwtManager := crypto.NewJwtPass(cfg.JWTSecret)
-
-	authService := service.NewAuthService(userRepo, &jwtManager)
+	_ = crypto.NewJwtPass(cfg.JWTSecret)
+	authserv := service.NewAuthService(userRepo)
+	authhand := handler.NewHandService(authserv)
 	grpcServer := grpc.NewServer()
 
-	authenticatorv1.RegisterAuthServiceServer(grpcServer, &authService)
+	authenticatorv1.RegisterAuthServiceServer(grpcServer, &authhand)
 	listener, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("failed to listen on port %s: %v", cfg.GRPCPort, err)

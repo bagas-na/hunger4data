@@ -1,76 +1,52 @@
-package grpc
+package handler
 
 import (
 	"authenticator/internal/service"
 	"context"
+	"fmt"
 	authenticatorv1 "hunger4data/pb/authenticator"
-	"net/http"
-	"time"
 
-	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-type AuthHandler struct {
-	authclient authenticatorv1.AuthServiceClient
+type AuthService struct {
+	serv service.AuthFunc
+	authenticatorv1.UnimplementedAuthServiceServer
 }
 
-func NewHandAuth(authclient authenticatorv1.AuthServiceClient) *AuthHandler {
-	return &AuthHandler{
-		authclient: authclient,
-	}
+func NewHandService(serv service.AuthFunc) AuthService {
+	return AuthService{serv: serv}
 }
 
-func (h *AuthHandler) Login(c echo.Context) error {
-	var req service.LoginRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
-		})
+func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginRequest) (*authenticatorv1.LoginResponse, error) {
+
+	if req.Username == "" || req.Password == "" {
+		return &authenticatorv1.LoginResponse{}, status.Error(codes.InvalidArgument, "username and password are required")
 	}
-
-	ctx := context.TODO()
-
-	resp, err := h.authclient.Login(ctx, &authenticatorv1.LoginRequest{
-		Username: req.Username,
-		Password: req.Password,
-	})
+	username := req.Username
+	password := req.Password
+	token, err := s.serv.Login(username, password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "error logging in",
-		})
+		return &authenticatorv1.LoginResponse{Token: "", Message: "Error loggin in"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"token": resp.Token,
-	})
+	return &authenticatorv1.LoginResponse{
+		Token:   token,
+		Message: "Success you are logged in",
+	}, nil
 }
 
-func (h *AuthHandler) Register(c echo.Context) error {
-	var req service.RegisterRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
-		})
-	}
+func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.RegisterRequest) (*authenticatorv1.RegisterResponse, error) {
 
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
-	defer cancel()
-
-	resp, err := h.authclient.Register(ctx, &authenticatorv1.RegisterRequest{
-		Username: req.Username,
-		Password: req.Password,
-	})
+	username := req.Username
+	password := req.Password
+	err := s.serv.Register(username, password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "error registering",
-		})
+		return &authenticatorv1.RegisterResponse{User: &authenticatorv1.User{}, Message: "Creating user error"}, status.Error(codes.AlreadyExists, fmt.Sprintf("%s", err))
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"message": resp.Message,
-		"user": map[string]interface{}{
-			"id":       resp.User.Id,
-			"username": resp.User.Username,
-		},
-	})
+	return &authenticatorv1.RegisterResponse{
+		User:    &authenticatorv1.User{},
+		Message: "Success you are registered",
+	}, nil
 }

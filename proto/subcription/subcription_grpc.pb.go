@@ -4,7 +4,7 @@
 // - protoc             v6.33.4
 // source: subcription.proto
 
-package pb
+package subscriptionv1
 
 import (
 	context "context"
