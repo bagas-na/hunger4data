@@ -10,6 +10,7 @@ import (
 	"subscription/internal/adapters/model"
 	"subscription/internal/adapters/repo"
 	"subscription/internal/service"
+	grpcHandler "subscription/internal/transport/grpc"
 
 	"time"
 
@@ -29,7 +30,6 @@ type Config struct {
 	JWTSecret  string
 	GRPCPort   string
 	RESTPort   string
-	RedisAddr  string
 }
 
 func LoadConfig() *Config {
@@ -45,9 +45,8 @@ func LoadConfig() *Config {
 		DBPassword: getEnv("DB_PASSWORD", "1"),
 		DBName:     getEnv("DB_NAME", "test"),
 		JWTSecret:  getEnv("JWT_SECRET", "secret"),
-		GRPCPort:   getEnv("GRPC_PORT", "50051"),
+		GRPCPort:   getEnv("GRPC_PORT", "50052"),
 		RESTPort:   getEnv("REST_PORT", "8080"),
-		RedisAddr:  getEnv("REDIS_ADDR", "8080"),
 	}
 }
 
@@ -59,7 +58,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPassword,
@@ -75,16 +74,6 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
-
-	if err := db.AutoMigrate(&model.Country{}); err != nil {
-		fmt.Println("country automigration failed")
-	}
-	fmt.Println("country automigration complete")
-
-	if err := db.AutoMigrate(&model.Subscription{}); err != nil {
-		fmt.Println("subscription automigration failed")
-	}
-	fmt.Println("subscription automigration complete")
 
 	sqlDB.SetMaxOpenConns(25)
 	sqlDB.SetMaxIdleConns(25)
@@ -103,7 +92,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddr,
+		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
@@ -115,17 +104,13 @@ func main() {
 	}
 
 	service.StartSyncScheduler(rdb)
-	err = db.AutoMigrate(&model.Country{})
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
 	err = db.AutoMigrate(&model.Subscription{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-	userRepo := repo.NewSubRepo(db)
-
-	subscriptionService := service.NewSubService(userRepo, rdb)
+	subsRepo := repo.NewSubRepo(db)
+	subsServ := service.NewSubService(subsRepo)
+	subscriptionService := grpcHandler.NewSubHand(subsServ, rdb)
 	grpcServer := grpc.NewServer()
 
 	pb.RegisterSubscription_ServiceServer(grpcServer, &subscriptionService)

@@ -4,7 +4,7 @@
 // 	protoc        v6.33.4
 // source: subcription.proto
 
-package pb
+package subscriptionv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -473,7 +473,7 @@ const file_subcription_proto_rawDesc = "" +
 	"\x13Create_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12X\n" +
 	"\x13Update_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12X\n" +
 	"\x13Delete_Subscription\x12\x1f.subscribe.Subscription_Request\x1a .subscribe.Subscription_Response\x12e\n" +
-	"\x16Get_Subscription_By_ID\x12\x1f.subscribe.Subscription_Request\x1a*.subscribe.Get_Subscription_BY_ID_ResponseB\x06Z\x04./pbb\x06proto3"
+	"\x16Get_Subscription_By_ID\x12\x1f.subscribe.Subscription_Request\x1a*.subscribe.Get_Subscription_BY_ID_ResponseB\x12Z\x10./subscriptionv1b\x06proto3"
 
 var (
 	file_subcription_proto_rawDescOnce sync.Once
