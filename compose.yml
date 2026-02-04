@@ -12,6 +12,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${AUTH_GRPC_PORT}
       REST_PORT: ${AUTH_REST_PORT}
+      JWT_DURATION: ${JWT_DURATION}
     restart: unless-stopped
 
   notification-service:

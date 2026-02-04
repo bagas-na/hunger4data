@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
@@ -24,9 +25,10 @@ type Config struct {
 	// DBUser     string
 	// DBPassword string
 	// DBName     string
-	JWTSecret string
-	GRPCPort  string
-	RESTPort  string
+	JWTSecret   string
+	JWTDuration time.Duration
+	GRPCPort    string
+	RESTPort    string
 }
 
 func LoadConfig() *Config {
@@ -44,6 +46,14 @@ func LoadConfig() *Config {
 		}
 	}
 
+	durString := getEnv("JWT_DURATION", "60m")
+
+	duration, err := time.ParseDuration(durString)
+	if err != nil {
+		fmt.Printf("%q is not a valid duration. Using default value of 60m", durString)
+		duration = 60 * time.Minute
+	}
+
 	return &Config{
 		DBDSN: getEnv("DB_DSN", ""),
 		// DBHost:     getEnv("DB_HOST", "localhost"),
@@ -51,9 +61,10 @@ func LoadConfig() *Config {
 		// DBUser:     getEnv("DB_USER", "postgres"),
 		// DBPassword: getEnv("DB_PASSWORD", "1"),
 		// DBName:     getEnv("DB_NAME", "test"),
-		JWTSecret: getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
-		GRPCPort:  getEnv("GRPC_PORT", "50051"),
-		RESTPort:  getEnv("REST_PORT", "8080"),
+		JWTSecret:   getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
+		JWTDuration: duration,
+		GRPCPort:    getEnv("GRPC_PORT", "50051"),
+		RESTPort:    getEnv("REST_PORT", "8080"),
 	}
 }
 
@@ -111,7 +122,7 @@ func main() {
 
 	userRepo := repo.NewUserRepo(db)
 
-	cf := crypto.NewJwtPass(cfg.JWTSecret)
+	cf := crypto.NewJwtPass(cfg.JWTSecret, cfg.JWTDuration)
 	authserv := service.NewAuthService(userRepo, cf)
 	authhand := handler.NewHandService(authserv)
 	grpcServer := grpc.NewServer()

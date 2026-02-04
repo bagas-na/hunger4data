@@ -38,7 +38,7 @@ func (s *AuthService) Login(username string, password string) (string, error) {
 	if s.jwt.PassCompare(user.Password, password) {
 		return "", errors.New("Wrong password")
 	}
-	token, err := s.jwt.GenerateToken(user.Id, user.Username, user.Role)
+	token, err := s.jwt.GenerateToken(user.Id)
 	if err != nil {
 		return "", err
 	}
