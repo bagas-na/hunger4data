@@ -36,7 +36,7 @@ func (s *AuthService) Login(username string, password string) (string, error) {
 	if err != nil {
 		return "", errors.New("Cannot find username")
 	}
-	if s.jwt.PassCompare(user.Password, password) {
+	if !s.jwt.PassCompare(user.Password, password) {
 		return "", errors.New("Wrong password")
 	}
 	token, err := s.jwt.GenerateToken(user.Id)
