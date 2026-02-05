@@ -34,8 +34,8 @@ func (m *MockPaymentService) CreatePaymentAndCheckout(
 	return args.Get(0).(*db.Payment), args.String(1), args.Error(2)
 }
 
-func (m *MockPaymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error) {
-	args := m.Called(paymentID)
+func (m *MockPaymentService) GetCheckoutURL(ctx context.Context, userID, paymentID uuid.UUID) (string, error) {
+	args := m.Called(userID, paymentID)
 	return args.String(0), args.Error(1)
 }
 

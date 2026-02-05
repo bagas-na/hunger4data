@@ -1,20 +1,20 @@
 services:
-  # api-gateway-service:
-  #   build:
-  #     context: .
-  #     dockerfile: apps/api-gateway/Dockerfile
-  #   image: api-gateway-service:latest
-  #   container_name: api-gateway-service
-  #   ports:
-  #     - "${GATEWAY_REST_PORT}:${GATEWAY_REST_PORT}"
-  #   environment:
-  #     GRPC_ADDR_AUTH: authenticator-service:${AUTH_GRPC_PORT}
-  #     GRPC_ADDR_NOTIFICATION: notification-service:${NOTIFICATION_GRPC_PORT}
-  #     GRPC_ADDR_PAYMENT: payment-service:${PAYMENT_GRPC_PORT}
-  #     GRPC_ADDR_SUBSCRIPTION: subscription-service:${SUBSCRIPTION_GRPC_PORT}
-  #     RESTPort: ${GATEWAY_REST_PORT}
-  #     JWT_SECRET: ${JWT_SECRET}
-  #   restart: unless-stopped
+  api-gateway-service:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    image: api-gateway-service:latest
+    container_name: api-gateway-service
+    ports:
+      - "${GATEWAY_REST_PORT}:${GATEWAY_REST_PORT}"
+    environment:
+      GRPC_ADDR_AUTH: authenticator-service:${AUTH_GRPC_PORT}
+      GRPC_ADDR_NOTIFICATION: notification-service:${NOTIFICATION_GRPC_PORT}
+      GRPC_ADDR_PAYMENT: payment-service:${PAYMENT_GRPC_PORT}
+      GRPC_ADDR_SUBSCRIPTION: subscription-service:${SUBSCRIPTION_GRPC_PORT}
+      RESTPort: ${GATEWAY_REST_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+    restart: unless-stopped
 
   authenticator-service:
     build:

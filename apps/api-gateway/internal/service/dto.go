@@ -30,7 +30,6 @@ type LoginResponse struct {
 
 // Subscription
 type CountryInfo struct {
-	Id                        string  `json:"id,omitempty"`
 	Name                      string  `json:"name,omitempty"`
 	IpcPhase                  string  `json:"ipc_phase,omitempty" example:"3+"`
 	PopulationInPhase         int64   `json:"population_in_phase,omitempty" example:"42000000"`
@@ -43,7 +42,7 @@ type GetCountriesResponse struct {
 	Data    []CountryInfo `json:"data"`
 }
 
-type SubcriptionInfo struct {
+type SubscriptionInfo struct {
 	Id          string `json:"id" example:"89aafe8b-e9aa-4daa-88f1-43e074ef0d6b"`
 	UserId      string `json:"user_id" example:"73a7f9b2-888e-4f79-be8a-34e56116a82b"`
 	CountryCode string `json:"country_code" example:"COF"`
@@ -54,8 +53,11 @@ type CreateSubcriptionRequest struct {
 }
 
 type CreateSubcriptionResponse struct {
-	Message string            `json:"message" example:"Subscription successful"`
-	Data    []SubcriptionInfo `json:"data"`
+	Message string `json:"message" example:"Subscription successful"`
+}
+
+type GetUserSubcriptionsResponse struct {
+	Data []SubscriptionInfo `json:"data"`
 }
 
 type DeleteSubcriptionResponse struct {

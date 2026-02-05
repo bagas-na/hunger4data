@@ -7,11 +7,12 @@
 package paymentv1
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -270,7 +271,8 @@ func (x *CreatePaymentResponse) GetCheckoutUrl() string {
 // --- Payment Checkout URL - DTO
 type GetPaymentCheckoutURLRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PaymentId     string                 `protobuf:"bytes,1,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PaymentId     string                 `protobuf:"bytes,2,opt,name=payment_id,json=paymentId,proto3" json:"payment_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -303,6 +305,13 @@ func (x *GetPaymentCheckoutURLRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetPaymentCheckoutURLRequest.ProtoReflect.Descriptor instead.
 func (*GetPaymentCheckoutURLRequest) Descriptor() ([]byte, []int) {
 	return file_payment_payment_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetPaymentCheckoutURLRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 func (x *GetPaymentCheckoutURLRequest) GetPaymentId() string {
@@ -562,10 +571,11 @@ const file_payment_payment_proto_rawDesc = "" +
 	"\bcurrency\x18\x04 \x01(\tR\bcurrency\"i\n" +
 	"\x15CreatePaymentResponse\x12-\n" +
 	"\apayment\x18\x01 \x01(\v2\x13.payment.v1.PaymentR\apayment\x12!\n" +
-	"\fcheckout_url\x18\x02 \x01(\tR\vcheckoutUrl\"=\n" +
-	"\x1cGetPaymentCheckoutURLRequest\x12\x1d\n" +
+	"\fcheckout_url\x18\x02 \x01(\tR\vcheckoutUrl\"V\n" +
+	"\x1cGetPaymentCheckoutURLRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
-	"payment_id\x18\x01 \x01(\tR\tpaymentId\"B\n" +
+	"payment_id\x18\x02 \x01(\tR\tpaymentId\"B\n" +
 	"\x1dGetPaymentCheckoutURLResponse\x12!\n" +
 	"\fcheckout_url\x18\x01 \x01(\tR\vcheckoutUrl\".\n" +
 	"\x13ListPaymentsRequest\x12\x17\n" +

@@ -2,6 +2,7 @@ package grpcHandler
 
 import (
 	"context"
+	"fmt"
 	paymentv1 "hunger4data/pb/payment"
 	"payment-service/internal/service"
 
@@ -22,6 +23,8 @@ func NewPaymentGRPCServer(svc service.PaymentService) *PaymentGRPCServer {
 }
 
 func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.CreatePaymentRequest) (*paymentv1.CreatePaymentResponse, error) {
+	fmt.Println("user_id: ", req.UserId)
+
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
@@ -53,12 +56,17 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 }
 
 func (h *PaymentGRPCServer) GetPaymentCheckoutURL(ctx context.Context, req *paymentv1.GetPaymentCheckoutURLRequest) (*paymentv1.GetPaymentCheckoutURLResponse, error) {
+	userID, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid payment_id")
+	}
+
 	paymentID, err := uuid.Parse(req.PaymentId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid payment_id")
 	}
 
-	url, err := h.svc.GetCheckoutURL(ctx, paymentID)
+	url, err := h.svc.GetCheckoutURL(ctx, userID, paymentID)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
