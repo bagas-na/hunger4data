@@ -30,12 +30,15 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 	if len(req.CountryCode) != 3 {
 		return nil, status.Error(codes.InvalidArgument, "invalid country_code")
 	}
-	countryCode := req.CountryCode
+
+	if req.Currency == "" || req.Amount == 0 {
+		return nil, status.Error(codes.InvalidArgument, "missing amount and currency")
+	}
 
 	payment, checkoutURL, err := h.svc.CreatePaymentAndCheckout(
 		ctx,
 		userID,
-		countryCode,
+		req.CountryCode,
 		req.Amount,
 		req.Currency,
 	)

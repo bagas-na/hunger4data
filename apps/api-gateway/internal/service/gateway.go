@@ -33,12 +33,27 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
 
+	req.UserId = c.Get("user_id").(string)
+
 	resp, err := h.paymentclient.CreatePayment(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, CreatePaymentResponse{
+		Message: "Payment created successfully.",
+		PaymentInfo: PaymentInfo{
+			PaymentID:       resp.Payment.Id,
+			CountryCode:     resp.Payment.CountryCode,
+			TransactionType: resp.Payment.TransactionType,
+			Amount:          resp.Payment.Amount,
+			Currency:        resp.Payment.Currency,
+			Status:          resp.Payment.Status,
+			CreatedAt:       resp.Payment.CreatedAt,
+			UpdatedAt:       resp.Payment.UpdatedAt,
+		},
+		CheckoutUrl: resp.CheckoutUrl,
+	})
 }
 
 func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
@@ -49,6 +64,7 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
+
 	req := &paymentv1.GetPaymentCheckoutURLRequest{
 		PaymentId: id,
 	}
@@ -67,11 +83,32 @@ func (h *PaymentHandler) ListPayments(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
+
+	req.UserId = c.Get("user_id").(string)
+
 	resp, err := h.paymentclient.ListPayments(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
-	return c.JSON(http.StatusOK, resp)
+
+	var paymentList []PaymentInfo
+
+	for _, p := range resp.Payments {
+		paymentInfo := PaymentInfo{
+			PaymentID:       p.Id,
+			CountryCode:     p.CountryCode,
+			TransactionType: p.TransactionType,
+			Amount:          p.Amount,
+			Currency:        p.Currency,
+			Status:          p.Status,
+			CreatedAt:       p.CreatedAt,
+			UpdatedAt:       p.UpdatedAt,
+		}
+
+		paymentList = append(paymentList, paymentInfo)
+	}
+
+	return c.JSON(http.StatusOK, paymentList)
 }
 
 func (h *PaymentHandler) ListPendingPayments(c echo.Context) error {
@@ -82,11 +119,32 @@ func (h *PaymentHandler) ListPendingPayments(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
+
+	req.UserId = c.Get("user_id").(string)
+
 	resp, err := h.paymentclient.ListPendingPayments(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
-	return c.JSON(http.StatusOK, resp)
+
+	var paymentList []PaymentInfo
+
+	for _, p := range resp.Payments {
+		paymentInfo := PaymentInfo{
+			PaymentID:       p.Id,
+			CountryCode:     p.CountryCode,
+			TransactionType: p.TransactionType,
+			Amount:          p.Amount,
+			Currency:        p.Currency,
+			Status:          p.Status,
+			CreatedAt:       p.CreatedAt,
+			UpdatedAt:       p.UpdatedAt,
+		}
+
+		paymentList = append(paymentList, paymentInfo)
+	}
+
+	return c.JSON(http.StatusOK, paymentList)
 }
 
 type NotificationHandler struct {

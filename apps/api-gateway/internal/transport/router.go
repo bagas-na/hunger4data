@@ -42,10 +42,10 @@ func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret 
 
 func PaymentRouting(e *echo.Echo, payment PaymentHandler, secret string) {
 	g := e.Group("/payments")
-	g.POST("/", payment.CreatePayment)
-	g.GET("/", payment.ListPayments)
-	g.GET("/checkout/:id", payment.GetPaymentCheckoutURL)
-	g.GET("/pending", payment.ListPendingPayments)
+	g.POST("", payment.CreatePayment, JWTMiddleware(secret))
+	g.GET("", payment.ListPayments, JWTMiddleware(secret))
+	g.GET("/checkout/:id", payment.GetPaymentCheckoutURL, JWTMiddleware(secret))
+	g.GET("/pending", payment.ListPendingPayments, JWTMiddleware(secret))
 }
 
 func NotificationRouting(e *echo.Echo, notification NotificationHandler, secret string) {
