@@ -25,18 +25,26 @@ func NewPaymentHand(paymentclient paymentv1.PaymentServiceClient) *PaymentHandle
 }
 
 func (h *PaymentHandler) CreatePayment(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &paymentv1.CreatePaymentRequest{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	resp, err := h.paymentclient.CreatePayment(c.Request().Context(), req)
+
+	resp, err := h.paymentclient.CreatePayment(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
+
 	return c.JSON(http.StatusOK, resp)
 }
 
 func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	id := c.Param("id")
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
@@ -44,7 +52,7 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 	req := &paymentv1.GetPaymentCheckoutURLRequest{
 		PaymentId: id,
 	}
-	resp, err := h.paymentclient.GetPaymentCheckoutURL(c.Request().Context(), req)
+	resp, err := h.paymentclient.GetPaymentCheckoutURL(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
@@ -52,11 +60,14 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 }
 
 func (h *PaymentHandler) ListPayments(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &paymentv1.ListPaymentsRequest{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	resp, err := h.paymentclient.ListPayments(c.Request().Context(), req)
+	resp, err := h.paymentclient.ListPayments(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
@@ -64,11 +75,14 @@ func (h *PaymentHandler) ListPayments(c echo.Context) error {
 }
 
 func (h *PaymentHandler) ListPendingPayments(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &paymentv1.ListPendingPaymentsRequest{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	resp, err := h.paymentclient.ListPendingPayments(c.Request().Context(), req)
+	resp, err := h.paymentclient.ListPendingPayments(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
@@ -86,11 +100,14 @@ func NewNotifyHand(notificationclient notifyv1.EmailServiceClient) *Notification
 }
 
 func (h *NotificationHandler) SendTransactionEmail(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &notifyv1.SendEmailRequest{}
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	resp, err := h.notificationclient.SendTransactionEmail(c.Request().Context(), req)
+	resp, err := h.notificationclient.SendTransactionEmail(ctx, req)
 	if err != nil {
 		return utils.MapGRPCError(c, err)
 	}
@@ -108,14 +125,15 @@ func NewHandAuth(authclient authenticatorv1.AuthServiceClient) *AuthHandler {
 }
 
 func (h *AuthHandler) Login(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	req := &authenticatorv1.LoginRequest{}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request body",
 		})
 	}
-
-	ctx := context.TODO()
 
 	resp, err := h.authclient.Login(ctx, req)
 	if err != nil {
@@ -169,7 +187,9 @@ func NewHandSubs(subscriptionclient subscriptionv1.Subscription_ServiceClient) *
 }
 
 func (h *subscriptionHandler) GetCountries(c echo.Context) error {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
 	resp, err := h.subscriptionclient.Get_Countries(ctx, &pb.Empty{})
 	if err != nil {
 		return utils.MapGRPCError(c, err)
@@ -181,7 +201,8 @@ func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 }
 
 func (h *subscriptionHandler) CreateSub(c echo.Context) error {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
 
 	userId := c.Get("user_id").(string)
 
@@ -205,13 +226,17 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 }
 
 func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
-	userId := c.Get("user_id").(string)
-	if userId == "" {
+
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
+	id := c.Param("id")
+	if id == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
-	ctx := context.TODO()
+
 	resp, err := h.subscriptionclient.Get_Subscriptions(ctx, &pb.Subscription_Request{
-		UserId: userId,
+		UserId: id,
 	})
 
 	if err != nil {
@@ -224,6 +249,9 @@ func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 }
 
 // func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
+// 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+// 	defer cancel()
+
 // 	id := c.Param("id")
 // 	if id == "" {
 // 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
@@ -234,7 +262,7 @@ func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 // 			"error": "invalid request body",
 // 		})
 // 	}
-// 	ctx := context.TODO()
+
 // 	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
 // 		Id:          id,
 // 		UserId:      req.UserId,
@@ -250,16 +278,16 @@ func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 // }
 
 func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
-	userId := c.Get("user_id").(string)
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
 
-	subscriptionId := c.Param("id")
-	if subscriptionId == "" {
+	id := c.Param("id")
+	if id == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
-	ctx := context.TODO()
+
 	resp, err := h.subscriptionclient.Delete_Subscription(ctx, &pb.Subscription_Request{
-		Id:     subscriptionId,
-		UserId: userId,
+		Id: id,
 	})
 	if err != nil {
 		return utils.MapGRPCError(c, err)
