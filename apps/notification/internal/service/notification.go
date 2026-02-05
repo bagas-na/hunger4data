@@ -52,7 +52,7 @@ func (s *EmailService) SendNotification(ctx context.Context, email Email) error 
 		log.Status = "failed"
 		log.Error = &errString
 
-		fmt.Printf("error sending notification: %w", err)
+		fmt.Printf("error sending notification: %v", err)
 
 		return s.repo.Create(ctx, &log)
 	}

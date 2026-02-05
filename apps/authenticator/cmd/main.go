@@ -91,6 +91,12 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	err = db.AutoMigrate(&repo.User{})
+	if err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+	fmt.Println("user automigration complete")
+
 	// sqlDB, err := db.DB()
 	// if err != nil {
 	// 	return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
@@ -112,12 +118,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
-
-	err = db.AutoMigrate(&repo.User{})
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
-	fmt.Println("user automigration complete")
 
 	userRepo := repo.NewUserRepo(db)
 

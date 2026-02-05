@@ -30,8 +30,13 @@ func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginReque
 	password := req.Password
 	token, err := s.serv.Login(username, password)
 	if err != nil {
-		return &authenticatorv1.LoginResponse{Token: "", Message: "Error loggin in"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		return &authenticatorv1.LoginResponse{
+				Token:   "",
+				Message: "Error loggin in",
+			},
+			status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
+
 	return &authenticatorv1.LoginResponse{
 		Token:   token,
 		Message: "Success you are logged in",

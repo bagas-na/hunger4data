@@ -20,9 +20,9 @@ func TestAuthService_Login(t *testing.T) {
 		username := "johndoe"
 		password := "secret123"
 		expectedToken := "fake-jwt-token"
-		user := &repo.User{Id: uuid.New(), Username: "johndoe", Password: "hashed_password"}
+		user := &repo.User{Id: uuid.New(), Username: "johndoe", PasswordHash: "hashed_password"}
 		mockRepo.On("GetByUsername", username).Return(user, nil)
-		mockJwt.On("PassCompare", user.Password, password).Return(true)
+		mockJwt.On("PassCompare", password, user.PasswordHash).Return(true)
 		mockJwt.On("GenerateToken", user.Id).Return(expectedToken, nil)
 
 		token, err := service.Login(username, password)
@@ -39,10 +39,10 @@ func TestAuthService_Login(t *testing.T) {
 		service := NewAuthService(mockRepo, mockJwt)
 		username := "johndoe"
 		password := "wrong_pass"
-		user := &repo.User{Username: username, Password: "hashed_password"}
+		user := &repo.User{Username: username, PasswordHash: "hashed_password"}
 
 		mockRepo.On("GetByUsername", username).Return(user, nil)
-		mockJwt.On("PassCompare", "hashed_password", password).Return(false)
+		mockJwt.On("PassCompare", password, "hashed_password").Return(false)
 
 		token, err := service.Login(username, password)
 
@@ -102,7 +102,7 @@ func TestAuthService_Register(t *testing.T) {
 
 		mockRepo.On("CreateUser", mock.MatchedBy(func(u repo.User) bool {
 			return u.Username == email &&
-				u.Password == hashedPass &&
+				u.PasswordHash == hashedPass &&
 				u.Role == "user"
 		})).Return(nil)
 
