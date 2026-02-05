@@ -39,7 +39,8 @@ message CreatePaymentResponse {
 
 // --- Payment Checkout URL - DTO
 message GetPaymentCheckoutURLRequest {
-  string payment_id = 1;
+  string user_id = 1;
+  string payment_id = 2;
 }
 
 message GetPaymentCheckoutURLResponse {

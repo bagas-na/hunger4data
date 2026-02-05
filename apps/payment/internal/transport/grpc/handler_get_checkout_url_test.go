@@ -14,8 +14,9 @@ import (
 func TestGetPaymentCheckoutURL_Success(t *testing.T) {
 	mockSvc := new(MockPaymentService)
 	paymentID := uuid.New()
+	userID := uuid.New()
 
-	mockSvc.On("GetCheckoutURL", paymentID).Return("https://checkout.example.com", nil)
+	mockSvc.On("GetCheckoutURL", userID, paymentID).Return("https://checkout.example.com", nil)
 
 	conn, cleanup := startTestGRPCServer(t, mockSvc)
 	defer cleanup()
@@ -23,6 +24,7 @@ func TestGetPaymentCheckoutURL_Success(t *testing.T) {
 	client := paymentv1.NewPaymentServiceClient(conn)
 
 	resp, err := client.GetPaymentCheckoutURL(context.Background(), &paymentv1.GetPaymentCheckoutURLRequest{
+		UserId:    userID.String(),
 		PaymentId: paymentID.String(),
 	})
 
@@ -51,8 +53,9 @@ func TestGetPaymentCheckoutURL_InvalidPaymentID(t *testing.T) {
 func TestGetPaymentCheckoutURL_ServiceError(t *testing.T) {
 	mockSvc := new(MockPaymentService)
 	paymentID := uuid.New()
+	userID := uuid.New()
 
-	mockSvc.On("GetCheckoutURL", paymentID).Return("", assert.AnError)
+	mockSvc.On("GetCheckoutURL", userID, paymentID).Return("", assert.AnError)
 
 	conn, cleanup := startTestGRPCServer(t, mockSvc)
 	defer cleanup()
@@ -61,6 +64,7 @@ func TestGetPaymentCheckoutURL_ServiceError(t *testing.T) {
 
 	_, err := client.GetPaymentCheckoutURL(context.Background(), &paymentv1.GetPaymentCheckoutURLRequest{
 		PaymentId: paymentID.String(),
+		UserId:    userID.String(),
 	})
 
 	st, _ := status.FromError(err)

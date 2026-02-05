@@ -1,0 +1,703 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API for food security data, subscriptions, and donations.\nProvides country-level food security indicators aggregated from HAPI/HDX.\nUsers can subscribe to countries, receive daily statistics, and donate to supported causes.",
+        "title": "Hunger4Data API",
+        "termsOfService": "https://github.com/bagas-na/hunger4data",
+        "contact": {
+            "name": "Hunger4Data Backend",
+            "url": "https://github.com/bagas-na/hunger4data",
+            "email": "none"
+        },
+        "license": {
+            "name": "MPL 2.0",
+            "url": "https://github.com/bagas-na/hunger4data/blob/main/LICENSE"
+        },
+        "version": "0.0.1"
+    },
+    "host": "localhost:9000",
+    "basePath": "/",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticates a user and returns a JWT token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Creates a new user account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "Register request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/countries": {
+            "get": {
+                "description": "Returns countries with food security data available.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "List available countries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.GetCountriesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all payments created by the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "List user payments",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.PaymentInfo"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a payment for donating to a country and returns a checkout URL.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a donation payment",
+                "parameters": [
+                    {
+                        "description": "Create payment request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/service.CreatePaymentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/pending": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all pending payments for the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "List pending payments",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.PaymentInfo"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/{id}/checkout": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the checkout URL for an existing payment.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get checkout URL for a payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.GetPaymentCheckoutURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all countries subscribed by the user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Get user subscriptions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.GetUserSubcriptionsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Subscribes the authenticated user to a country.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Subscribe to a country",
+                "parameters": [
+                    {
+                        "description": "Subscription request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateSubcriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateSubcriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Unsubscribes the user from a country.",
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Delete a subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.DeleteSubcriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "service.CountryInfo": {
+            "type": "object",
+            "properties": {
+                "ipc_phase": {
+                    "type": "string",
+                    "example": "3+"
+                },
+                "location_code": {
+                    "type": "string",
+                    "example": "COD"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "population_fraction_in_phase": {
+                    "type": "number",
+                    "example": 0.42
+                },
+                "population_in_phase": {
+                    "type": "integer",
+                    "example": 42000000
+                }
+            }
+        },
+        "service.CreatePaymentRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "country_code": {
+                    "type": "string",
+                    "example": "AFG"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "usd"
+                }
+            }
+        },
+        "service.CreatePaymentResponse": {
+            "type": "object",
+            "properties": {
+                "checkout_url": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "payment_info": {
+                    "$ref": "#/definitions/service.PaymentInfo"
+                }
+            }
+        },
+        "service.CreateSubcriptionRequest": {
+            "type": "object",
+            "properties": {
+                "country_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateSubcriptionResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Subscription successful"
+                }
+            }
+        },
+        "service.DeleteSubcriptionResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Delete successful"
+                }
+            }
+        },
+        "service.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.GetCountriesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.CountryInfo"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Success"
+                }
+            }
+        },
+        "service.GetPaymentCheckoutURLResponse": {
+            "type": "object",
+            "properties": {
+                "checkout_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.GetUserSubcriptionsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.SubscriptionInfo"
+                    }
+                }
+            }
+        },
+        "service.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "hunger4data"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "bagas-na@github.com"
+                }
+            }
+        },
+        "service.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJzdWIiOiI3M2E3ZjliMi04ODhlLTRmNzktYmU4YS0zNGU1NjExNmE4MmIiLCJhdWQiOlsiYm9va21zIl0sImV4cCI6MTc3MDI5OTM1MSwiaWF0IjoxNzcwMjg4NTUxfQ.kd1EJWYnAo9pw0R2_QH6Uxhjvmh10_AnPW3tbP55LC0"
+                }
+            }
+        },
+        "service.PaymentInfo": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "example": 10000
+                },
+                "countryCode": {
+                    "type": "string",
+                    "example": "IDN"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "paymentId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                },
+                "transactionType": {
+                    "type": "string",
+                    "example": "donation"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "hunger4data"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "bagas-na@github.com"
+                }
+            }
+        },
+        "service.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "example": "45dcf27b-29e4-46aa-a3aa-6e2b33ca86ae"
+                        },
+                        "username": {
+                            "type": "string",
+                            "example": "bagas-na@github.com"
+                        }
+                    }
+                }
+            }
+        },
+        "service.SubscriptionInfo": {
+            "type": "object",
+            "properties": {
+                "country_code": {
+                    "type": "string",
+                    "example": "COF"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "89aafe8b-e9aa-4daa-88f1-43e074ef0d6b"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "73a7f9b2-888e-4f79-be8a-34e56116a82b"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Bearer token for authenticated user, subscription, and donation endpoints.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

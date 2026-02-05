@@ -1,0 +1,464 @@
+basePath: /
+definitions:
+  service.CountryInfo:
+    properties:
+      ipc_phase:
+        example: 3+
+        type: string
+      location_code:
+        example: COD
+        type: string
+      name:
+        type: string
+      population_fraction_in_phase:
+        example: 0.42
+        type: number
+      population_in_phase:
+        example: 42000000
+        type: integer
+    type: object
+  service.CreatePaymentRequest:
+    properties:
+      amount:
+        example: 1000
+        type: integer
+      country_code:
+        example: AFG
+        type: string
+      currency:
+        example: usd
+        type: string
+    type: object
+  service.CreatePaymentResponse:
+    properties:
+      checkout_url:
+        type: string
+      message:
+        type: string
+      payment_info:
+        $ref: '#/definitions/service.PaymentInfo'
+    type: object
+  service.CreateSubcriptionRequest:
+    properties:
+      country_code:
+        type: string
+    type: object
+  service.CreateSubcriptionResponse:
+    properties:
+      message:
+        example: Subscription successful
+        type: string
+    type: object
+  service.DeleteSubcriptionResponse:
+    properties:
+      message:
+        example: Delete successful
+        type: string
+    type: object
+  service.ErrorResponse:
+    properties:
+      detail:
+        type: string
+      message:
+        type: string
+    type: object
+  service.GetCountriesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.CountryInfo'
+        type: array
+      message:
+        example: Success
+        type: string
+    type: object
+  service.GetPaymentCheckoutURLResponse:
+    properties:
+      checkout_url:
+        type: string
+    type: object
+  service.GetUserSubcriptionsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.SubscriptionInfo'
+        type: array
+    type: object
+  service.LoginRequest:
+    properties:
+      password:
+        example: hunger4data
+        type: string
+      username:
+        example: bagas-na@github.com
+        type: string
+    type: object
+  service.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJzdWIiOiI3M2E3ZjliMi04ODhlLTRmNzktYmU4YS0zNGU1NjExNmE4MmIiLCJhdWQiOlsiYm9va21zIl0sImV4cCI6MTc3MDI5OTM1MSwiaWF0IjoxNzcwMjg4NTUxfQ.kd1EJWYnAo9pw0R2_QH6Uxhjvmh10_AnPW3tbP55LC0
+        type: string
+    type: object
+  service.PaymentInfo:
+    properties:
+      amount:
+        example: 10000
+        type: integer
+      countryCode:
+        example: IDN
+        type: string
+      createdAt:
+        type: string
+      currency:
+        example: USD
+        type: string
+      paymentId:
+        type: string
+      status:
+        example: pending
+        type: string
+      transactionType:
+        example: donation
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  service.RegisterRequest:
+    properties:
+      password:
+        example: hunger4data
+        type: string
+      username:
+        example: bagas-na@github.com
+        type: string
+    type: object
+  service.RegisterResponse:
+    properties:
+      message:
+        type: string
+      user:
+        properties:
+          id:
+            example: 45dcf27b-29e4-46aa-a3aa-6e2b33ca86ae
+            type: string
+          username:
+            example: bagas-na@github.com
+            type: string
+        type: object
+    type: object
+  service.SubscriptionInfo:
+    properties:
+      country_code:
+        example: COF
+        type: string
+      id:
+        example: 89aafe8b-e9aa-4daa-88f1-43e074ef0d6b
+        type: string
+      user_id:
+        example: 73a7f9b2-888e-4f79-be8a-34e56116a82b
+        type: string
+    type: object
+host: localhost:9000
+info:
+  contact:
+    email: none
+    name: Hunger4Data Backend
+    url: https://github.com/bagas-na/hunger4data
+  description: |-
+    API for food security data, subscriptions, and donations.
+    Provides country-level food security indicators aggregated from HAPI/HDX.
+    Users can subscribe to countries, receive daily statistics, and donate to supported causes.
+  license:
+    name: MPL 2.0
+    url: https://github.com/bagas-na/hunger4data/blob/main/LICENSE
+  termsOfService: https://github.com/bagas-na/hunger4data
+  title: Hunger4Data API
+  version: 0.0.1
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token.
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      summary: User login
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account.
+      parameters:
+      - description: Register request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+  /countries:
+    get:
+      description: Returns countries with food security data available.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GetCountriesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      summary: List available countries
+      tags:
+      - Countries
+  /payments:
+    get:
+      description: Returns all payments created by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.PaymentInfo'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List user payments
+      tags:
+      - Payments
+    post:
+      consumes:
+      - application/json
+      description: Creates a payment for donating to a country and returns a checkout
+        URL.
+      parameters:
+      - description: Create payment request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.CreatePaymentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a donation payment
+      tags:
+      - Payments
+  /payments/{id}/checkout:
+    get:
+      description: Retrieves the checkout URL for an existing payment.
+      parameters:
+      - description: Payment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GetPaymentCheckoutURLResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get checkout URL for a payment
+      tags:
+      - Payments
+  /payments/pending:
+    get:
+      description: Returns all pending payments for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.PaymentInfo'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List pending payments
+      tags:
+      - Payments
+  /subscriptions:
+    get:
+      description: Returns all countries subscribed by the user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GetUserSubcriptionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user subscriptions
+      tags:
+      - Subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Subscribes the authenticated user to a country.
+      parameters:
+      - description: Subscription request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateSubcriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.CreateSubcriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Subscribe to a country
+      tags:
+      - Subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Unsubscribes the user from a country.
+      parameters:
+      - description: Subscription ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.DeleteSubcriptionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a subscription
+      tags:
+      - Subscriptions
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Bearer token for authenticated user, subscription, and donation endpoints.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

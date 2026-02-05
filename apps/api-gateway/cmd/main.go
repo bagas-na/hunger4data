@@ -14,8 +14,34 @@ import (
 	echomw "github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	_ "api-gateway/docs"
+
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// @title           Hunger4Data API
+// @version         0.0.1
+// @description     API for food security data, subscriptions, and donations.
+// @description     Provides country-level food security indicators aggregated from HAPI/HDX.
+// @description     Users can subscribe to countries, receive daily statistics, and donate to supported causes.
+// @termsOfService  https://github.com/bagas-na/hunger4data
+
+// @contact.name    Hunger4Data Backend
+// @contact.url     https://github.com/bagas-na/hunger4data
+// @contact.email   none
+
+// @license.name  MPL 2.0
+// @license.url   https://github.com/bagas-na/hunger4data/blob/main/LICENSE
+
+// @host      localhost:9000
+// @BasePath  /
+// @schemes http https
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description     Bearer token for authenticated user, subscription, and donation endpoints.
 func main() {
 	cfg := config.Load()
 	grpcConnAuth, err := grpc.NewClient(cfg.GRPCAddrAUTH, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -43,6 +69,8 @@ func main() {
 	e.HideBanner = true
 	e.Use(echomw.RequestLogger())
 	e.Use(echomw.Recover())
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	authclient := authenticatorv1.NewAuthServiceClient(grpcConnAuth)
 	authhand := service.NewHandAuth(authclient)

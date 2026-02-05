@@ -11,7 +11,7 @@ import (
 
 type PaymentService interface {
 	CreatePaymentAndCheckout(ctx context.Context, userID uuid.UUID, countryCode string, amount int64, currency string) (*db.Payment, string, error)
-	GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error)
+	GetCheckoutURL(ctx context.Context, userID uuid.UUID, paymentID uuid.UUID) (string, error)
 	ListPaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
 	ListActivePaymentsByUser(ctx context.Context, userID uuid.UUID) ([]db.Payment, error)
 	UpdatePaymentToPending(ctx context.Context, paymentID uuid.UUID, providerSessionID string) (*db.Payment, error)
@@ -109,12 +109,12 @@ func (s *paymentService) CreatePaymentAndCheckout(
 	return newPayment, session.URL, nil
 }
 
-func (s *paymentService) GetCheckoutURL(ctx context.Context, paymentID uuid.UUID) (string, error) {
+func (s *paymentService) GetCheckoutURL(ctx context.Context, userID, paymentID uuid.UUID) (string, error) {
 	if paymentID == uuid.Nil {
 		return "", errors.New("paymentID is required")
 	}
 
-	payment, err := s.repo.FindPaymentByID(ctx, paymentID)
+	payment, err := s.repo.FindUserPaymentByID(ctx, userID, paymentID)
 	if err != nil {
 		return "", err
 	}

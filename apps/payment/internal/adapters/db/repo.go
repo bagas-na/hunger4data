@@ -24,6 +24,12 @@ func (r *PaymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payme
 	return &payment, err
 }
 
+func (r *PaymentRepo) FindUserPaymentByID(ctx context.Context, userId, paymentId uuid.UUID) (*Payment, error) {
+	var payment Payment
+	err := r.db.WithContext(ctx).First(&payment, "user_id = ? AND id = ?", userId, paymentId).Error
+	return &payment, err
+}
+
 func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, error) {
 	paymentID := uuid.New()
 	eventID := uuid.New()
