@@ -321,7 +321,7 @@ func (x *Subscription_Request) GetMessage() string {
 	return ""
 }
 
-type Get_Subscription_BY_ID_Response struct {
+type Get_Subscriptions_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Subscription  []*Subscription        `protobuf:"bytes,1,rep,name=subscription,proto3" json:"subscription,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
@@ -329,20 +329,20 @@ type Get_Subscription_BY_ID_Response struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Get_Subscription_BY_ID_Response) Reset() {
-	*x = Get_Subscription_BY_ID_Response{}
+func (x *Get_Subscriptions_Response) Reset() {
+	*x = Get_Subscriptions_Response{}
 	mi := &file_subcription_subcription_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Get_Subscription_BY_ID_Response) String() string {
+func (x *Get_Subscriptions_Response) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Get_Subscription_BY_ID_Response) ProtoMessage() {}
+func (*Get_Subscriptions_Response) ProtoMessage() {}
 
-func (x *Get_Subscription_BY_ID_Response) ProtoReflect() protoreflect.Message {
+func (x *Get_Subscriptions_Response) ProtoReflect() protoreflect.Message {
 	mi := &file_subcription_subcription_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -354,19 +354,19 @@ func (x *Get_Subscription_BY_ID_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Get_Subscription_BY_ID_Response.ProtoReflect.Descriptor instead.
-func (*Get_Subscription_BY_ID_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use Get_Subscriptions_Response.ProtoReflect.Descriptor instead.
+func (*Get_Subscriptions_Response) Descriptor() ([]byte, []int) {
 	return file_subcription_subcription_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Get_Subscription_BY_ID_Response) GetSubscription() []*Subscription {
+func (x *Get_Subscriptions_Response) GetSubscription() []*Subscription {
 	if x != nil {
 		return x.Subscription
 	}
 	return nil
 }
 
-func (x *Get_Subscription_BY_ID_Response) GetMessage() string {
+func (x *Get_Subscriptions_Response) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
@@ -493,21 +493,20 @@ const file_subcription_subcription_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
 	"\fcountry_code\x18\x03 \x01(\tR\vcountryCode\x12\x18\n" +
-	"\amessage\x18\x04 \x01(\tR\amessage\"{\n" +
-	"\x1fGet_Subscription_BY_ID_Response\x12>\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\"v\n" +
+	"\x1aGet_Subscriptions_Response\x12>\n" +
 	"\fsubscription\x18\x01 \x03(\v2\x1a.subscribe.v1.SubscriptionR\fsubscription\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"u\n" +
 	"\x19Get_Subscription_Response\x12>\n" +
 	"\fsubscription\x18\x01 \x01(\v2\x1a.subscribe.v1.SubscriptionR\fsubscription\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"1\n" +
 	"\x15Subscription_Response\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xef\x03\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\x85\x03\n" +
 	"\x14Subscription_Service\x12J\n" +
 	"\rGet_Countries\x12\x13.subscribe.v1.Empty\x1a$.subscribe.v1.Get_Countries_Response\x12^\n" +
 	"\x13Create_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12^\n" +
-	"\x13Update_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12^\n" +
-	"\x13Delete_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12k\n" +
-	"\x16Get_Subscription_By_ID\x12\".subscribe.v1.Subscription_Request\x1a-.subscribe.v1.Get_Subscription_BY_ID_ResponseB-Z+hunger4data/pb/subscriptionv;subscriptionv1b\x06proto3"
+	"\x13Delete_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12a\n" +
+	"\x11Get_Subscriptions\x12\".subscribe.v1.Subscription_Request\x1a(.subscribe.v1.Get_Subscriptions_ResponseB-Z+hunger4data/pb/subscriptionv;subscriptionv1b\x06proto3"
 
 var (
 	file_subcription_subcription_proto_rawDescOnce sync.Once
@@ -523,31 +522,29 @@ func file_subcription_subcription_proto_rawDescGZIP() []byte {
 
 var file_subcription_subcription_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_subcription_subcription_proto_goTypes = []any{
-	(*Subscription)(nil),                    // 0: subscribe.v1.Subscription
-	(*Country)(nil),                         // 1: subscribe.v1.Country
-	(*Empty)(nil),                           // 2: subscribe.v1.Empty
-	(*Get_Countries_Response)(nil),          // 3: subscribe.v1.Get_Countries_Response
-	(*Subscription_Request)(nil),            // 4: subscribe.v1.Subscription_Request
-	(*Get_Subscription_BY_ID_Response)(nil), // 5: subscribe.v1.Get_Subscription_BY_ID_Response
-	(*Get_Subscription_Response)(nil),       // 6: subscribe.v1.Get_Subscription_Response
-	(*Subscription_Response)(nil),           // 7: subscribe.v1.Subscription_Response
+	(*Subscription)(nil),               // 0: subscribe.v1.Subscription
+	(*Country)(nil),                    // 1: subscribe.v1.Country
+	(*Empty)(nil),                      // 2: subscribe.v1.Empty
+	(*Get_Countries_Response)(nil),     // 3: subscribe.v1.Get_Countries_Response
+	(*Subscription_Request)(nil),       // 4: subscribe.v1.Subscription_Request
+	(*Get_Subscriptions_Response)(nil), // 5: subscribe.v1.Get_Subscriptions_Response
+	(*Get_Subscription_Response)(nil),  // 6: subscribe.v1.Get_Subscription_Response
+	(*Subscription_Response)(nil),      // 7: subscribe.v1.Subscription_Response
 }
 var file_subcription_subcription_proto_depIdxs = []int32{
 	1, // 0: subscribe.v1.Get_Countries_Response.countries:type_name -> subscribe.v1.Country
-	0, // 1: subscribe.v1.Get_Subscription_BY_ID_Response.subscription:type_name -> subscribe.v1.Subscription
+	0, // 1: subscribe.v1.Get_Subscriptions_Response.subscription:type_name -> subscribe.v1.Subscription
 	0, // 2: subscribe.v1.Get_Subscription_Response.subscription:type_name -> subscribe.v1.Subscription
 	2, // 3: subscribe.v1.Subscription_Service.Get_Countries:input_type -> subscribe.v1.Empty
 	4, // 4: subscribe.v1.Subscription_Service.Create_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 5: subscribe.v1.Subscription_Service.Update_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 6: subscribe.v1.Subscription_Service.Delete_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 7: subscribe.v1.Subscription_Service.Get_Subscription_By_ID:input_type -> subscribe.v1.Subscription_Request
-	3, // 8: subscribe.v1.Subscription_Service.Get_Countries:output_type -> subscribe.v1.Get_Countries_Response
-	7, // 9: subscribe.v1.Subscription_Service.Create_Subscription:output_type -> subscribe.v1.Subscription_Response
-	7, // 10: subscribe.v1.Subscription_Service.Update_Subscription:output_type -> subscribe.v1.Subscription_Response
-	7, // 11: subscribe.v1.Subscription_Service.Delete_Subscription:output_type -> subscribe.v1.Subscription_Response
-	5, // 12: subscribe.v1.Subscription_Service.Get_Subscription_By_ID:output_type -> subscribe.v1.Get_Subscription_BY_ID_Response
-	8, // [8:13] is the sub-list for method output_type
-	3, // [3:8] is the sub-list for method input_type
+	4, // 5: subscribe.v1.Subscription_Service.Delete_Subscription:input_type -> subscribe.v1.Subscription_Request
+	4, // 6: subscribe.v1.Subscription_Service.Get_Subscriptions:input_type -> subscribe.v1.Subscription_Request
+	3, // 7: subscribe.v1.Subscription_Service.Get_Countries:output_type -> subscribe.v1.Get_Countries_Response
+	7, // 8: subscribe.v1.Subscription_Service.Create_Subscription:output_type -> subscribe.v1.Subscription_Response
+	7, // 9: subscribe.v1.Subscription_Service.Delete_Subscription:output_type -> subscribe.v1.Subscription_Response
+	5, // 10: subscribe.v1.Subscription_Service.Get_Subscriptions:output_type -> subscribe.v1.Get_Subscriptions_Response
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name

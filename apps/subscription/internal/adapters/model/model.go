@@ -1,11 +1,17 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Subscription struct {
-	Id          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId      uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
-	CountryCode string    `json:"country_id" gorm:"not null"`
+	Id          uuid.UUID  `gorm:"type:uuid;primaryKey"`
+	UserId      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;uniqueIndex:idx_user_country"`
+	CountryCode string     `json:"country_code" gorm:"not null;uniqueIndex:idx_user_country"`
+	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
+	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
 type Country struct {

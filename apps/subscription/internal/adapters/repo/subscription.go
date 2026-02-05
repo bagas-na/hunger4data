@@ -1,17 +1,21 @@
 package repo
 
 import (
+	"errors"
+	"fmt"
 	"subscription/internal/adapters/model"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
 type SubscriptionRepo interface {
 	CreateSubcription(u model.Subscription) error
-	GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error)
-	UpdateSubscription(id uuid.UUID, subs model.Subscription) error
-	DeleteSubscription(id uuid.UUID) error
+	GetSubscriptionsByUserID(userId uuid.UUID) ([]model.Subscription, error)
+	// UpdateSubscription(id uuid.UUID, subs model.Subscription) error
+	DeleteSubscription(userId, subcriptionId uuid.UUID) error
 }
 
 type GORMRepository struct {
@@ -29,39 +33,54 @@ func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
 		Id:          uuid.New(),
 		UserId:      subs.UserId,
 		CountryCode: subs.CountryCode,
+		CreatedAt:   time.Now(),
 	}
 
 	err := r.db.Create(&newSub).Error
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr); pgErr.Code == "23505" {
+			return gorm.ErrDuplicatedKey
+		}
 		return err
 	}
 
 	return nil
 }
 
-func (r *GORMRepository) GetBySubscriptionUserID(id uuid.UUID) ([]model.Subscription, error) {
+func (r *GORMRepository) GetSubscriptionsByUserID(userId uuid.UUID) ([]model.Subscription, error) {
 	var sub []model.Subscription
-	result := r.db.Where("user_id = ? ", id).Find(&sub).Error
+	result := r.db.Where("user_id = ? AND deleted_at IS NULL", userId).Find(&sub).Error
 	if result != nil {
 		return nil, result
 	}
 	return sub, nil
 }
 
-func (r *GORMRepository) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
-	err := r.db.Where("id = ?", id).Updates(subs).Error
-	if err != nil {
-		return err
+// func (r *GORMRepository) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
+// 	err := r.db.Where("id = ?", id).Updates(subs).Error
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+func (r *GORMRepository) DeleteSubscription(userId, subcriptionId uuid.UUID) error {
+	var subs model.Subscription
+
+	if err := r.db.
+		Where("id = ? AND user_id = ? AND deleted_at IS NULL", subcriptionId, userId).
+		First(&subs).
+		Error; err != nil {
+		return fmt.Errorf("error fetching subscription id; %w", err)
 	}
 
-	return nil
-}
+	timeNow := time.Now()
+	subs.DeletedAt = &timeNow
 
-func (r *GORMRepository) DeleteSubscription(id uuid.UUID) error {
-	var subs model.Subscription
-	err := r.db.Delete(subs, "id = ?", id).Error
-	if err != nil {
-		return err
+	if err := r.db.Save(&subs).Error; err != nil {
+		return fmt.Errorf("error deleting subscription")
 	}
 	return nil
 }

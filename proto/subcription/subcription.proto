@@ -20,9 +20,9 @@ message Country {
 service Subscription_Service {
   rpc Get_Countries(Empty) returns (Get_Countries_Response);
   rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
+  // rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Get_Subscription_By_ID(Subscription_Request) returns (Get_Subscription_BY_ID_Response);
+  rpc Get_Subscriptions(Subscription_Request) returns (Get_Subscriptions_Response);
 }
 
 message Empty {}
@@ -39,7 +39,7 @@ message Subscription_Request {
   string message = 4;
 }
 
-message Get_Subscription_BY_ID_Response {
+message Get_Subscriptions_Response {
   repeated Subscription subscription = 1;
   string message = 2;
 }

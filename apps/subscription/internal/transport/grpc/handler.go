@@ -51,11 +51,11 @@ func (s *SubService) Create_Subscription(ctx context.Context, req *pb.Subscripti
 	return &pb.Subscription_Response{Message: "Subscription successful"}, nil
 }
 
-func (s *SubService) Get_Subscription_By_ID(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscription_BY_ID_Response, error) {
-	iduser, _ := uuid.Parse(req.UserId)
-	data, err := s.serv.GetSubscriptionByID(iduser)
+func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription_Request) (*pb.Get_Subscriptions_Response, error) {
+	userId, _ := uuid.Parse(req.UserId)
+	data, err := s.serv.GetSubscriptionByUserID(userId)
 	if err != nil {
-		return &pb.Get_Subscription_BY_ID_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		return &pb.Get_Subscriptions_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
 	protoSubs := []*pb.Subscription{}
 	for _, sub := range data {
@@ -65,29 +65,42 @@ func (s *SubService) Get_Subscription_By_ID(ctx context.Context, req *pb.Subscri
 			CountryCode: sub.CountryCode,
 		})
 	}
-	return &pb.Get_Subscription_BY_ID_Response{Subscription: protoSubs, Message: "Success Getting Subscription"}, nil
+	return &pb.Get_Subscriptions_Response{Subscription: protoSubs, Message: "Success Getting Subscription"}, nil
 
 }
 
-func (s *SubService) Update_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	subs := model.Subscription{
-		CountryCode: req.CountryCode,
-	}
-	id, _ := uuid.Parse(req.Id)
-	err := s.serv.UpdateSubscription(id, subs)
-	if err != nil {
-		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
-	}
-	return &pb.Subscription_Response{Message: "Success Updating"}, nil
+// func (s *SubService) Update_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+// 	subs := model.Subscription{
+// 		CountryCode: req.CountryCode,
+// 	}
+// 	id, _ := uuid.Parse(req.Id)
+// 	err := s.serv.UpdateSubscription(id, subs)
+// 	if err != nil {
+// 		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+// 	}
+// 	return &pb.Subscription_Response{Message: "Success Updating"}, nil
 
-}
+// }
 
 func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	id, _ := uuid.Parse(req.Id)
-	err := s.serv.DeleteSubscription(id)
+	userId, _ := uuid.Parse(req.UserId)
+	subscriptionId, err := uuid.Parse(req.Id)
 	if err != nil {
-		return &pb.Subscription_Response{Message: "Error Deleting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		return &pb.Subscription_Response{
+				Message: "Error Parsing SubcpritionId. Expect uuid",
+			},
+			status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
-	return &pb.Subscription_Response{Message: "success deleting"}, nil
+
+	err = s.serv.DeleteSubscription(userId, subscriptionId)
+	if err != nil {
+		return &pb.Subscription_Response{
+				Message: "Error Deleting subscription",
+			},
+			status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	return &pb.Subscription_Response{
+		Message: "success deleting",
+	}, nil
 
 }
