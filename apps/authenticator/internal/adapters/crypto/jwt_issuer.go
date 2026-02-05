@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate mockery --name Cryptofuncs --inpackage
 type Cryptofuncs interface {
 	GenerateToken(user_ID uuid.UUID) (string, error)
 	PassHash(pass string) (string, error)

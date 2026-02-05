@@ -91,7 +91,6 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// // 3. Access the underlying generic sql.DB to set pool settings
 	// sqlDB, err := db.DB()
 	// if err != nil {
 	// 	return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)

@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+//go:generate mockery --name UserRepo --inpackage
 type UserRepo interface {
 	CreateUser(u User) error
 	GetByUsername(username string) (*User, error)
@@ -28,7 +29,7 @@ func (r *GORMRepository) CreateUser(u User) error {
 	err := r.db.Create(&u).Error
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr); pgErr.Code == "23505" {
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return gorm.ErrDuplicatedKey
 		}
 		return err
@@ -57,7 +58,7 @@ func (r *GORMRepository) UpdateUser(username string, user User) error {
 
 func (r *GORMRepository) DeleteUser(username string) error {
 	var user User
-	err := r.db.Delete(user, "username = ?", username).Error
+	err := r.db.Delete(&user, "username = ?", username).Error
 	if err != nil {
 		return err
 	}
