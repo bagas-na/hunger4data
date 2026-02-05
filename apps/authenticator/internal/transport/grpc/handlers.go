@@ -27,9 +27,8 @@ func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginReque
 		return &authenticatorv1.LoginResponse{},
 			status.Error(codes.InvalidArgument, "Username and Password are required")
 	}
-	username := req.Username
-	password := req.Password
-	token, err := s.serv.Login(username, password)
+
+	token, err := s.serv.Login(ctx, req.Username, req.Password)
 	if err != nil {
 		return &authenticatorv1.LoginResponse{
 				Token:   "",
@@ -55,7 +54,7 @@ func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.Registe
 		}, status.Error(codes.InvalidArgument, "Username and password must not be empty")
 	}
 
-	newUser, err := s.serv.Register(username, password)
+	newUser, err := s.serv.Register(ctx, username, password)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {

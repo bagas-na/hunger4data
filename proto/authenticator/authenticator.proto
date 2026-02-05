@@ -12,6 +12,7 @@ message User {
 service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Activate(ActivateRequest) returns(ActivateResponse);
 }
 
 message RegisterRequest {
@@ -32,4 +33,12 @@ message LoginRequest {
 message LoginResponse {
   string token = 1;
   string message = 2;
+}
+
+message ActivateRequest {
+  string key = 1;
+}
+
+message ActivateResponse {
+  string message = 1;
 }

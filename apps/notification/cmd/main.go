@@ -9,6 +9,7 @@ import (
 	"notification/internal/config"
 	"notification/internal/service"
 	grpcHandler "notification/internal/transport/grpc"
+	"strconv"
 
 	"google.golang.org/grpc"
 )
@@ -21,16 +22,27 @@ func main() {
 		log.Fatalf("db error: %v", err)
 	}
 
-	mailer := mailer.NewMailersendMailer(cfg.MAILER_SEND_API)
+	port, err := strconv.Atoi(cfg.MAILER_PORT)
+
+	mailer := mailer.NewSMTPMailer(
+		cfg.MAILER_HOST,
+		port,
+		cfg.MAILER_LOGIN,
+		cfg.MAILER_PASSWORD,
+		cfg.MAILER_USERNAME,
+		cfg.MAILER_EMAIL,
+	)
 	logRepo := db.NewNotificationLogRepo(dbClient)
 
 	notificationSvc := service.NewNotificationService(mailer, logRepo)
 
 	grpcServer := grpc.NewServer()
 
-	mailerFromName := cfg.MAILER_EMAIL_USERNAME
-	mailerFromeEmail := cfg.MAILER_EMAIL_USERNAME + "@" + cfg.MAILER_EMAIL_DOMAIN
-	notificationHandler := grpcHandler.NewEmailGRPCServer(notificationSvc, mailerFromName, mailerFromeEmail)
+	notificationHandler := grpcHandler.NewEmailGRPCServer(
+		notificationSvc,
+		cfg.MAILER_USERNAME,
+		cfg.MAILER_EMAIL,
+	)
 
 	notifyv1.RegisterEmailServiceServer(grpcServer, notificationHandler)
 

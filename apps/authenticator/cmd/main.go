@@ -2,11 +2,13 @@ package main
 
 import (
 	"authenticator/internal/adapters/crypto"
+	"authenticator/internal/adapters/notification"
 	"authenticator/internal/adapters/repo"
 	"authenticator/internal/service"
 	handler "authenticator/internal/transport/grpc"
 	"fmt"
 	authenticatorv1 "hunger4data/pb/authenticator"
+	notifyv1 "hunger4data/pb/notification"
 	"log"
 	"net"
 	"os"
@@ -14,6 +16,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -25,10 +28,11 @@ type Config struct {
 	// DBUser     string
 	// DBPassword string
 	// DBName     string
-	JWTSecret   string
-	JWTDuration time.Duration
-	GRPCPort    string
-	RESTPort    string
+	JWTSecret            string
+	JWTDuration          time.Duration
+	GRPCPort             string
+	RESTPort             string
+	NotificationGRPCAddr string
 }
 
 func LoadConfig() *Config {
@@ -61,10 +65,11 @@ func LoadConfig() *Config {
 		// DBUser:     getEnv("DB_USER", "postgres"),
 		// DBPassword: getEnv("DB_PASSWORD", "1"),
 		// DBName:     getEnv("DB_NAME", "test"),
-		JWTSecret:   getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
-		JWTDuration: duration,
-		GRPCPort:    getEnv("GRPC_PORT", "50051"),
-		RESTPort:    getEnv("REST_PORT", "8080"),
+		JWTSecret:            getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
+		JWTDuration:          duration,
+		GRPCPort:             getEnv("GRPC_PORT", "50051"),
+		RESTPort:             getEnv("REST_PORT", "8080"),
+		NotificationGRPCAddr: getEnv("GRPC_ADDR_NOTIFICATION", ":50052"),
 	}
 }
 
@@ -119,10 +124,21 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	userRepo := repo.NewUserRepo(db)
+	grpcConnNotif, err := grpc.NewClient(
+		cfg.NotificationGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect to notification gRPC server: %v", err)
+	}
+	defer grpcConnNotif.Close()
+
+	notifclient := notifyv1.NewEmailServiceClient(grpcConnNotif)
+	mailer := notification.NewMailer(notifclient)
 
 	cf := crypto.NewJwtPass(cfg.JWTSecret, cfg.JWTDuration)
-	authserv := service.NewAuthService(userRepo, cf)
+
+	userRepo := repo.NewUserRepo(db)
+	authserv := service.NewAuthService(userRepo, cf, mailer)
 	authhand := handler.NewHandService(authserv)
 	grpcServer := grpc.NewServer()
 

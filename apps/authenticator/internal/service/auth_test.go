@@ -3,6 +3,7 @@ package service
 import (
 	"authenticator/internal/adapters/repo"
 	mockery "authenticator/internal/mocks"
+	"context"
 	"errors"
 	"testing"
 
@@ -16,7 +17,9 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("Successful Login", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		username := "johndoe"
 		password := "secret123"
 		expectedToken := "fake-jwt-token"
@@ -25,7 +28,7 @@ func TestAuthService_Login(t *testing.T) {
 		mockJwt.On("PassCompare", password, user.PasswordHash).Return(true)
 		mockJwt.On("GenerateToken", user.Id).Return(expectedToken, nil)
 
-		token, err := service.Login(username, password)
+		token, err := service.Login(ctx, username, password)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedToken, token)
@@ -36,7 +39,9 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("Invalid Password", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		username := "johndoe"
 		password := "wrong_pass"
 		user := &repo.User{Username: username, PasswordHash: "hashed_password"}
@@ -44,7 +49,7 @@ func TestAuthService_Login(t *testing.T) {
 		mockRepo.On("GetByUsername", username).Return(user, nil)
 		mockJwt.On("PassCompare", password, "hashed_password").Return(false)
 
-		token, err := service.Login(username, password)
+		token, err := service.Login(ctx, username, password)
 
 		assert.Error(t, err)
 		assert.Equal(t, "Invalid username or password", err.Error())
@@ -54,12 +59,14 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("Invalid username or password", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		username := "michael"
 		password := "pass"
 		mockRepo.On("GetByUsername", username).Return(nil, errors.New("db error"))
 
-		token, err := service.Login(username, password)
+		token, err := service.Login(ctx, username, password)
 
 		assert.Error(t, err)
 		assert.Equal(t, "Invalid username or password", err.Error())
@@ -72,11 +79,13 @@ func TestAuthService_Login(t *testing.T) {
 	t.Run("Needs username and password", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		username := ""
 		password := ""
 
-		token, err := service.Login(username, password)
+		token, err := service.Login(ctx, username, password)
 
 		assert.Error(t, err)
 		assert.Equal(t, "Needs username and password", err.Error())
@@ -93,7 +102,9 @@ func TestAuthService_Register(t *testing.T) {
 	t.Run("Successful Registration", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		email := "test@example.com"
 		rawPass := "password123"
 		hashedPass := "hashed_result"
@@ -106,7 +117,7 @@ func TestAuthService_Register(t *testing.T) {
 				u.Role == "user"
 		})).Return(nil)
 
-		user, err := service.Register(email, rawPass)
+		user, err := service.Register(ctx, email, rawPass)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
@@ -118,7 +129,9 @@ func TestAuthService_Register(t *testing.T) {
 	t.Run("Invalid Email Format", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
-		service := NewAuthService(mockRepo, mockJwt)
+		mockMailer := new(mockery.MockMailer)
+		service := NewAuthService(mockRepo, mockJwt, mockMailer)
+		ctx := context.Background()
 		invalidEmail := "!!!"
 
 		mockRepo.ExpectedCalls = nil
@@ -126,7 +139,7 @@ func TestAuthService_Register(t *testing.T) {
 
 		mockJwt.On("PassHash", "pass").Return("hashed_pass", nil)
 
-		user, err := service.Register(invalidEmail, "pass")
+		user, err := service.Register(ctx, invalidEmail, "pass")
 
 		assert.ErrorIs(t, err, ErrInvalidEmail)
 		assert.Nil(t, user)

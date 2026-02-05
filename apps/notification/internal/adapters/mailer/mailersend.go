@@ -36,6 +36,8 @@ func (m *MailersendMailer) Send(ctx context.Context, email service.Email) error 
 		HTML:       email.Body,
 	}
 
+	fmt.Printf("msg: %#v\n", msg)
+
 	_, err := m.client.Email.Send(ctx, msg)
 	if err != nil {
 		return fmt.Errorf("mailersend send failed: %w", err)

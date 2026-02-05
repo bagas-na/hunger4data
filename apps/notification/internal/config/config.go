@@ -8,11 +8,14 @@ import (
 )
 
 type Config struct {
-	GRPCPort              string
-	DBDSN                 string
-	MAILER_SEND_API       string
-	MAILER_EMAIL_USERNAME string
-	MAILER_EMAIL_DOMAIN   string
+	GRPCPort        string
+	DBDSN           string
+	MAILER_HOST     string
+	MAILER_PORT     string
+	MAILER_LOGIN    string
+	MAILER_PASSWORD string
+	MAILER_USERNAME string
+	MAILER_EMAIL    string
 }
 
 func Load() *Config {
@@ -31,11 +34,14 @@ func Load() *Config {
 	}
 
 	return &Config{
-		GRPCPort:              getEnv("GRPC_PORT", "50054"),
-		DBDSN:                 getEnv("DB_DSN", "postgresql://postgres:postgres@localhost:5432/postgres"),
-		MAILER_SEND_API:       getEnv("MAILER_SEND_API_KEY", ""),
-		MAILER_EMAIL_DOMAIN:   getEnv("MAILER_EMAIL_DOMAIN", ""),
-		MAILER_EMAIL_USERNAME: getEnv("MAILER_EMAIL_USERNAME", ""),
+		GRPCPort:        getEnv("GRPC_PORT", "50054"),
+		DBDSN:           getEnv("DB_DSN", "postgresql://postgres:postgres@localhost:5432/postgres"),
+		MAILER_HOST:     getEnv("MAILER_HOST", ""),
+		MAILER_PORT:     getEnv("MAILER_PORT", ""),
+		MAILER_LOGIN:    getEnv("MAILER_LOGIN", ""),
+		MAILER_PASSWORD: getEnv("MAILER_PASSWORD", ""),
+		MAILER_USERNAME: getEnv("MAILER_USERNAME", ""),
+		MAILER_EMAIL:    getEnv("MAILER_EMAIL", ""),
 	}
 }
 
