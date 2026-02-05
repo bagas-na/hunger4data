@@ -1,4 +1,5 @@
-```mermaid erDiagram
+```mermaid 
+erDiagram
     USERS ||--o{ PAYMENTS : places
     USERS ||--o{ SUBSCRIPTIONS : has
     PAYMENTS ||--o{ PAYMENT_EVENTS : generates
