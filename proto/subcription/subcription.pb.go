@@ -501,11 +501,10 @@ const file_subcription_subcription_proto_rawDesc = "" +
 	"\fsubscription\x18\x01 \x01(\v2\x1a.subscribe.v1.SubscriptionR\fsubscription\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"1\n" +
 	"\x15Subscription_Response\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xe5\x03\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\x85\x03\n" +
 	"\x14Subscription_Service\x12J\n" +
 	"\rGet_Countries\x12\x13.subscribe.v1.Empty\x1a$.subscribe.v1.Get_Countries_Response\x12^\n" +
 	"\x13Create_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12^\n" +
-	"\x13Update_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12^\n" +
 	"\x13Delete_Subscription\x12\".subscribe.v1.Subscription_Request\x1a#.subscribe.v1.Subscription_Response\x12a\n" +
 	"\x11Get_Subscriptions\x12\".subscribe.v1.Subscription_Request\x1a(.subscribe.v1.Get_Subscriptions_ResponseB-Z+hunger4data/pb/subscriptionv;subscriptionv1b\x06proto3"
 
@@ -538,16 +537,14 @@ var file_subcription_subcription_proto_depIdxs = []int32{
 	0, // 2: subscribe.v1.Get_Subscription_Response.subscription:type_name -> subscribe.v1.Subscription
 	2, // 3: subscribe.v1.Subscription_Service.Get_Countries:input_type -> subscribe.v1.Empty
 	4, // 4: subscribe.v1.Subscription_Service.Create_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 5: subscribe.v1.Subscription_Service.Update_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 6: subscribe.v1.Subscription_Service.Delete_Subscription:input_type -> subscribe.v1.Subscription_Request
-	4, // 7: subscribe.v1.Subscription_Service.Get_Subscriptions:input_type -> subscribe.v1.Subscription_Request
-	3, // 8: subscribe.v1.Subscription_Service.Get_Countries:output_type -> subscribe.v1.Get_Countries_Response
-	7, // 9: subscribe.v1.Subscription_Service.Create_Subscription:output_type -> subscribe.v1.Subscription_Response
-	7, // 10: subscribe.v1.Subscription_Service.Update_Subscription:output_type -> subscribe.v1.Subscription_Response
-	7, // 11: subscribe.v1.Subscription_Service.Delete_Subscription:output_type -> subscribe.v1.Subscription_Response
-	5, // 12: subscribe.v1.Subscription_Service.Get_Subscriptions:output_type -> subscribe.v1.Get_Subscriptions_Response
-	8, // [8:13] is the sub-list for method output_type
-	3, // [3:8] is the sub-list for method input_type
+	4, // 5: subscribe.v1.Subscription_Service.Delete_Subscription:input_type -> subscribe.v1.Subscription_Request
+	4, // 6: subscribe.v1.Subscription_Service.Get_Subscriptions:input_type -> subscribe.v1.Subscription_Request
+	3, // 7: subscribe.v1.Subscription_Service.Get_Countries:output_type -> subscribe.v1.Get_Countries_Response
+	7, // 8: subscribe.v1.Subscription_Service.Create_Subscription:output_type -> subscribe.v1.Subscription_Response
+	7, // 9: subscribe.v1.Subscription_Service.Delete_Subscription:output_type -> subscribe.v1.Subscription_Response
+	5, // 10: subscribe.v1.Subscription_Service.Get_Subscriptions:output_type -> subscribe.v1.Get_Subscriptions_Response
+	7, // [7:11] is the sub-list for method output_type
+	3, // [3:7] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name

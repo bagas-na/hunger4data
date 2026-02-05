@@ -10,7 +10,7 @@ type SubscriptionHandler interface {
 	GetCountries(c echo.Context) error
 	GetUserSubs(c echo.Context) error
 	CreateSub(c echo.Context) error
-	UpdateSub(c echo.Context) error
+	// UpdateSub(c echo.Context) error
 	DeleteSub(c echo.Context) error
 }
 
@@ -36,7 +36,7 @@ func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret 
 	g.GET("/countries", subscription.GetCountries) // done
 	g.GET("", subscription.GetUserSubs, JWTMiddleware(secret))
 	g.POST("", subscription.CreateSub, JWTMiddleware(secret)) // done
-	g.PUT("/:id", subscription.UpdateSub, JWTMiddleware(secret))
+	// g.PUT("/:id", subscription.UpdateSub, JWTMiddleware(secret))
 	g.DELETE("/:id", subscription.DeleteSub, JWTMiddleware(secret))
 }
 

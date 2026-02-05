@@ -169,7 +169,6 @@ func NewHandSubs(subscriptionclient subscriptionv1.Subscription_ServiceClient) *
 }
 
 func (h *subscriptionHandler) GetCountries(c echo.Context) error {
-
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Get_Countries(ctx, &pb.Empty{})
 	if err != nil {
@@ -224,40 +223,43 @@ func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 	})
 }
 
-func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
-	}
-	req := &pb.Subscription_Request{}
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
-		})
-	}
-	ctx := context.TODO()
-	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
-		Id:          id,
-		UserId:      req.UserId,
-		CountryCode: req.CountryCode,
-	})
-	if err != nil {
-		return utils.MapGRPCError(c, err)
-	}
+// func (h *subscriptionHandler) UpdateSub(c echo.Context) error {
+// 	id := c.Param("id")
+// 	if id == "" {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+// 	}
+// 	req := &pb.Subscription_Request{}
+// 	if err := c.Bind(req); err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{
+// 			"error": "invalid request body",
+// 		})
+// 	}
+// 	ctx := context.TODO()
+// 	resp, err := h.subscriptionclient.Update_Subscription(ctx, &pb.Subscription_Request{
+// 		Id:          id,
+// 		UserId:      req.UserId,
+// 		CountryCode: req.CountryCode,
+// 	})
+// 	if err != nil {
+// 		return utils.MapGRPCError(c, err)
+// 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": resp.Message,
-	})
-}
+// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 		"message": resp.Message,
+// 	})
+// }
 
 func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
+	userId := c.Get("user_id").(string)
+
+	subscriptionId := c.Param("id")
+	if subscriptionId == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
 	ctx := context.TODO()
 	resp, err := h.subscriptionclient.Delete_Subscription(ctx, &pb.Subscription_Request{
-		Id: id,
+		Id:     subscriptionId,
+		UserId: userId,
 	})
 	if err != nil {
 		return utils.MapGRPCError(c, err)

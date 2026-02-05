@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Subscription_Service_Get_Countries_FullMethodName       = "/subscribe.v1.Subscription_Service/Get_Countries"
 	Subscription_Service_Create_Subscription_FullMethodName = "/subscribe.v1.Subscription_Service/Create_Subscription"
-	Subscription_Service_Update_Subscription_FullMethodName = "/subscribe.v1.Subscription_Service/Update_Subscription"
 	Subscription_Service_Delete_Subscription_FullMethodName = "/subscribe.v1.Subscription_Service/Delete_Subscription"
 	Subscription_Service_Get_Subscriptions_FullMethodName   = "/subscribe.v1.Subscription_Service/Get_Subscriptions"
 )
@@ -32,7 +31,7 @@ const (
 type Subscription_ServiceClient interface {
 	Get_Countries(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Get_Countries_Response, error)
 	Create_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
-	Update_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
+	// rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
 	Delete_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error)
 	Get_Subscriptions(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Get_Subscriptions_Response, error)
 }
@@ -65,16 +64,6 @@ func (c *subscription_ServiceClient) Create_Subscription(ctx context.Context, in
 	return out, nil
 }
 
-func (c *subscription_ServiceClient) Update_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Subscription_Response)
-	err := c.cc.Invoke(ctx, Subscription_Service_Update_Subscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *subscription_ServiceClient) Delete_Subscription(ctx context.Context, in *Subscription_Request, opts ...grpc.CallOption) (*Subscription_Response, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Subscription_Response)
@@ -101,7 +90,7 @@ func (c *subscription_ServiceClient) Get_Subscriptions(ctx context.Context, in *
 type Subscription_ServiceServer interface {
 	Get_Countries(context.Context, *Empty) (*Get_Countries_Response, error)
 	Create_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
-	Update_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
+	// rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
 	Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error)
 	Get_Subscriptions(context.Context, *Subscription_Request) (*Get_Subscriptions_Response, error)
 	mustEmbedUnimplementedSubscription_ServiceServer()
@@ -119,9 +108,6 @@ func (UnimplementedSubscription_ServiceServer) Get_Countries(context.Context, *E
 }
 func (UnimplementedSubscription_ServiceServer) Create_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method Create_Subscription not implemented")
-}
-func (UnimplementedSubscription_ServiceServer) Update_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error) {
-	return nil, status.Error(codes.Unimplemented, "method Update_Subscription not implemented")
 }
 func (UnimplementedSubscription_ServiceServer) Delete_Subscription(context.Context, *Subscription_Request) (*Subscription_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete_Subscription not implemented")
@@ -186,24 +172,6 @@ func _Subscription_Service_Create_Subscription_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Subscription_Service_Update_Subscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Subscription_Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(Subscription_ServiceServer).Update_Subscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Subscription_Service_Update_Subscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Subscription_ServiceServer).Update_Subscription(ctx, req.(*Subscription_Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Subscription_Service_Delete_Subscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Subscription_Request)
 	if err := dec(in); err != nil {
@@ -254,10 +222,6 @@ var Subscription_Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create_Subscription",
 			Handler:    _Subscription_Service_Create_Subscription_Handler,
-		},
-		{
-			MethodName: "Update_Subscription",
-			Handler:    _Subscription_Service_Update_Subscription_Handler,
 		},
 		{
 			MethodName: "Delete_Subscription",

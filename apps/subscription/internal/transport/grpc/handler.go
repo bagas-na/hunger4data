@@ -69,25 +69,38 @@ func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription
 
 }
 
-func (s *SubService) Update_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	subs := model.Subscription{
-		CountryCode: req.CountryCode,
-	}
-	id, _ := uuid.Parse(req.Id)
-	err := s.serv.UpdateSubscription(id, subs)
-	if err != nil {
-		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
-	}
-	return &pb.Subscription_Response{Message: "Success Updating"}, nil
+// func (s *SubService) Update_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
+// 	subs := model.Subscription{
+// 		CountryCode: req.CountryCode,
+// 	}
+// 	id, _ := uuid.Parse(req.Id)
+// 	err := s.serv.UpdateSubscription(id, subs)
+// 	if err != nil {
+// 		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+// 	}
+// 	return &pb.Subscription_Response{Message: "Success Updating"}, nil
 
-}
+// }
 
 func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
-	id, _ := uuid.Parse(req.Id)
-	err := s.serv.DeleteSubscription(id)
+	userId, _ := uuid.Parse(req.UserId)
+	subscriptionId, err := uuid.Parse(req.Id)
 	if err != nil {
-		return &pb.Subscription_Response{Message: "Error Deleting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		return &pb.Subscription_Response{
+				Message: "Error Parsing SubcpritionId. Expect uuid",
+			},
+			status.Error(codes.Internal, fmt.Sprintf("%s", err))
 	}
-	return &pb.Subscription_Response{Message: "success deleting"}, nil
+
+	err = s.serv.DeleteSubscription(userId, subscriptionId)
+	if err != nil {
+		return &pb.Subscription_Response{
+				Message: "Error Deleting subscription",
+			},
+			status.Error(codes.Internal, fmt.Sprintf("%s", err))
+	}
+	return &pb.Subscription_Response{
+		Message: "success deleting",
+	}, nil
 
 }

@@ -20,7 +20,7 @@ message Country {
 service Subscription_Service {
   rpc Get_Countries(Empty) returns (Get_Countries_Response);
   rpc Create_Subscription(Subscription_Request) returns (Subscription_Response);
-  rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
+  // rpc Update_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Delete_Subscription(Subscription_Request) returns (Subscription_Response);
   rpc Get_Subscriptions(Subscription_Request) returns (Get_Subscriptions_Response);
 }
