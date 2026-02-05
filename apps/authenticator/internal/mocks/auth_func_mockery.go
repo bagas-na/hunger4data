@@ -22,6 +22,53 @@ func (_m *MockAuthFunc) EXPECT() *MockAuthFunc_Expecter {
 	return &MockAuthFunc_Expecter{mock: &_m.Mock}
 }
 
+// Activate provides a mock function with given fields: ctx, activationString
+func (_m *MockAuthFunc) Activate(ctx context.Context, activationString string) error {
+	ret := _m.Called(ctx, activationString)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Activate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, activationString)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockAuthFunc_Activate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Activate'
+type MockAuthFunc_Activate_Call struct {
+	*mock.Call
+}
+
+// Activate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - activationString string
+func (_e *MockAuthFunc_Expecter) Activate(ctx interface{}, activationString interface{}) *MockAuthFunc_Activate_Call {
+	return &MockAuthFunc_Activate_Call{Call: _e.mock.On("Activate", ctx, activationString)}
+}
+
+func (_c *MockAuthFunc_Activate_Call) Run(run func(ctx context.Context, activationString string)) *MockAuthFunc_Activate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockAuthFunc_Activate_Call) Return(_a0 error) *MockAuthFunc_Activate_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockAuthFunc_Activate_Call) RunAndReturn(run func(context.Context, string) error) *MockAuthFunc_Activate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Login provides a mock function with given fields: ctx, username, password
 func (_m *MockAuthFunc) Login(ctx context.Context, username string, password string) (string, error) {
 	ret := _m.Called(ctx, username, password)

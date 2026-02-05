@@ -21,6 +21,25 @@ func NewHandService(serv service.AuthFunc) AuthService {
 	return AuthService{serv: serv}
 }
 
+func (s *AuthService) Activate(ctx context.Context, req *authenticatorv1.ActivateRequest) (*authenticatorv1.ActivateResponse, error) {
+	if req.Key == "" {
+		return nil, status.Error(codes.InvalidArgument, "Activation string cannot be empty")
+	}
+
+	err := s.serv.Activate(ctx, req.Key)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "Invalid activation string")
+		}
+
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &authenticatorv1.ActivateResponse{
+		Message: "Your account has been activated successfully.",
+	}, nil
+}
+
 func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginRequest) (*authenticatorv1.LoginResponse, error) {
 
 	if req.Username == "" || req.Password == "" {

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type UserRepo interface {
 	GetByUsername(username string) (*User, error)
 	UpdateUser(username string, user User) error
 	DeleteUser(username string) error
+	ActivateUser(activationString string) error
 }
 
 type GORMRepository struct {
@@ -23,6 +25,24 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 	return &GORMRepository{
 		db: db,
 	}
+}
+
+func (r *GORMRepository) ActivateUser(activationString string) error {
+	var user User
+	err := r.db.
+		Where("activation_string = ? AND is_activated = ?", activationString, false).
+		First(&user).Error
+	if err != nil {
+		return err
+	}
+	user.IsActivated = true
+	user.Updated_At = time.Now()
+
+	if err := r.db.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *GORMRepository) CreateUser(u User) error {

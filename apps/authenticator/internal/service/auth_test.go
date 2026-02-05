@@ -117,6 +117,8 @@ func TestAuthService_Register(t *testing.T) {
 				u.Role == "user"
 		})).Return(nil)
 
+		mockMailer.On("SendRegistrationActivationLink", mock.Anything, mock.AnythingOfType("*repo.User")).Return(nil)
+
 		user, err := service.Register(ctx, email, rawPass)
 
 		assert.NoError(t, err)
@@ -124,8 +126,8 @@ func TestAuthService_Register(t *testing.T) {
 		assert.Equal(t, email, user.Username)
 		assert.Equal(t, "user", user.Role)
 		mockRepo.AssertExpectations(t)
+		mockMailer.AssertExpectations(t)
 	})
-
 	t.Run("Invalid Email Format", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)

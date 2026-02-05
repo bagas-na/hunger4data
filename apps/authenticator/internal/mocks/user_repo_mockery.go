@@ -21,6 +21,52 @@ func (_m *MockUserRepo) EXPECT() *MockUserRepo_Expecter {
 	return &MockUserRepo_Expecter{mock: &_m.Mock}
 }
 
+// ActivateUser provides a mock function with given fields: activationString
+func (_m *MockUserRepo) ActivateUser(activationString string) error {
+	ret := _m.Called(activationString)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ActivateUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(activationString)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserRepo_ActivateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ActivateUser'
+type MockUserRepo_ActivateUser_Call struct {
+	*mock.Call
+}
+
+// ActivateUser is a helper method to define mock.On call
+//   - activationString string
+func (_e *MockUserRepo_Expecter) ActivateUser(activationString interface{}) *MockUserRepo_ActivateUser_Call {
+	return &MockUserRepo_ActivateUser_Call{Call: _e.mock.On("ActivateUser", activationString)}
+}
+
+func (_c *MockUserRepo_ActivateUser_Call) Run(run func(activationString string)) *MockUserRepo_ActivateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserRepo_ActivateUser_Call) Return(_a0 error) *MockUserRepo_ActivateUser_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserRepo_ActivateUser_Call) RunAndReturn(run func(string) error) *MockUserRepo_ActivateUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateUser provides a mock function with given fields: u
 func (_m *MockUserRepo) CreateUser(u repo.User) error {
 	ret := _m.Called(u)

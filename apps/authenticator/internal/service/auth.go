@@ -17,6 +17,7 @@ import (
 type AuthFunc interface {
 	Login(ctx context.Context, username string, password string) (string, error)
 	Register(ctx context.Context, username string, password string) (*repo.User, error)
+	Activate(ctx context.Context, activationString string) error
 }
 
 type AuthService struct {
@@ -92,4 +93,11 @@ func (s *AuthService) Register(ctx context.Context, username string, password st
 	}
 
 	return &user, nil
+}
+
+func (s *AuthService) Activate(ctx context.Context, activationString string) error {
+	if activationString == "" {
+		return errors.New("activation string cannot be empty")
+	}
+	return s.repo.ActivateUser(activationString)
 }
