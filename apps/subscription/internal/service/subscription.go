@@ -61,21 +61,26 @@ func (s *SubService) GetSubscriptionByUserID(userId uuid.UUID) ([]model.Subscrip
 // 		return errors.New("Must have country_code (3 letters)")
 // 	}
 
-// 	err := s.repo.UpdateSubscription(id, subs)
-// 	if err != nil {
-// 		return errors.New("Failed to update subscription")
-// 	}
-// 	return nil
-// }
+//		err := s.repo.UpdateSubscription(id, subs)
+//		if err != nil {
+//			return errors.New("Failed to update subscription")
+//		}
+//		return nil
+//	}
 
 func (s *SubService) DeleteSubscription(userId uuid.UUID, subsId uuid.UUID) error {
-	if userId == uuid.Nil || subsId == uuid.Nil {
-		return errors.New("missing user id and/or subscription id")
+	if userId == uuid.Nil {
+		return errors.New("missing user id")
+	}
+
+	if subsId == uuid.Nil {
+		return errors.New("missing subscription id")
 	}
 
 	err := s.repo.DeleteSubscription(userId, subsId)
 	if err != nil {
 		return fmt.Errorf("failed to delete subscription: %w", err)
 	}
+
 	return nil
 }

@@ -62,7 +62,9 @@ func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription
 	userId, _ := uuid.Parse(req.UserId)
 	data, err := s.serv.GetSubscriptionByUserID(userId)
 	if err != nil {
-		return &pb.Get_Subscriptions_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, err.Error())
+		return &pb.Get_Subscriptions_Response{
+			Message: "Error Getting subscription",
+		}, status.Error(codes.Internal, err.Error())
 	}
 	protoSubs := []*pb.Subscription{}
 	for _, sub := range data {
@@ -94,20 +96,36 @@ func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscripti
 	subscriptionId, err := uuid.Parse(req.Id)
 	if err != nil {
 		return &pb.Subscription_Response{
-				Message: "Error Parsing SubcpritionId. Expect uuid",
+				Message: "Expected valid uuid for SubscriptionId",
+			}, status.Error(
+				codes.InvalidArgument,
+				"Expected valid uuid for SubscriptionId",
+			)
+	}
+
+	if userId == uuid.Nil || subscriptionId == uuid.Nil {
+		return &pb.Subscription_Response{
+				Message: "userId and subscriptionId must not be empty",
 			},
-			status.Error(codes.Internal, err.Error())
+			status.Error(codes.InvalidArgument, "userId and subscriptionId must not be empty")
 	}
 
 	err = s.serv.DeleteSubscription(userId, subscriptionId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &pb.Subscription_Response{
+					Message: "Subscription not found",
+				},
+				status.Error(codes.NotFound, "Subscription not found")
+		}
+
 		return &pb.Subscription_Response{
 				Message: "Error Deleting subscription",
 			},
 			status.Error(codes.Internal, err.Error())
 	}
+
 	return &pb.Subscription_Response{
 		Message: "success deleting",
 	}, nil
-
 }

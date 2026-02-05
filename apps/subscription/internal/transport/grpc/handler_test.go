@@ -149,10 +149,10 @@ func TestCreate_Delete_Subscription(t *testing.T) {
 		res, err := handler.Delete_Subscription(ctx, req)
 
 		assert.Error(t, err)
-		assert.Contains(t, res.Message, "Error Parsing SubcpritionId")
+		assert.Contains(t, res.Message, "Expected valid uuid for SubscriptionId")
 
 		st, _ := status.FromError(err)
-		assert.Equal(t, codes.Internal, st.Code())
+		assert.Equal(t, codes.InvalidArgument, st.Code())
 		mockServ.AssertNotCalled(t, "DeleteSubscription", mock.Anything, mock.Anything)
 	})
 

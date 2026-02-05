@@ -51,9 +51,9 @@ func TestAuthHandler_Login(t *testing.T) {
 		assert.Error(t, err)
 		st, ok := status.FromError(err)
 		assert.True(t, ok)
-		assert.Equal(t, codes.Internal, st.Code())
+		assert.Equal(t, codes.Unauthenticated, st.Code())
 
-		assert.Equal(t, "Error loggin in", res.Message)
+		assert.Equal(t, "Error logging in", res.Message)
 	})
 }
 
@@ -78,7 +78,7 @@ func TestAuthHandler_Register(t *testing.T) {
 		res, err := handler.Register(context.Background(), req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Success you are registered", res.Message)
+		assert.Equal(t, "Registration Complete", res.Message)
 		assert.Equal(t, returnedUser.Id.String(), res.User.Id)
 		assert.Equal(t, returnedUser.Username, res.User.Username)
 	})

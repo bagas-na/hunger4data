@@ -82,7 +82,7 @@ func (r *GORMRepository) DeleteSubscription(userId, subcriptionId uuid.UUID) err
 	subs.DeletedAt = &timeNow
 
 	if err := r.db.Save(&subs).Error; err != nil {
-		return fmt.Errorf("error deleting subscription")
+		return err
 	}
 	return nil
 }
