@@ -2,7 +2,7 @@ package grpcHandler
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	pb "hunger4data/pb/subcription"
 	"subscription/internal/adapters/external"
 	"subscription/internal/adapters/model"
@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type SubService struct {
@@ -45,7 +46,13 @@ func (s *SubService) Create_Subscription(ctx context.Context, req *pb.Subscripti
 	}
 	err := s.serv.CreateSubcription(subs)
 	if err != nil {
-		return &pb.Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return &pb.Subscription_Response{Message: "Subscription already exists"}, status.Error(codes.AlreadyExists, "Subscription already exists")
+		} else if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return &pb.Subscription_Response{Message: "User does not exist"}, status.Error(codes.NotFound, "User does not exist")
+		}
+
+		return &pb.Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pb.Subscription_Response{Message: "Subscription successful"}, nil
@@ -55,7 +62,7 @@ func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription
 	userId, _ := uuid.Parse(req.UserId)
 	data, err := s.serv.GetSubscriptionByUserID(userId)
 	if err != nil {
-		return &pb.Get_Subscriptions_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+		return &pb.Get_Subscriptions_Response{Message: "Error Getting subscription"}, status.Error(codes.Internal, err.Error())
 	}
 	protoSubs := []*pb.Subscription{}
 	for _, sub := range data {
@@ -76,7 +83,7 @@ func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription
 // 	id, _ := uuid.Parse(req.Id)
 // 	err := s.serv.UpdateSubscription(id, subs)
 // 	if err != nil {
-// 		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, fmt.Sprintf("%s", err))
+// 		return &pb.Subscription_Response{Message: "Error Updating subscription"}, status.Error(codes.Internal, err.Error())
 // 	}
 // 	return &pb.Subscription_Response{Message: "Success Updating"}, nil
 
@@ -89,7 +96,7 @@ func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscripti
 		return &pb.Subscription_Response{
 				Message: "Error Parsing SubcpritionId. Expect uuid",
 			},
-			status.Error(codes.Internal, fmt.Sprintf("%s", err))
+			status.Error(codes.Internal, err.Error())
 	}
 
 	err = s.serv.DeleteSubscription(userId, subscriptionId)
@@ -97,7 +104,7 @@ func (s *SubService) Delete_Subscription(ctx context.Context, req *pb.Subscripti
 		return &pb.Subscription_Response{
 				Message: "Error Deleting subscription",
 			},
-			status.Error(codes.Internal, fmt.Sprintf("%s", err))
+			status.Error(codes.Internal, err.Error())
 	}
 	return &pb.Subscription_Response{
 		Message: "success deleting",

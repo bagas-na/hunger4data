@@ -24,7 +24,8 @@ func NewHandService(serv service.AuthFunc) AuthService {
 func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginRequest) (*authenticatorv1.LoginResponse, error) {
 
 	if req.Username == "" || req.Password == "" {
-		return &authenticatorv1.LoginResponse{}, status.Error(codes.InvalidArgument, "username and password are required")
+		return &authenticatorv1.LoginResponse{},
+			status.Error(codes.InvalidArgument, "Username and Password are required")
 	}
 	username := req.Username
 	password := req.Password
@@ -32,9 +33,9 @@ func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginReque
 	if err != nil {
 		return &authenticatorv1.LoginResponse{
 				Token:   "",
-				Message: "Error loggin in",
+				Message: "Error logging in",
 			},
-			status.Error(codes.Internal, fmt.Sprintf("%s", err))
+			status.Error(codes.Unauthenticated, fmt.Sprintf("%s", err))
 	}
 
 	return &authenticatorv1.LoginResponse{
@@ -46,6 +47,14 @@ func (s *AuthService) Login(ctx context.Context, req *authenticatorv1.LoginReque
 func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.RegisterRequest) (*authenticatorv1.RegisterResponse, error) {
 	username := req.Username
 	password := req.Password
+
+	if username == "" || password == "" {
+		return &authenticatorv1.RegisterResponse{
+			User:    &authenticatorv1.User{},
+			Message: "Username and password must not be empty",
+		}, status.Error(codes.InvalidArgument, "Username and password must not be empty")
+	}
+
 	newUser, err := s.serv.Register(username, password)
 
 	if err != nil {
@@ -53,18 +62,18 @@ func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.Registe
 			return &authenticatorv1.RegisterResponse{
 				User:    &authenticatorv1.User{},
 				Message: "User already exists",
-			}, status.Error(codes.AlreadyExists, err.Error())
+			}, status.Error(codes.AlreadyExists, "User already exists")
 		} else if errors.Is(err, service.ErrInvalidEmail) {
 			return &authenticatorv1.RegisterResponse{
 				User:    &authenticatorv1.User{},
 				Message: "Username must be a valid email",
-			}, status.Error(codes.InvalidArgument, err.Error())
+			}, status.Error(codes.InvalidArgument, "Username must be a valid email")
 		}
 
 		return &authenticatorv1.RegisterResponse{
 			User:    &authenticatorv1.User{},
 			Message: "Creating user error",
-		}, status.Error(codes.Unauthenticated, err.Error())
+		}, status.Error(codes.Internal, err.Error())
 	}
 
 	return &authenticatorv1.RegisterResponse{
@@ -73,6 +82,6 @@ func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.Registe
 			Username: newUser.Username,
 			Role:     newUser.Role,
 		},
-		Message: "Success you are registered",
+		Message: "Success. You are registered",
 	}, nil
 }

@@ -48,7 +48,9 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 
 	var req CreatePaymentRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "body must have country_code, amount, and currency",
+		})
 	}
 
 	resp, err := h.paymentclient.CreatePayment(ctx,
@@ -296,13 +298,13 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
+			"error": "body must have username and password",
 		})
 	}
 
 	if req.Username == "" || req.Password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "missing username or password",
+			"error": "missing username and/or password",
 		})
 	}
 
@@ -408,7 +410,7 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 	var req CreateSubcriptionRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
+			"error": "body must have country_code (3 letter, ISO 3166-1 alpha-3 standard)",
 		})
 	}
 
