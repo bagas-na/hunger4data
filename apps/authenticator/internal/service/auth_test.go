@@ -22,7 +22,7 @@ func TestAuthService_Login(t *testing.T) {
 		expectedToken := "fake-jwt-token"
 		user := &repo.User{Id: uuid.New(), Username: "johndoe", PasswordHash: "hashed_password"}
 		mockRepo.On("GetByUsername", username).Return(user, nil)
-		mockJwt.On("PassCompare", user.PasswordHash, password).Return(true)
+		mockJwt.On("PassCompare", password, user.PasswordHash).Return(true)
 		mockJwt.On("GenerateToken", user.Id).Return(expectedToken, nil)
 
 		token, err := service.Login(username, password)
@@ -42,7 +42,7 @@ func TestAuthService_Login(t *testing.T) {
 		user := &repo.User{Username: username, PasswordHash: "hashed_password"}
 
 		mockRepo.On("GetByUsername", username).Return(user, nil)
-		mockJwt.On("PassCompare", "hashed_password", password).Return(false)
+		mockJwt.On("PassCompare", password, "hashed_password").Return(false)
 
 		token, err := service.Login(username, password)
 

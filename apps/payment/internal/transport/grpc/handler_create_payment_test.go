@@ -71,7 +71,7 @@ func TestCreatePayment_InvalidUserID(t *testing.T) {
 
 	_, err := client.CreatePayment(context.Background(), &paymentv1.CreatePaymentRequest{
 		UserId:      "not-a-uuid",
-		CountryCode: uuid.New().String(),
+		CountryCode: "COD",
 		Amount:      1000,
 		Currency:    "USD",
 	})
@@ -86,12 +86,12 @@ func TestCreatePayment_ServiceError(t *testing.T) {
 	mockSvc := new(MockPaymentService)
 
 	userID := uuid.New()
-	countryID := uuid.New()
+	CountryCode := "USA"
 
 	mockSvc.On(
 		"CreatePaymentAndCheckout",
 		userID,
-		countryID,
+		CountryCode,
 		int64(1000),
 		"USD",
 	).Return(
@@ -107,7 +107,7 @@ func TestCreatePayment_ServiceError(t *testing.T) {
 
 	_, err := client.CreatePayment(context.Background(), &paymentv1.CreatePaymentRequest{
 		UserId:      userID.String(),
-		CountryCode: countryID.String(),
+		CountryCode: CountryCode,
 		Amount:      1000,
 		Currency:    "USD",
 	})
