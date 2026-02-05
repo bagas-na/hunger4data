@@ -18,21 +18,21 @@ import (
 
 func main() {
 	cfg := config.Load()
-	grpcConnAuth, err := grpc.NewClient("localhost:"+cfg.GRPCPortAUTH, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnAuth, err := grpc.NewClient(cfg.GRPCAddrAUTH, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to gRPC server: %v", err)
+		log.Fatalf("failed to connect to auth gRPC server: %v", err)
 	}
-	grpcConnNotif, err := grpc.NewClient("localhost:"+cfg.GRPCPortNOTIFICATION, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnNotif, err := grpc.NewClient(cfg.GRPCAddrNOTIFICATION, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to gRPC server: %v", err)
+		log.Fatalf("failed to connect to notification gRPC server: %v", err)
 	}
-	grpcConnPayment, err := grpc.NewClient("localhost:"+cfg.GRPCPortPAYMENT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnPayment, err := grpc.NewClient(cfg.GRPCAddrPAYMENT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to gRPC server: %v", err)
+		log.Fatalf("failed to connect to payment gRPC server: %v", err)
 	}
-	grpcConnSubscription, err := grpc.NewClient("localhost:"+cfg.GRPCPortSUBSCRIPTION, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnSubscription, err := grpc.NewClient(cfg.GRPCAddrSUBSCRIPTION, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to gRPC server: %v", err)
+		log.Fatalf("failed to connect to subscription gRPC server: %v", err)
 	}
 	defer grpcConnAuth.Close()
 	defer grpcConnNotif.Close()

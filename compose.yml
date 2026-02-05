@@ -1,4 +1,21 @@
 services:
+  api-gateway-service:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    image: api-gateway-service:latest
+    container_name: api-gateway-service
+    ports:
+      - "${GATEWAY_REST_PORT}:${GATEWAY_REST_PORT}"
+    environment:
+      GRPC_ADDR_AUTH: authenticator-service:${AUTH_GRPC_PORT}
+      GRPC_ADDR_NOTIFICATION: notification-service:${NOTIFICATION_GRPC_PORT}
+      GRPC_ADDR_PAYMENT: payment-service:${PAYMENT_GRPC_PORT}
+      GRPC_ADDR_SUBSCRIPTION: subscription-service:${SUBSCRIPTION_GRPC_PORT}
+      RESTPort: ${GATEWAY_REST_PORT}
+      JWT_SECRET: change-this-super-secret-but-insecure-key
+    restart: unless-stopped
+
   authenticator-service:
     build:
       context: .
@@ -11,7 +28,7 @@ services:
       DB_DSN: ${DB_DSN}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${AUTH_GRPC_PORT}
-      REST_PORT: ${AUTH_REST_PORT}
+      # REST_PORT: ${AUTH_REST_PORT}
       JWT_DURATION: ${JWT_DURATION}
     restart: unless-stopped
 
@@ -69,11 +86,9 @@ services:
       DB_DSN: ${DB_DSN}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${SUBSCRIPTION_GRPC_PORT}
-      REST_PORT: ${SUBSCRIPTION_REST_PORT}
+      # REST_PORT: ${SUBSCRIPTION_REST_PORT}
       REDIS_ADDR: redis:6379
     restart: unless-stopped
-    networks:
-      - cache-redis
 
   redis:
     image: redis:alpine
@@ -82,8 +97,3 @@ services:
     healthcheck:
       test: /healthchecks/redis.sh
       interval: "5s"
-    networks:
-      - cache-redis
-
-networks:
-  cache-redis:
