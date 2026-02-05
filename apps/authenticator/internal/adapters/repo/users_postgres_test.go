@@ -33,17 +33,17 @@ func TestCreateUser(t *testing.T) {
 	t.Run("Successful creation", func(t *testing.T) {
 		userID := uuid.New()
 		user := User{
-			Id:       userID,
-			Username: "test@gmail.com",
-			Password: "securepassword",
-			Role:     "user",
+			Id:           userID,
+			Username:     "test@gmail.com",
+			PasswordHash: "securepassword",
+			Role:         "user",
 		}
 		mock.ExpectBegin()
 		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
 			WithArgs(
 				user.Id,
 				user.Username,
-				user.Password,
+				user.PasswordHash,
 				user.Role,
 				sqlmock.AnyArg(), // CreatedAt
 				sqlmock.AnyArg(), // UpdatedAt
@@ -61,10 +61,10 @@ func TestCreateUser(t *testing.T) {
 	t.Run("Failed creation", func(t *testing.T) {
 		userID := uuid.New()
 		user := User{
-			Id:       userID,
-			Username: "test@gmail.com",
-			Password: "securepassword",
-			Role:     "user",
+			Id:           userID,
+			Username:     "test@gmail.com",
+			PasswordHash: "securepassword",
+			Role:         "user",
 		}
 		mock.ExpectBegin()
 		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).

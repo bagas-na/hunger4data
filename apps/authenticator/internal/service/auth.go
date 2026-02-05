@@ -4,6 +4,7 @@ import (
 	"authenticator/internal/adapters/crypto"
 	"authenticator/internal/adapters/repo"
 	"errors"
+	"fmt"
 	"net/mail"
 	"time"
 
@@ -36,7 +37,10 @@ func (s *AuthService) Login(username string, password string) (string, error) {
 	if err != nil {
 		return "", errors.New("Cannot find username")
 	}
-	if !s.jwt.PassCompare(user.Password, password) {
+
+	fmt.Printf("Comparing hashed-password and pasword:\nHash: %q\nPassword: %q\n", user.PasswordHash, password)
+
+	if !s.jwt.PassCompare(password, user.PasswordHash) {
 		return "", errors.New("Wrong password")
 	}
 	token, err := s.jwt.GenerateToken(user.Id)
@@ -60,12 +64,12 @@ func (s *AuthService) Register(username string, password string) (*repo.User, er
 	}
 
 	user := repo.User{
-		Id:         uuid.New(),
-		Username:   username,
-		Password:   passhashed,
-		Role:       "user",
-		Created_At: time.Now(),
-		Updated_At: time.Now(),
+		Id:           uuid.New(),
+		Username:     username,
+		PasswordHash: passhashed,
+		Role:         "user",
+		Created_At:   time.Now(),
+		Updated_At:   time.Now(),
 	}
 	err = s.repo.CreateUser(user)
 	if err != nil {

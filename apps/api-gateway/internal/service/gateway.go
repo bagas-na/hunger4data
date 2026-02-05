@@ -226,17 +226,16 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 }
 
 func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
-
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	id := c.Param("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	userId := c.Get("user_id").(string)
+	if userId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "userId is required"})
 	}
 
 	resp, err := h.subscriptionclient.Get_Subscriptions(ctx, &pb.Subscription_Request{
-		UserId: id,
+		UserId: userId,
 	})
 
 	if err != nil {
@@ -281,13 +280,20 @@ func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
 
-	id := c.Param("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	subriptionId := c.Param("id")
+
+	userId := c.Get("user_id").(string)
+	if userId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "userId is required"})
+	}
+
+	if subriptionId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "subcriptionId is required"})
 	}
 
 	resp, err := h.subscriptionclient.Delete_Subscription(ctx, &pb.Subscription_Request{
-		Id: id,
+		Id:     subriptionId,
+		UserId: userId,
 	})
 	if err != nil {
 		return utils.MapGRPCError(c, err)

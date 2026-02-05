@@ -13,7 +13,7 @@ services:
       GRPC_ADDR_PAYMENT: payment-service:${PAYMENT_GRPC_PORT}
       GRPC_ADDR_SUBSCRIPTION: subscription-service:${SUBSCRIPTION_GRPC_PORT}
       RESTPort: ${GATEWAY_REST_PORT}
-      JWT_SECRET: change-this-super-secret-but-insecure-key
+      JWT_SECRET: ${JWT_SECRET}
     restart: unless-stopped
 
   authenticator-service:
