@@ -102,9 +102,15 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
 
+	userId := c.Get("user_id").(string)
+	if userId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "userId is required"})
+	}
+
 	resp, err := h.paymentclient.GetPaymentCheckoutURL(ctx,
 		&paymentv1.GetPaymentCheckoutURLRequest{
 			PaymentId: id,
+			UserId:    userId,
 		})
 	if err != nil {
 		return utils.MapGRPCError(c, err)

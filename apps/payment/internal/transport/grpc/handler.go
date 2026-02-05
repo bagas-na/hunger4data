@@ -58,7 +58,7 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 func (h *PaymentGRPCServer) GetPaymentCheckoutURL(ctx context.Context, req *paymentv1.GetPaymentCheckoutURLRequest) (*paymentv1.GetPaymentCheckoutURLResponse, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid payment_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
 	paymentID, err := uuid.Parse(req.PaymentId)
