@@ -11,6 +11,7 @@ type Subscription struct {
 	UserId      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;uniqueIndex:idx_user_country"`
 	CountryCode string     `json:"country_code" gorm:"not null;uniqueIndex:idx_user_country"`
 	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
+	UpdateAt    time.Time  `json:"updated_at" gorm:"not null"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 

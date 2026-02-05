@@ -39,7 +39,7 @@ func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
 	err := r.db.Create(&newSub).Error
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr); pgErr.Code == "23505" {
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return gorm.ErrDuplicatedKey
 		}
 		return err
