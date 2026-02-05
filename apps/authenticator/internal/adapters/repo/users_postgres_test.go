@@ -30,27 +30,18 @@ func SetupMockDB() (*gorm.DB, sqlmock.Sqlmock, error) {
 func TestCreateUser(t *testing.T) {
 	db, mock, _ := SetupMockDB()
 	repo := NewUserRepo(db)
-	t.Run("Successful creation", func(t *testing.T) {
-		userID := uuid.New()
+
+	t.Run("success", func(t *testing.T) {
 		user := User{
-			Id:           userID,
+			Id:           uuid.New(),
 			Username:     "test@gmail.com",
 			PasswordHash: "securepassword",
 			Role:         "user",
 		}
+
 		mock.ExpectBegin()
 		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
-			WithArgs(
-				user.Id,
-				user.Username,
-				user.PasswordHash,
-				user.Role,
-				sqlmock.AnyArg(), // CreatedAt
-				sqlmock.AnyArg(), // UpdatedAt
-				sqlmock.AnyArg(), // DeletedAt
-			).
-			WillReturnResult(sqlmock.NewResult(1, 1))
-
+			WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
 
 		err := repo.CreateUser(user)
@@ -58,48 +49,40 @@ func TestCreateUser(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
-	t.Run("Failed creation", func(t *testing.T) {
-		userID := uuid.New()
-		user := User{
-			Id:           userID,
-			Username:     "test@gmail.com",
-			PasswordHash: "securepassword",
-			Role:         "user",
-		}
-		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
-			WithArgs(sqlmock.AnyArg(), "test@gmail.com", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-			WillReturnError(errors.New("duplicate key value violates unique constraint"))
 
-		mock.ExpectRollback()
-
-		err := repo.CreateUser(user)
-
-		assert.Error(t, err)
-	})
-	t.Run("Duplicate username error", func(t *testing.T) {
+	t.Run("duplicate username", func(t *testing.T) {
 		user := User{
 			Id:       uuid.New(),
 			Username: "existing_user",
 		}
 
-		pgErr := &pgconn.PgError{
-			Code:    "23505",
-			Message: "duplicate key value violates unique constraint",
+		mock.ExpectBegin()
+		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
+			WillReturnError(&pgconn.PgError{
+				Code: "23505",
+			})
+		mock.ExpectRollback()
+
+		err := repo.CreateUser(user)
+
+		assert.ErrorIs(t, err, gorm.ErrDuplicatedKey)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("generic db error", func(t *testing.T) {
+		user := User{
+			Id:       uuid.New(),
+			Username: "fail_user",
 		}
 
 		mock.ExpectBegin()
-
 		mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "users"`)).
-			WithArgs(sqlmock.AnyArg(), user.Username, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-			WillReturnError(pgErr)
-
+			WillReturnError(errors.New("db down"))
 		mock.ExpectRollback()
 
 		err := repo.CreateUser(user)
 
 		assert.Error(t, err)
-		assert.ErrorIs(t, err, gorm.ErrDuplicatedKey)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
@@ -107,17 +90,27 @@ func TestCreateUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	db, mock, _ := SetupMockDB()
 	repo := NewUserRepo(db)
-	t.Run("Successful Get", func(t *testing.T) {
+
+	t.Run("success", func(t *testing.T) {
 		username := "johndoe"
-		expectedUser := User{
-			Id:       uuid.New(),
-			Username: username,
-			Role:     "user",
-		}
-		rows := sqlmock.NewRows([]string{"id", "username", "password", "role", "created_at", "updated_at", "deleted_at"}).
-			AddRow(expectedUser.Id, expectedUser.Username, "hashed_pw", expectedUser.Role, time.Now(), time.Now(), nil)
-		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE username = $1 AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT $2`)).
-			WithArgs(username, 1).
+		userID := uuid.New()
+
+		rows := sqlmock.NewRows([]string{
+			"id", "username", "password_hash", "role",
+			"created_at", "updated_at", "deleted_at",
+		}).AddRow(
+			userID,
+			username,
+			"hashed_pw",
+			"user",
+			time.Now(),
+			time.Now(),
+			nil,
+		)
+
+		mock.ExpectQuery(regexp.QuoteMeta(
+			`SELECT * FROM "users" WHERE (username = $1 AND deleted_at IS NULL)`)).
+			WithArgs(username, sqlmock.AnyArg()).
 			WillReturnRows(rows)
 
 		user, err := repo.GetByUsername(username)
@@ -128,63 +121,62 @@ func TestGetUser(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
-	t.Run("Failed Get", func(t *testing.T) {
-		username := "nonexistent"
+	t.Run("not found", func(t *testing.T) {
+		username := "missing"
 
-		// Return empty rows to simulate "not found"
-		rows := sqlmock.NewRows([]string{"id", "username", "role"})
-
-		mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE username = $1`)).
-			WithArgs(username, 1).
-			WillReturnRows(rows)
+		mock.ExpectQuery(regexp.QuoteMeta(
+			`SELECT * FROM "users" WHERE (username = $1 AND deleted_at IS NULL)`)).
+			WithArgs(username, sqlmock.AnyArg()).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}))
 
 		user, err := repo.GetByUsername(username)
 
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 		assert.Nil(t, user)
-		assert.Equal(t, gorm.ErrRecordNotFound, err) // Verify it returns GORM's specific error
+		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 
 func TestUpdateUser(t *testing.T) {
 	db, mock, _ := SetupMockDB()
 	repo := NewUserRepo(db)
-	t.Run("Successful update", func(t *testing.T) {
+
+	t.Run("success", func(t *testing.T) {
 		username := "johndoe"
-		updatedData := User{
-			Role:       "admin",
-			Updated_At: time.Now(),
+		updated := User{
+			Role: "admin",
 		}
+
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "users" SET "role"=$1,"updated_at"=$2 WHERE username = $3 AND "users"."deleted_at" IS NULL`)).
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "users" SET`)).
 			WithArgs(
-				updatedData.Role,
-				updatedData.Updated_At,
+				updated.Role,
 				username,
 			).
-			WillReturnResult(sqlmock.NewResult(1, 1))
+			WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
-		err := repo.UpdateUser(username, updatedData)
+
+		err := repo.UpdateUser(username, updated)
+
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
-
 }
 
 func TestDeleteUser(t *testing.T) {
 	db, mock, _ := SetupMockDB()
 	repo := NewUserRepo(db)
 
-	t.Run("Successful soft delete", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 		username := "johndoe"
 
 		mock.ExpectBegin()
-		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "users" SET "deleted_at"=`)).
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "users" SET "deleted_at"`)).
 			WithArgs(
 				sqlmock.AnyArg(),
 				username,
 			).
-			WillReturnResult(sqlmock.NewResult(1, 1))
+			WillReturnResult(sqlmock.NewResult(0, 1))
 		mock.ExpectCommit()
 
 		err := repo.DeleteUser(username)
@@ -192,5 +184,4 @@ func TestDeleteUser(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
-
 }

@@ -47,11 +47,11 @@ func TestAuthService_Login(t *testing.T) {
 		token, err := service.Login(username, password)
 
 		assert.Error(t, err)
-		assert.Equal(t, "Wrong password", err.Error())
+		assert.Equal(t, "Invalid username or password", err.Error())
 		assert.Empty(t, token)
 	})
 
-	t.Run("Cannot find username", func(t *testing.T) {
+	t.Run("Invalid username or password", func(t *testing.T) {
 		mockRepo := new(mockery.MockUserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		service := NewAuthService(mockRepo, mockJwt)
@@ -62,7 +62,7 @@ func TestAuthService_Login(t *testing.T) {
 		token, err := service.Login(username, password)
 
 		assert.Error(t, err)
-		assert.Equal(t, "Cannot find username", err.Error())
+		assert.Equal(t, "Invalid username or password", err.Error())
 		assert.Empty(t, token)
 
 		mockJwt.AssertNotCalled(t, "PassCompare", password, password)

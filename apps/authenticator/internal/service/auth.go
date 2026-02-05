@@ -35,13 +35,13 @@ func (s *AuthService) Login(username string, password string) (string, error) {
 	}
 	user, err := s.repo.GetByUsername(username)
 	if err != nil {
-		return "", errors.New("Cannot find username")
+		return "", errors.New("Invalid username or password")
 	}
 
 	fmt.Printf("Comparing hashed-password and pasword:\nHash: %q\nPassword: %q\n", user.PasswordHash, password)
 
 	if !s.jwt.PassCompare(password, user.PasswordHash) {
-		return "", errors.New("Wrong password")
+		return "", errors.New("Invalid username or password")
 	}
 	token, err := s.jwt.GenerateToken(user.Id)
 	if err != nil {

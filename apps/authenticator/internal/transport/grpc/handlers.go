@@ -82,6 +82,6 @@ func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.Registe
 			Username: newUser.Username,
 			Role:     newUser.Role,
 		},
-		Message: "Success. You are registered",
+		Message: "Registration Complete",
 	}, nil
 }

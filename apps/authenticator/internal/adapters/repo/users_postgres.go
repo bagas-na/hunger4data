@@ -40,7 +40,7 @@ func (r *GORMRepository) CreateUser(u User) error {
 
 func (r *GORMRepository) GetByUsername(username string) (*User, error) {
 	var user User
-	if err := r.db.Where("username = ? ", username).First(&user).Error; err != nil {
+	if err := r.db.Where("username = ? AND deleted_at IS NULL", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -48,7 +48,7 @@ func (r *GORMRepository) GetByUsername(username string) (*User, error) {
 
 func (r *GORMRepository) UpdateUser(username string, user User) error {
 
-	err := r.db.Where("username = ?", username).Updates(user).Error
+	err := r.db.Where("username = ? AND deleted_at IS NULL", username).Updates(user).Error
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (r *GORMRepository) UpdateUser(username string, user User) error {
 
 func (r *GORMRepository) DeleteUser(username string) error {
 	var user User
-	err := r.db.Delete(&user, "username = ?", username).Error
+	err := r.db.Delete(&user, "username = ? AND deleted_at IS NULL", username).Error
 	if err != nil {
 		return err
 	}
