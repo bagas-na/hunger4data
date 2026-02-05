@@ -10,7 +10,7 @@ import (
 
 type SubServ interface {
 	CreateSubcription(subs model.Subscription) error
-	GetSubscriptionByID(id uuid.UUID) ([]model.Subscription, error)
+	GetSubscriptionByUserID(userId uuid.UUID) ([]model.Subscription, error)
 	UpdateSubscription(id uuid.UUID, subs model.Subscription) error
 	DeleteSubscription(id uuid.UUID) error
 }
@@ -39,11 +39,11 @@ func (s *SubService) CreateSubcription(subs model.Subscription) error {
 	return nil
 }
 
-func (s *SubService) GetSubscriptionByID(id uuid.UUID) ([]model.Subscription, error) {
-	if id == uuid.Nil {
+func (s *SubService) GetSubscriptionByUserID(userId uuid.UUID) ([]model.Subscription, error) {
+	if userId == uuid.Nil {
 		return []model.Subscription{}, errors.New("need user id")
 	}
-	data, err := s.repo.GetBySubscriptionUserID(id)
+	data, err := s.repo.GetBySubscriptionUserID(userId)
 	if err != nil {
 		return []model.Subscription{}, errors.New("no matching data found")
 	}

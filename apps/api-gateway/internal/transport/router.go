@@ -8,8 +8,8 @@ import (
 
 type SubscriptionHandler interface {
 	GetCountries(c echo.Context) error
+	GetUserSubs(c echo.Context) error
 	CreateSub(c echo.Context) error
-	GetSubByID(c echo.Context) error
 	UpdateSub(c echo.Context) error
 	DeleteSub(c echo.Context) error
 }
@@ -27,17 +27,17 @@ type NotificationHandler interface {
 
 func AuthRouting(e *echo.Echo, auth *service.AuthHandler) {
 	g := e.Group("/auth")
-	g.POST("/register", auth.Register)
-	g.POST("/login", auth.Login)
+	g.POST("/register", auth.Register) // complete
+	g.POST("/login", auth.Login)       // complete
 }
 
 func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret string) {
 	g := e.Group("/subscription")
-	g.GET("/getcountries", subscription.GetCountries)
-	g.POST("/createsub", subscription.CreateSub, JWTMiddleware(secret))
-	g.GET("/getsubbyid/:id", subscription.GetSubByID, JWTMiddleware(secret))
-	g.PUT("/updatesub", subscription.UpdateSub, JWTMiddleware(secret))
-	g.DELETE("/deletesub", subscription.DeleteSub, JWTMiddleware(secret))
+	g.GET("/countries", subscription.GetCountries) // done
+	g.GET("", subscription.GetUserSubs, JWTMiddleware(secret))
+	g.POST("", subscription.CreateSub, JWTMiddleware(secret)) // done
+	g.PUT("/:id", subscription.UpdateSub, JWTMiddleware(secret))
+	g.DELETE("/:id", subscription.DeleteSub, JWTMiddleware(secret))
 }
 
 func PaymentRouting(e *echo.Echo, payment PaymentHandler, secret string) {

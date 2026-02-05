@@ -205,14 +205,14 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 	})
 }
 
-func (h *subscriptionHandler) GetSubByID(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
+func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
+	userId := c.Get("user_id").(string)
+	if userId == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
 	ctx := context.TODO()
-	resp, err := h.subscriptionclient.Get_Subscription_By_ID(ctx, &pb.Subscription_Request{
-		UserId: id,
+	resp, err := h.subscriptionclient.Get_Subscriptions(ctx, &pb.Subscription_Request{
+		UserId: userId,
 	})
 
 	if err != nil {
