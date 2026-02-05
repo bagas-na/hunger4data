@@ -138,3 +138,51 @@ func TestGetSubscriptionsByUserID(t *testing.T) {
 		assert.Empty(t, subs)
 	})
 }
+
+func TestDeleteSubscription(t *testing.T) {
+	db, mock, _ := SetupMockDB()
+	repo := NewSubRepo(db)
+
+	t.Run("Success - Soft delete subscription", func(t *testing.T) {
+		userID := uuid.New()
+		subID := uuid.New()
+
+		rows := sqlmock.NewRows([]string{"id", "user_id", "country_code", "created_at", "updated_at", "deleted_at"}).
+			AddRow(subID, userID, "USA", time.Now(), time.Now(), nil)
+
+		mock.ExpectQuery(`SELECT \* FROM "subscriptions" WHERE id = \$1 AND user_id = \$2 AND deleted_at IS NULL.*`).
+			WithArgs(subID, userID, 1). // GORM adds the '1' for the LIMIT clause
+			WillReturnRows(rows)
+
+		mock.ExpectBegin()
+		mock.ExpectExec(regexp.QuoteMeta(`UPDATE "subscriptions" SET`)).
+			WithArgs(
+				userID,
+				sqlmock.AnyArg(),
+				sqlmock.AnyArg(), // created_at
+				sqlmock.AnyArg(), // updated_at
+				sqlmock.AnyArg(), // deleted_at
+				subID,            // WHERE clause id
+			).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectCommit()
+
+		err := repo.DeleteSubscription(userID, subID)
+
+		assert.NoError(t, err)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("Failure - Subscription not found", func(t *testing.T) {
+		userID := uuid.New()
+		subID := uuid.New()
+
+		mock.ExpectQuery(`SELECT \* FROM "subscriptions"`).
+			WillReturnError(gorm.ErrRecordNotFound)
+
+		err := repo.DeleteSubscription(userID, subID)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error fetching subscription id")
+	})
+}
