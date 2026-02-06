@@ -1,4 +1,3 @@
-// smtp_mailer.go
 package mailer
 
 import (
