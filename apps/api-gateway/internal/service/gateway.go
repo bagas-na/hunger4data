@@ -382,7 +382,7 @@ func NewHandSubs(subscriptionclient subscriptionv1.Subscription_ServiceClient) *
 // @Produce      json
 // @Success      200 {object} GetCountriesResponse
 // @Failure      500 {object} ErrorResponse
-// @Router       /countries [get]
+// @Router       /subscription/countries [get]
 func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
@@ -422,7 +422,7 @@ func (h *subscriptionHandler) GetCountries(c echo.Context) error {
 // @Success      200 {object} CreateSubcriptionResponse
 // @Failure      400 {object} ErrorResponse
 // @Failure      401 {object} ErrorResponse
-// @Router       /subscriptions [post]
+// @Router       /subscription [post]
 func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
@@ -461,7 +461,7 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 // @Produce      json
 // @Success      200 {object} GetUserSubcriptionsResponse
 // @Failure      401 {object} ErrorResponse
-// @Router       /subscriptions [get]
+// @Router       /subscription [get]
 func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
@@ -534,7 +534,7 @@ func (h *subscriptionHandler) GetUserSubs(c echo.Context) error {
 // @Success      200 {object} DeleteSubcriptionResponse
 // @Failure      400 {object} ErrorResponse
 // @Failure      401 {object} ErrorResponse
-// @Router       /subscriptions/{id} [delete]
+// @Router       /subscription/{id} [delete]
 func (h *subscriptionHandler) DeleteSub(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()

@@ -250,23 +250,6 @@ paths:
       summary: Register a new user
       tags:
       - Auth
-  /countries:
-    get:
-      description: Returns countries with food security data available.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.GetCountriesResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/service.ErrorResponse'
-      summary: List available countries
-      tags:
-      - Countries
   /payments:
     get:
       description: Returns all payments created by the authenticated user.
@@ -390,7 +373,7 @@ paths:
       summary: List pending payments
       tags:
       - Payments
-  /subscriptions:
+  /subscription:
     get:
       description: Returns all countries subscribed by the user.
       produces:
@@ -440,7 +423,7 @@ paths:
       summary: Subscribe to a country
       tags:
       - Subscriptions
-  /subscriptions/{id}:
+  /subscription/{id}:
     delete:
       description: Unsubscribes the user from a country.
       parameters:
@@ -467,6 +450,23 @@ paths:
       summary: Delete a subscription
       tags:
       - Subscriptions
+  /subscription/countries:
+    get:
+      description: Returns countries with food security data available.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GetCountriesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      summary: List available countries
+      tags:
+      - Countries
 schemes:
 - http
 - https
