@@ -60,7 +60,7 @@ func (r *GORMRepository) CreateUser(u User) error {
 
 func (r *GORMRepository) GetByUsername(username string) (*User, error) {
 	var user User
-	if err := r.db.Where("username = ? AND deleted_at IS NULL", username).First(&user).Error; err != nil {
+	if err := r.db.Where("username = ? AND is_activated = ? AND deleted_at IS NULL ", username, true).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

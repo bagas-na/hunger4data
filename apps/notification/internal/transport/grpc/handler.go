@@ -6,14 +6,18 @@ import (
 	"notification/internal/service"
 )
 
+// type EmailGRPCServer interface {
+// 	SendTransactionEmail(ctx context.Context, req *notifyv1.SendEmailRequest) (*notifyv1.SendEmailResponse, error)
+// }
+
 type EmailGRPCServer struct {
 	notifyv1.UnimplementedEmailServiceServer
-	svc       *service.EmailService
+	svc       service.EmailService
 	fromName  string
 	fromEmail string
 }
 
-func NewEmailGRPCServer(svc *service.EmailService, fromName, fromEmail string) *EmailGRPCServer {
+func NewEmailGRPCServer(svc service.EmailService, fromName, fromEmail string) *EmailGRPCServer {
 	return &EmailGRPCServer{
 		svc:       svc,
 		fromName:  fromName,

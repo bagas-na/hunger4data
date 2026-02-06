@@ -15,7 +15,7 @@ import (
 func TestAuthService_Login(t *testing.T) {
 
 	t.Run("Successful Login", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
@@ -37,7 +37,7 @@ func TestAuthService_Login(t *testing.T) {
 	})
 
 	t.Run("Invalid Password", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
@@ -57,7 +57,7 @@ func TestAuthService_Login(t *testing.T) {
 	})
 
 	t.Run("Invalid username or password", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
@@ -77,7 +77,7 @@ func TestAuthService_Login(t *testing.T) {
 	})
 
 	t.Run("Needs username and password", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
@@ -100,7 +100,7 @@ func TestAuthService_Login(t *testing.T) {
 func TestAuthService_Register(t *testing.T) {
 
 	t.Run("Successful Registration", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
@@ -129,7 +129,7 @@ func TestAuthService_Register(t *testing.T) {
 		mockMailer.AssertExpectations(t)
 	})
 	t.Run("Invalid Email Format", func(t *testing.T) {
-		mockRepo := new(mockery.MockUserRepo)
+		mockRepo := new(mockery.UserRepo)
 		mockJwt := new(mockery.MockCryptofuncs)
 		mockMailer := new(mockery.MockMailer)
 		service := NewAuthService(mockRepo, mockJwt, mockMailer)
