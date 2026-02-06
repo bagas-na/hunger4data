@@ -18,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/stripe/stripe-go/v84"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -41,7 +42,8 @@ func main() {
 	notifclient := notifyv1.NewEmailServiceClient(grpcConnNotif)
 	mailer := notification.NewMailer(notifclient)
 
-	stripeAdapter := stripeAdapter.NewStripeAdapter(cfg.STRIPE_SECRET_KEY)
+	stripeClient := stripe.NewClient(cfg.STRIPE_SECRET_KEY)
+	stripeAdapter := stripeAdapter.NewStripeAdapterWithClient(stripeClient)
 
 	paymentRepo := db.NewPaymentRepo(dbClient)
 	paymentService := service.NewPaymentService(paymentRepo, stripeAdapter, mailer)

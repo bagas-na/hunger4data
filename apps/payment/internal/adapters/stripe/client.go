@@ -16,10 +16,8 @@ type stripeAdapter struct {
 	client *stripe.Client
 }
 
-func NewStripeAdapter(secretKey string) StripeAdapter {
-	return &stripeAdapter{
-		client: stripe.NewClient(secretKey),
-	}
+func NewStripeAdapterWithClient(client *stripe.Client) StripeAdapter {
+	return &stripeAdapter{client: client}
 }
 
 // type PaymentIntentResult struct {
