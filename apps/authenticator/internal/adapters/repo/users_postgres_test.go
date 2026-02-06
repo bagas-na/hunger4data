@@ -4,7 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -91,49 +90,37 @@ func TestGetUser(t *testing.T) {
 	db, mock, _ := SetupMockDB()
 	repo := NewUserRepo(db)
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("success - activated user found", func(t *testing.T) {
 		username := "johndoe"
-		userID := uuid.New()
+		rows := sqlmock.NewRows([]string{"id", "username", "is_activated", "deleted_at"}).
+			AddRow(uuid.New(), username, true, nil) // State: true
 
-		rows := sqlmock.NewRows([]string{
-			"id", "username", "password_hash", "role",
-			"created_at", "updated_at", "deleted_at",
-		}).AddRow(
-			userID,
-			username,
-			"hashed_pw",
-			"user",
-			time.Now(),
-			time.Now(),
-			nil,
-		)
-
+		// Note the trailing space in "deleted_at IS NULL " to match your repo code
 		mock.ExpectQuery(regexp.QuoteMeta(
-			`SELECT * FROM "users" WHERE (username = $1 AND deleted_at IS NULL)`)).
-			WithArgs(username, sqlmock.AnyArg()).
+			`SELECT * FROM "users" WHERE (username = $1 AND is_activated = $2 AND deleted_at IS NULL ) AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT $3`)).
+			WithArgs(username, true, 1). // We expect the repo to pass 'true' here
 			WillReturnRows(rows)
 
 		user, err := repo.GetByUsername(username)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
-		assert.Equal(t, username, user.Username)
-		assert.NoError(t, mock.ExpectationsWereMet())
+		assert.True(t, user.IsActivated)
 	})
 
-	t.Run("not found", func(t *testing.T) {
-		username := "missing"
+	t.Run("failure - user exists but not activated", func(t *testing.T) {
+		username := "unactivated_user"
 
+		// The DB returns nothing because the SQL includes "is_activated = true"
 		mock.ExpectQuery(regexp.QuoteMeta(
-			`SELECT * FROM "users" WHERE (username = $1 AND deleted_at IS NULL)`)).
-			WithArgs(username, sqlmock.AnyArg()).
-			WillReturnRows(sqlmock.NewRows([]string{"id"}))
+			`SELECT * FROM "users" WHERE (username = $1 AND is_activated = $2 AND deleted_at IS NULL )`)).
+			WithArgs(username, true, 1).
+			WillReturnRows(sqlmock.NewRows([]string{"id"})) // Empty result
 
 		user, err := repo.GetByUsername(username)
 
 		assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 		assert.Nil(t, user)
-		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }
 

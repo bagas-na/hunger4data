@@ -100,6 +100,6 @@ func (s *AuthService) Register(ctx context.Context, req *authenticatorv1.Registe
 			Username: newUser.Username,
 			Role:     newUser.Role,
 		},
-		Message: "Registration Complete",
+		Message: "Registration complete.d An activation link has been sent to your email.",
 	}, nil
 }

@@ -78,7 +78,7 @@ func TestAuthHandler_Register(t *testing.T) {
 		res, err := handler.Register(context.Background(), req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Registration Complete", res.Message)
+		assert.Equal(t, "Registration complete.d An activation link has been sent to your email.", res.Message)
 		assert.Equal(t, returnedUser.Id.String(), res.User.Id)
 		assert.Equal(t, returnedUser.Username, res.User.Username)
 	})
