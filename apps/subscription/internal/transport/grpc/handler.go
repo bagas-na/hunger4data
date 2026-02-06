@@ -50,6 +50,10 @@ func (s *SubService) Create_Subscription(ctx context.Context, req *pb.Subscripti
 			return &pb.Subscription_Response{Message: "Subscription already exists"}, status.Error(codes.AlreadyExists, "Subscription already exists")
 		} else if errors.Is(err, gorm.ErrForeignKeyViolated) {
 			return &pb.Subscription_Response{Message: "User does not exist"}, status.Error(codes.NotFound, "User does not exist")
+		} else if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &pb.Subscription_Response{Message: "Country_code does not exist"}, status.Error(codes.NotFound, "Country_code does not exist")
+		} else if errors.Is(err, service.ErrMissingUserId) || errors.Is(err, service.ErrInvalidCountryCode) {
+			return &pb.Subscription_Response{Message: err.Error()}, status.Error(codes.InvalidArgument, err.Error())
 		}
 
 		return &pb.Subscription_Response{Message: "Error Creating subscription"}, status.Error(codes.Internal, err.Error())

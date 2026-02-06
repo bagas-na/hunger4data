@@ -39,7 +39,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		err := service.CreateSubcription(subs)
 
 		assert.Error(t, err)
-		assert.Equal(t, "Must have user_id in jwt", err.Error())
+		assert.Equal(t, "Missing user_id from jwt", err.Error())
 		// Ensure the repo was NOT called
 		mockRepo.AssertNotCalled(t, "CreateSubcription", mock.Anything)
 	})
@@ -55,7 +55,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		err := service.CreateSubcription(subs)
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "country_code (3 letters)")
+		assert.Contains(t, err.Error(), "must consist of 3 uppercase letters")
 		mockRepo.AssertNotCalled(t, "CreateSubcription", mock.Anything)
 	})
 }

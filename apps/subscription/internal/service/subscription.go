@@ -3,10 +3,13 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"subscription/internal/adapters/model"
 	"subscription/internal/adapters/repo"
+	"subscription/internal/utils"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type SubServ interface {
@@ -24,13 +27,22 @@ func NewSubService(repo repo.SubscriptionRepo) SubServ {
 	return &SubService{repo: repo}
 }
 
+var ErrMissingUserId = errors.New("Missing user_id from jwt")
+var ErrInvalidCountryCode = errors.New("country_code must consist of 3 uppercase letters")
+
 func (s *SubService) CreateSubcription(subs model.Subscription) error {
 	if subs.UserID == uuid.Nil {
-		return errors.New("Must have user_id in jwt")
+		return ErrMissingUserId
 	}
 
 	if subs.CountryCode == "" || len(subs.CountryCode) != 3 {
-		return errors.New("Must have country_code (3 letters)")
+		return ErrInvalidCountryCode
+	}
+
+	code := strings.ToUpper(subs.CountryCode)
+
+	if _, ok := utils.ISO3166Alpha3[code]; !ok {
+		return gorm.ErrRecordNotFound
 	}
 
 	err := s.repo.CreateSubcription(subs)
@@ -54,7 +66,7 @@ func (s *SubService) GetSubscriptionByUserID(userId uuid.UUID) ([]model.Subscrip
 
 // func (s *SubService) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
 // 	if subs.UserID == uuid.Nil {
-// 		return errors.New("Must have user_id in jwt")
+// 		return errors.New("Missing user_id from jwt")
 // 	}
 
 // 	if subs.CountryCode == "" {
