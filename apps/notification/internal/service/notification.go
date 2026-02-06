@@ -22,19 +22,23 @@ type Mailer interface {
 	Send(ctx context.Context, email Email) error
 }
 
-type EmailService struct {
+type EmailService interface {
+	SendNotification(ctx context.Context, email Email) error
+}
+
+type emailService struct {
 	mailer Mailer
 	repo   *db.NotificationLogRepo
 }
 
-func NewNotificationService(mailer Mailer, repo *db.NotificationLogRepo) *EmailService {
-	return &EmailService{
+func NewNotificationService(mailer Mailer, repo *db.NotificationLogRepo) EmailService {
+	return &emailService{
 		mailer: mailer,
 		repo:   repo,
 	}
 }
 
-func (s *EmailService) SendNotification(ctx context.Context, email Email) error {
+func (s *emailService) SendNotification(ctx context.Context, email Email) error {
 	log := db.NotificationLog{
 		ID:        uuid.New(),
 		ToEmail:   email.ToEmail,
