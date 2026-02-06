@@ -14,6 +14,8 @@ import (
 	"github.com/stripe/stripe-go/v84"
 )
 
+var ConstructEvent = stripe.ConstructEvent
+
 func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
@@ -34,7 +36,7 @@ func StripeWebhookHandler(webhookSecret string, svc service.PaymentService) echo
 			})
 		}
 
-		event, err := stripe.ConstructEvent(payload, sig, webhookSecret)
+		event, err := ConstructEvent(payload, sig, webhookSecret)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
 				"message": "invalid stripe signature",
