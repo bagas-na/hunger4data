@@ -31,7 +31,7 @@ func NewSubRepo(db *gorm.DB) SubscriptionRepo {
 func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
 	newSub := model.Subscription{
 		Id:          uuid.New(),
-		UserId:      subs.UserId,
+		UserID:      subs.UserID,
 		CountryCode: subs.CountryCode,
 		CreatedAt:   time.Now(),
 	}

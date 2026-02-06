@@ -21,7 +21,7 @@ type User struct {
 
 type Subscription struct {
 	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserId uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
 	User   User      `gorm:"foreignKey:UserID"`
 
 	CountryCode string     `json:"country_code" gorm:"not null"`

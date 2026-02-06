@@ -74,8 +74,8 @@ func TestCreate_Get_Subscription(t *testing.T) {
 		req := &pb.Subscription_Request{UserId: userID.String()}
 
 		mockData := []model.Subscription{
-			{Id: uuid.New(), UserId: userID, CountryCode: "US"},
-			{Id: uuid.New(), UserId: userID, CountryCode: "UK"},
+			{Id: uuid.New(), UserID: userID, CountryCode: "US"},
+			{Id: uuid.New(), UserID: userID, CountryCode: "UK"},
 		}
 
 		mockServ.On("GetSubscriptionByUserID", userID).Return(mockData, nil)

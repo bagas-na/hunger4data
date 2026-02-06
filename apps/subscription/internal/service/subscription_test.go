@@ -17,7 +17,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.New(),
+			UserID:      uuid.New(),
 			CountryCode: "AFG",
 		}
 
@@ -32,7 +32,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.Nil,
+			UserID:      uuid.Nil,
 			CountryCode: "USA",
 		}
 
@@ -48,7 +48,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.New(),
+			UserID:      uuid.New(),
 			CountryCode: "US",
 		}
 
@@ -67,7 +67,7 @@ func TestGetSubscriptionByUserID_Flat(t *testing.T) {
 	t.Run("Success_ValidUser", func(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := &SubService{repo: mockRepo}
-		mockData := []model.Subscription{{Id: uuid.New(), UserId: userID}}
+		mockData := []model.Subscription{{Id: uuid.New(), UserID: userID}}
 
 		mockRepo.On("GetSubscriptionsByUserID", userID).Return(mockData, nil).Once()
 

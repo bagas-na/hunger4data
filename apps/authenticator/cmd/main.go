@@ -22,16 +22,10 @@ import (
 )
 
 type Config struct {
-	DBDSN string
-	// DBHost     string
-	// DBPort     string
-	// DBUser     string
-	// DBPassword string
-	// DBName     string
+	DBDSN                string
 	JWTSecret            string
 	JWTDuration          time.Duration
 	GRPCPort             string
-	RESTPort             string
 	NotificationGRPCAddr string
 }
 
@@ -59,16 +53,10 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		DBDSN: getEnv("DB_DSN", ""),
-		// DBHost:     getEnv("DB_HOST", "localhost"),
-		// DBPort:     getEnv("DB_PORT", "5432"),
-		// DBUser:     getEnv("DB_USER", "postgres"),
-		// DBPassword: getEnv("DB_PASSWORD", "1"),
-		// DBName:     getEnv("DB_NAME", "test"),
+		GRPCPort:             getEnv("GRPC_PORT", "50051"),
+		DBDSN:                getEnv("DB_DSN", ""),
 		JWTSecret:            getEnv("JWT_SECRET", "change-this-super-secret-but-insecure-key"),
 		JWTDuration:          duration,
-		GRPCPort:             getEnv("GRPC_PORT", "50051"),
-		RESTPort:             getEnv("REST_PORT", "8080"),
 		NotificationGRPCAddr: getEnv("GRPC_ADDR_NOTIFICATION", ":50052"),
 	}
 }
@@ -81,17 +69,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func NewDBConnection(cfg *Config) (*gorm.DB, error) {
-	fmt.Printf("Value of cfg:\n%#v", cfg)
-	// dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
-	// 	cfg.DBHost,
-	// 	cfg.DBUser,
-	// 	cfg.DBPassword,
-	// 	cfg.DBName,
-	// 	cfg.DBPort,
-	// )
-	dsn := cfg.DBDSN
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}

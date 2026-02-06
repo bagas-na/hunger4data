@@ -20,13 +20,21 @@ func NewPaymentRepo(db *gorm.DB) *PaymentRepo {
 
 func (r *PaymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payment, error) {
 	var payment Payment
-	err := r.db.WithContext(ctx).First(&payment, "id = ?", id).Error
+
+	err := r.db.WithContext(ctx).
+		Preload("User").
+		First(&payment, "id = ?", id).Error
+
 	return &payment, err
 }
 
 func (r *PaymentRepo) FindUserPaymentByID(ctx context.Context, userId, paymentId uuid.UUID) (*Payment, error) {
 	var payment Payment
-	err := r.db.WithContext(ctx).First(&payment, "user_id = ? AND id = ?", userId, paymentId).Error
+
+	err := r.db.WithContext(ctx).
+		Preload("User").
+		First(&payment, "user_id = ? AND id = ?", userId, paymentId).Error
+
 	return &payment, err
 }
 

@@ -41,7 +41,7 @@ func (s *SubService) Get_Countries(ctx context.Context, req *pb.Empty) (*pb.Get_
 func (s *SubService) Create_Subscription(ctx context.Context, req *pb.Subscription_Request) (*pb.Subscription_Response, error) {
 	userId, _ := uuid.Parse(req.UserId)
 	subs := model.Subscription{
-		UserId:      userId,
+		UserID:      userId,
 		CountryCode: req.CountryCode,
 	}
 	err := s.serv.CreateSubcription(subs)
@@ -70,7 +70,7 @@ func (s *SubService) Get_Subscriptions(ctx context.Context, req *pb.Subscription
 	for _, sub := range data {
 		protoSubs = append(protoSubs, &pb.Subscription{
 			Id:          sub.Id.String(),
-			UserId:      sub.UserId.String(),
+			UserId:      sub.UserID.String(),
 			CountryCode: sub.CountryCode,
 		})
 	}

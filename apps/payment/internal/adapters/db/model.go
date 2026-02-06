@@ -17,6 +17,18 @@ type User struct {
 	Created_At       time.Time      `json:"created_at"`
 	Updated_At       time.Time      `json:"updated_at"`
 	Deleted_At       gorm.DeletedAt `gorm:"index" json:"-"`
+
+	Subscriptions []Subscription `gorm:"foreignKey:UserID"`
+}
+
+type Subscription struct {
+	Id     uuid.UUID `gorm:"type:uuid;primaryKey"`
+	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+
+	CountryCode string     `json:"country_code" gorm:"not null"`
+	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
+	UpdateAt    time.Time  `json:"updated_at" gorm:"not null"`
+	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
 type Payment struct {

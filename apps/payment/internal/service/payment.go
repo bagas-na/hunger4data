@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"payment-service/internal/adapters/db"
+	"payment-service/internal/adapters/notification"
 	stripeAdapter "payment-service/internal/adapters/stripe"
 
 	"github.com/google/uuid"
@@ -23,16 +25,18 @@ type PaymentService interface {
 type paymentService struct {
 	repo       *db.PaymentRepo
 	stripe     *stripeAdapter.StripeAdapter
+	mailer     notification.Mailer
 	successURL string
 	cancelURL  string
 }
 
-func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter) PaymentService {
+func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter, mailer notification.Mailer) PaymentService {
 	return &paymentService{
 		repo:       repo,
 		stripe:     client,
 		successURL: "https://example.com/success",
 		cancelURL:  "https://example.com/cancel",
+		mailer:     mailer,
 	}
 }
 
@@ -99,6 +103,17 @@ func (s *paymentService) CreatePaymentAndCheckout(
 	)
 	if err != nil {
 		return nil, "", err
+	}
+
+	paymentWithUser, err := s.repo.FindPaymentByID(ctx, newPayment.ID)
+
+	fmt.Println("=== Data to be sent to notification service ===")
+	fmt.Printf("payment (with user data): %#v\n", paymentWithUser)
+	fmt.Printf("checkout URL: %#v\n", session.URL)
+
+	err = s.mailer.SendCheckoutURL(ctx, paymentWithUser, session.URL)
+	if err != nil {
+		fmt.Printf("Error sending checkout email to %s\n", paymentWithUser.User.Username)
 	}
 
 	newPayment, err = s.UpdatePaymentToPending(ctx, newPayment.ID, session.ID)

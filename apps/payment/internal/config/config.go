@@ -11,6 +11,7 @@ type Config struct {
 	WebhookPort            string
 	GRPCPort               string
 	DBDSN                  string
+	NotificationGRPCAddr   string
 	STRIPE_SECRET_KEY      string
 	STRIPE_PUBLISHABLE_KEY string
 	STRIPE_WEBHOOK_SECRET  string
@@ -38,6 +39,7 @@ func Load() *Config {
 		STRIPE_SECRET_KEY:      getEnv("STRIPE_SECRET_KEY", ""),
 		STRIPE_PUBLISHABLE_KEY: getEnv("STRIPE_PUBLISHABLE_KEY", ""),
 		STRIPE_WEBHOOK_SECRET:  getEnv("STRIPE_WEBHOOK_SECRET", ""),
+		NotificationGRPCAddr:   getEnv("GRPC_ADDR_NOTIFICATION", ":50052"),
 	}
 }
 

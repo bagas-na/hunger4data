@@ -25,7 +25,7 @@ func NewSubService(repo repo.SubscriptionRepo) SubServ {
 }
 
 func (s *SubService) CreateSubcription(subs model.Subscription) error {
-	if subs.UserId == uuid.Nil {
+	if subs.UserID == uuid.Nil {
 		return errors.New("Must have user_id in jwt")
 	}
 
@@ -53,7 +53,7 @@ func (s *SubService) GetSubscriptionByUserID(userId uuid.UUID) ([]model.Subscrip
 }
 
 // func (s *SubService) UpdateSubscription(id uuid.UUID, subs model.Subscription) error {
-// 	if subs.UserId == uuid.Nil {
+// 	if subs.UserID == uuid.Nil {
 // 		return errors.New("Must have user_id in jwt")
 // 	}
 
