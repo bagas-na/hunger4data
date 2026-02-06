@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ type UserRepo interface {
 	GetByUsername(username string) (*User, error)
 	UpdateUser(username string, user User) error
 	DeleteUser(username string) error
+	ActivateUser(activationString string) error
 }
 
 type GORMRepository struct {
@@ -23,6 +25,24 @@ func NewUserRepo(db *gorm.DB) UserRepo {
 	return &GORMRepository{
 		db: db,
 	}
+}
+
+func (r *GORMRepository) ActivateUser(activationString string) error {
+	var user User
+	err := r.db.
+		Where("activation_string = ? AND is_activated = ?", activationString, false).
+		First(&user).Error
+	if err != nil {
+		return err
+	}
+	user.IsActivated = true
+	user.Updated_At = time.Now()
+
+	if err := r.db.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *GORMRepository) CreateUser(u User) error {
@@ -40,7 +60,7 @@ func (r *GORMRepository) CreateUser(u User) error {
 
 func (r *GORMRepository) GetByUsername(username string) (*User, error) {
 	var user User
-	if err := r.db.Where("username = ? ", username).First(&user).Error; err != nil {
+	if err := r.db.Where("username = ? AND deleted_at IS NULL", username).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -48,7 +68,7 @@ func (r *GORMRepository) GetByUsername(username string) (*User, error) {
 
 func (r *GORMRepository) UpdateUser(username string, user User) error {
 
-	err := r.db.Where("username = ?", username).Updates(user).Error
+	err := r.db.Where("username = ? AND deleted_at IS NULL", username).Updates(user).Error
 	if err != nil {
 		return err
 	}
@@ -58,7 +78,7 @@ func (r *GORMRepository) UpdateUser(username string, user User) error {
 
 func (r *GORMRepository) DeleteUser(username string) error {
 	var user User
-	err := r.db.Delete(&user, "username = ?", username).Error
+	err := r.db.Delete(&user, "username = ? AND deleted_at IS NULL", username).Error
 	if err != nil {
 		return err
 	}

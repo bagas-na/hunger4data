@@ -31,7 +31,7 @@ func NewSubRepo(db *gorm.DB) SubscriptionRepo {
 func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
 	newSub := model.Subscription{
 		Id:          uuid.New(),
-		UserId:      subs.UserId,
+		UserID:      subs.UserID,
 		CountryCode: subs.CountryCode,
 		CreatedAt:   time.Now(),
 	}
@@ -41,6 +41,8 @@ func (r *GORMRepository) CreateSubcription(subs model.Subscription) error {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return gorm.ErrDuplicatedKey
+		} else if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+			return gorm.ErrForeignKeyViolated
 		}
 		return err
 	}
@@ -80,7 +82,7 @@ func (r *GORMRepository) DeleteSubscription(userId, subcriptionId uuid.UUID) err
 	subs.DeletedAt = &timeNow
 
 	if err := r.db.Save(&subs).Error; err != nil {
-		return fmt.Errorf("error deleting subscription")
+		return err
 	}
 	return nil
 }

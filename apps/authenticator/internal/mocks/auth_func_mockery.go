@@ -4,6 +4,7 @@ package mockery
 
 import (
 	repo "authenticator/internal/adapters/repo"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -21,9 +22,56 @@ func (_m *MockAuthFunc) EXPECT() *MockAuthFunc_Expecter {
 	return &MockAuthFunc_Expecter{mock: &_m.Mock}
 }
 
-// Login provides a mock function with given fields: username, password
-func (_m *MockAuthFunc) Login(username string, password string) (string, error) {
-	ret := _m.Called(username, password)
+// Activate provides a mock function with given fields: ctx, activationString
+func (_m *MockAuthFunc) Activate(ctx context.Context, activationString string) error {
+	ret := _m.Called(ctx, activationString)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Activate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, activationString)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockAuthFunc_Activate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Activate'
+type MockAuthFunc_Activate_Call struct {
+	*mock.Call
+}
+
+// Activate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - activationString string
+func (_e *MockAuthFunc_Expecter) Activate(ctx interface{}, activationString interface{}) *MockAuthFunc_Activate_Call {
+	return &MockAuthFunc_Activate_Call{Call: _e.mock.On("Activate", ctx, activationString)}
+}
+
+func (_c *MockAuthFunc_Activate_Call) Run(run func(ctx context.Context, activationString string)) *MockAuthFunc_Activate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockAuthFunc_Activate_Call) Return(_a0 error) *MockAuthFunc_Activate_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockAuthFunc_Activate_Call) RunAndReturn(run func(context.Context, string) error) *MockAuthFunc_Activate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Login provides a mock function with given fields: ctx, username, password
+func (_m *MockAuthFunc) Login(ctx context.Context, username string, password string) (string, error) {
+	ret := _m.Called(ctx, username, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
@@ -31,17 +79,17 @@ func (_m *MockAuthFunc) Login(username string, password string) (string, error) 
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (string, error)); ok {
-		return rf(username, password)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+		return rf(ctx, username, password)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(username, password)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+		r0 = rf(ctx, username, password)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(username, password)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, username, password)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -55,15 +103,16 @@ type MockAuthFunc_Login_Call struct {
 }
 
 // Login is a helper method to define mock.On call
+//   - ctx context.Context
 //   - username string
 //   - password string
-func (_e *MockAuthFunc_Expecter) Login(username interface{}, password interface{}) *MockAuthFunc_Login_Call {
-	return &MockAuthFunc_Login_Call{Call: _e.mock.On("Login", username, password)}
+func (_e *MockAuthFunc_Expecter) Login(ctx interface{}, username interface{}, password interface{}) *MockAuthFunc_Login_Call {
+	return &MockAuthFunc_Login_Call{Call: _e.mock.On("Login", ctx, username, password)}
 }
 
-func (_c *MockAuthFunc_Login_Call) Run(run func(username string, password string)) *MockAuthFunc_Login_Call {
+func (_c *MockAuthFunc_Login_Call) Run(run func(ctx context.Context, username string, password string)) *MockAuthFunc_Login_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -73,14 +122,14 @@ func (_c *MockAuthFunc_Login_Call) Return(_a0 string, _a1 error) *MockAuthFunc_L
 	return _c
 }
 
-func (_c *MockAuthFunc_Login_Call) RunAndReturn(run func(string, string) (string, error)) *MockAuthFunc_Login_Call {
+func (_c *MockAuthFunc_Login_Call) RunAndReturn(run func(context.Context, string, string) (string, error)) *MockAuthFunc_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// Register provides a mock function with given fields: username, password
-func (_m *MockAuthFunc) Register(username string, password string) (*repo.User, error) {
-	ret := _m.Called(username, password)
+// Register provides a mock function with given fields: ctx, username, password
+func (_m *MockAuthFunc) Register(ctx context.Context, username string, password string) (*repo.User, error) {
+	ret := _m.Called(ctx, username, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Register")
@@ -88,19 +137,19 @@ func (_m *MockAuthFunc) Register(username string, password string) (*repo.User, 
 
 	var r0 *repo.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (*repo.User, error)); ok {
-		return rf(username, password)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*repo.User, error)); ok {
+		return rf(ctx, username, password)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) *repo.User); ok {
-		r0 = rf(username, password)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *repo.User); ok {
+		r0 = rf(ctx, username, password)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*repo.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(username, password)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, username, password)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,15 +163,16 @@ type MockAuthFunc_Register_Call struct {
 }
 
 // Register is a helper method to define mock.On call
+//   - ctx context.Context
 //   - username string
 //   - password string
-func (_e *MockAuthFunc_Expecter) Register(username interface{}, password interface{}) *MockAuthFunc_Register_Call {
-	return &MockAuthFunc_Register_Call{Call: _e.mock.On("Register", username, password)}
+func (_e *MockAuthFunc_Expecter) Register(ctx interface{}, username interface{}, password interface{}) *MockAuthFunc_Register_Call {
+	return &MockAuthFunc_Register_Call{Call: _e.mock.On("Register", ctx, username, password)}
 }
 
-func (_c *MockAuthFunc_Register_Call) Run(run func(username string, password string)) *MockAuthFunc_Register_Call {
+func (_c *MockAuthFunc_Register_Call) Run(run func(ctx context.Context, username string, password string)) *MockAuthFunc_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -132,7 +182,7 @@ func (_c *MockAuthFunc_Register_Call) Return(_a0 *repo.User, _a1 error) *MockAut
 	return _c
 }
 
-func (_c *MockAuthFunc_Register_Call) RunAndReturn(run func(string, string) (*repo.User, error)) *MockAuthFunc_Register_Call {
+func (_c *MockAuthFunc_Register_Call) RunAndReturn(run func(context.Context, string, string) (*repo.User, error)) *MockAuthFunc_Register_Call {
 	_c.Call.Return(run)
 	return _c
 }

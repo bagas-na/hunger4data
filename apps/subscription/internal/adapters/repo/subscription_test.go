@@ -34,14 +34,14 @@ func TestCreateSubscription(t *testing.T) {
 	t.Run("Successful creation", func(t *testing.T) {
 		UserID := uuid.New()
 		subs := model.Subscription{
-			UserId:      UserID,
+			UserID:      UserID,
 			CountryCode: "AFG",
 		}
 		mock.ExpectBegin()
 		mock.ExpectExec(`INSERT INTO "subscriptions"`).
 			WithArgs(
 				sqlmock.AnyArg(),
-				subs.UserId,
+				subs.UserID,
 				subs.CountryCode,
 				sqlmock.AnyArg(), // CreatedAt
 				sqlmock.AnyArg(), // UpdatedAt
@@ -59,14 +59,14 @@ func TestCreateSubscription(t *testing.T) {
 	t.Run("Failed creation", func(t *testing.T) {
 		UserID := uuid.New()
 		subs := model.Subscription{
-			UserId:      UserID,
+			UserID:      UserID,
 			CountryCode: "AFG",
 		}
 		mock.ExpectBegin()
 		mock.ExpectExec(`INSERT INTO "subscriptions"`).
 			WithArgs(
 				sqlmock.AnyArg(),
-				subs.UserId,
+				subs.UserID,
 				subs.CountryCode,
 				sqlmock.AnyArg(), // CreatedAt
 				sqlmock.AnyArg(), // UpdatedAt
@@ -84,14 +84,14 @@ func TestCreateSubscription(t *testing.T) {
 	})
 	t.Run("Failure - Duplicate Key (23505)", func(t *testing.T) {
 		input := model.Subscription{
-			UserId:      uuid.New(),
+			UserID:      uuid.New(),
 			CountryCode: "CAF",
 		}
 		pgErr := &pgconn.PgError{Code: "23505"}
 
 		mock.ExpectBegin()
 		mock.ExpectExec(`INSERT INTO "subscriptions"`).
-			WithArgs(sqlmock.AnyArg(), input.UserId, input.CountryCode, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+			WithArgs(sqlmock.AnyArg(), input.UserID, input.CountryCode, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnError(pgErr)
 		mock.ExpectRollback()
 

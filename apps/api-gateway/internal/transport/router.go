@@ -29,6 +29,7 @@ func AuthRouting(e *echo.Echo, auth *service.AuthHandler) {
 	g := e.Group("/auth")
 	g.POST("/register", auth.Register) // complete
 	g.POST("/login", auth.Login)       // complete
+	g.GET("/activate/:key", auth.ActivateUser)
 }
 
 func SubscriptionRouting(e *echo.Echo, subscription SubscriptionHandler, secret string) {

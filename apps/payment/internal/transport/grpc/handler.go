@@ -2,6 +2,7 @@ package grpcHandler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	paymentv1 "hunger4data/pb/payment"
 	"payment-service/internal/service"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type PaymentGRPCServer struct {
@@ -30,12 +32,16 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
-	if len(req.CountryCode) != 3 {
+	if req.CountryCode == "" || len(req.CountryCode) != 3 {
 		return nil, status.Error(codes.InvalidArgument, "invalid country_code")
 	}
 
 	if req.Currency == "" || req.Amount == 0 {
 		return nil, status.Error(codes.InvalidArgument, "missing amount and currency")
+	}
+
+	if req.Amount <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "amount must be positive")
 	}
 
 	payment, checkoutURL, err := h.svc.CreatePaymentAndCheckout(
@@ -46,6 +52,11 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 		req.Currency,
 	)
 	if err != nil {
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return nil, status.Error(codes.NotFound, "User does not exist")
+		} else if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "Country_code does not exist")
+		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -58,7 +69,7 @@ func (h *PaymentGRPCServer) CreatePayment(ctx context.Context, req *paymentv1.Cr
 func (h *PaymentGRPCServer) GetPaymentCheckoutURL(ctx context.Context, req *paymentv1.GetPaymentCheckoutURLRequest) (*paymentv1.GetPaymentCheckoutURLResponse, error) {
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid payment_id")
+		return nil, status.Error(codes.InvalidArgument, "invalid user_id")
 	}
 
 	paymentID, err := uuid.Parse(req.PaymentId)

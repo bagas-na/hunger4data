@@ -74,6 +74,16 @@ func NewDBConnection(cfg *Config) (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(25)
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
+	err = db.AutoMigrate(&model.Subscription{})
+	if err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+	db.Exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_user_country_active
+    ON subscriptions (user_id, country_code)
+    WHERE deleted_at IS NULL
+`)
+
 	log.Println("PostgreSQL connected successfully via GORM")
 	return db, nil
 }
@@ -100,10 +110,7 @@ func main() {
 
 	service.StartSyncWithoutScheduler(rdb)
 	service.StartSyncScheduler(rdb)
-	err = db.AutoMigrate(&model.Subscription{})
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
+
 	subsRepo := repo.NewSubRepo(db)
 	subsServ := service.NewSubService(subsRepo)
 	subscriptionService := grpcHandler.NewSubHand(subsServ, rdb)

@@ -175,6 +175,21 @@ info:
   title: Hunger4Data API
   version: 0.0.1
 paths:
+  /auth/activate/{key}:
+    get:
+      description: Activate the user account to be able to log in
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/service.ErrorResponse'
+      summary: Activate user account using a link.
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -313,7 +328,7 @@ paths:
       summary: Create a donation payment
       tags:
       - Payments
-  /payments/{id}/checkout:
+  /payments/checkout/{id}:
     get:
       description: Retrieves the checkout URL for an existing payment.
       parameters:

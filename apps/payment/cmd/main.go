@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	notifyv1 "hunger4data/pb/notification"
 	paymentv1 "hunger4data/pb/payment"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"payment-service/internal/adapters/db"
+	"payment-service/internal/adapters/notification"
 	stripeAdapter "payment-service/internal/adapters/stripe"
 	"payment-service/internal/config"
 	"payment-service/internal/service"
@@ -17,6 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -27,9 +30,21 @@ func main() {
 		log.Fatalf("db error: %v", err)
 	}
 
+	grpcConnNotif, err := grpc.NewClient(
+		cfg.NotificationGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect to notification gRPC server: %v", err)
+	}
+	defer grpcConnNotif.Close()
+
+	notifclient := notifyv1.NewEmailServiceClient(grpcConnNotif)
+	mailer := notification.NewMailer(notifclient)
+
 	stripeAdapter := stripeAdapter.NewStripeAdapter(cfg.STRIPE_SECRET_KEY)
+
 	paymentRepo := db.NewPaymentRepo(dbClient)
-	paymentService := service.NewPaymentService(paymentRepo, stripeAdapter)
+	paymentService := service.NewPaymentService(paymentRepo, stripeAdapter, mailer)
 
 	go startGRPCServer(cfg.GRPCPort, paymentService)
 	go startHTTPServer(cfg.WebhookPort, paymentService, cfg.STRIPE_WEBHOOK_SECRET)

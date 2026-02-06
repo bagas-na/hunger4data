@@ -297,6 +297,94 @@ func (x *LoginResponse) GetMessage() string {
 	return ""
 }
 
+type ActivateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ActivateRequest) Reset() {
+	*x = ActivateRequest{}
+	mi := &file_authenticator_authenticator_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ActivateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActivateRequest) ProtoMessage() {}
+
+func (x *ActivateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_authenticator_authenticator_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActivateRequest.ProtoReflect.Descriptor instead.
+func (*ActivateRequest) Descriptor() ([]byte, []int) {
+	return file_authenticator_authenticator_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ActivateRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type ActivateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ActivateResponse) Reset() {
+	*x = ActivateResponse{}
+	mi := &file_authenticator_authenticator_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ActivateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActivateResponse) ProtoMessage() {}
+
+func (x *ActivateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_authenticator_authenticator_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActivateResponse.ProtoReflect.Descriptor instead.
+func (*ActivateResponse) Descriptor() ([]byte, []int) {
+	return file_authenticator_authenticator_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ActivateResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_authenticator_authenticator_proto protoreflect.FileDescriptor
 
 const file_authenticator_authenticator_proto_rawDesc = "" +
@@ -318,10 +406,15 @@ const file_authenticator_authenticator_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"?\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xaa\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"#\n" +
+	"\x0fActivateRequest\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\",\n" +
+	"\x10ActivateResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xfd\x01\n" +
 	"\vAuthService\x12Q\n" +
 	"\bRegister\x12!.authenticator.v1.RegisterRequest\x1a\".authenticator.v1.RegisterResponse\x12H\n" +
-	"\x05Login\x12\x1e.authenticator.v1.LoginRequest\x1a\x1f.authenticator.v1.LoginResponseB.Z,hunger4data/pb/authenticator;authenticatorv1b\x06proto3"
+	"\x05Login\x12\x1e.authenticator.v1.LoginRequest\x1a\x1f.authenticator.v1.LoginResponse\x12Q\n" +
+	"\bActivate\x12!.authenticator.v1.ActivateRequest\x1a\".authenticator.v1.ActivateResponseB.Z,hunger4data/pb/authenticator;authenticatorv1b\x06proto3"
 
 var (
 	file_authenticator_authenticator_proto_rawDescOnce sync.Once
@@ -335,22 +428,26 @@ func file_authenticator_authenticator_proto_rawDescGZIP() []byte {
 	return file_authenticator_authenticator_proto_rawDescData
 }
 
-var file_authenticator_authenticator_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_authenticator_authenticator_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_authenticator_authenticator_proto_goTypes = []any{
 	(*User)(nil),             // 0: authenticator.v1.User
 	(*RegisterRequest)(nil),  // 1: authenticator.v1.RegisterRequest
 	(*RegisterResponse)(nil), // 2: authenticator.v1.RegisterResponse
 	(*LoginRequest)(nil),     // 3: authenticator.v1.LoginRequest
 	(*LoginResponse)(nil),    // 4: authenticator.v1.LoginResponse
+	(*ActivateRequest)(nil),  // 5: authenticator.v1.ActivateRequest
+	(*ActivateResponse)(nil), // 6: authenticator.v1.ActivateResponse
 }
 var file_authenticator_authenticator_proto_depIdxs = []int32{
 	0, // 0: authenticator.v1.RegisterResponse.user:type_name -> authenticator.v1.User
 	1, // 1: authenticator.v1.AuthService.Register:input_type -> authenticator.v1.RegisterRequest
 	3, // 2: authenticator.v1.AuthService.Login:input_type -> authenticator.v1.LoginRequest
-	2, // 3: authenticator.v1.AuthService.Register:output_type -> authenticator.v1.RegisterResponse
-	4, // 4: authenticator.v1.AuthService.Login:output_type -> authenticator.v1.LoginResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
+	5, // 3: authenticator.v1.AuthService.Activate:input_type -> authenticator.v1.ActivateRequest
+	2, // 4: authenticator.v1.AuthService.Register:output_type -> authenticator.v1.RegisterResponse
+	4, // 5: authenticator.v1.AuthService.Login:output_type -> authenticator.v1.LoginResponse
+	6, // 6: authenticator.v1.AuthService.Activate:output_type -> authenticator.v1.ActivateResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -367,7 +464,7 @@ func file_authenticator_authenticator_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_authenticator_authenticator_proto_rawDesc), len(file_authenticator_authenticator_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

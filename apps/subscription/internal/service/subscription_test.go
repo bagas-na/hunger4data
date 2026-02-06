@@ -17,7 +17,7 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.New(),
+			UserID:      uuid.New(),
 			CountryCode: "AFG",
 		}
 
@@ -32,14 +32,14 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.Nil,
+			UserID:      uuid.Nil,
 			CountryCode: "USA",
 		}
 
 		err := service.CreateSubcription(subs)
 
 		assert.Error(t, err)
-		assert.Equal(t, "Must have user_id in jwt", err.Error())
+		assert.Equal(t, "Missing user_id from jwt", err.Error())
 		// Ensure the repo was NOT called
 		mockRepo.AssertNotCalled(t, "CreateSubcription", mock.Anything)
 	})
@@ -48,14 +48,14 @@ func TestCreateSubscription_Service(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := NewSubService(mockRepo)
 		subs := model.Subscription{
-			UserId:      uuid.New(),
+			UserID:      uuid.New(),
 			CountryCode: "US",
 		}
 
 		err := service.CreateSubcription(subs)
 
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "country_code (3 letters)")
+		assert.Contains(t, err.Error(), "must consist of 3 uppercase letters")
 		mockRepo.AssertNotCalled(t, "CreateSubcription", mock.Anything)
 	})
 }
@@ -67,7 +67,7 @@ func TestGetSubscriptionByUserID_Flat(t *testing.T) {
 	t.Run("Success_ValidUser", func(t *testing.T) {
 		mockRepo := new(mockery.MockSubscriptionRepo)
 		service := &SubService{repo: mockRepo}
-		mockData := []model.Subscription{{Id: uuid.New(), UserId: userID}}
+		mockData := []model.Subscription{{Id: uuid.New(), UserID: userID}}
 
 		mockRepo.On("GetSubscriptionsByUserID", userID).Return(mockData, nil).Once()
 

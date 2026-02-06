@@ -28,7 +28,7 @@ services:
       DB_DSN: ${DB_DSN}
       JWT_SECRET: ${JWT_SECRET}
       GRPC_PORT: ${AUTH_GRPC_PORT}
-      # REST_PORT: ${AUTH_REST_PORT}
+      GRPC_ADDR_NOTIFICATION: notification-service:${NOTIFICATION_GRPC_PORT}
       JWT_DURATION: ${JWT_DURATION}
     restart: unless-stopped
 
@@ -45,9 +45,12 @@ services:
     environment:
       GRPC_PORT: ${NOTIFICATION_GRPC_PORT}
       DB_DSN: ${DB_DSN}
-      MAILER_SEND_API_KEY: ${MAILER_SEND_API_KEY}
-      MAILER_EMAIL_DOMAIN: ${MAILER_EMAIL_DOMAIN}
-      MAILER_EMAIL_USERNAME: ${MAILER_EMAIL_USERNAME}
+      MAILER_HOST: ${MAILER_HOST}
+      MAILER_PORT: ${MAILER_PORT}
+      MAILER_LOGIN: ${MAILER_LOGIN}
+      MAILER_PASSWORD: ${MAILER_PASSWORD}
+      MAILER_USERNAME: ${MAILER_USERNAME}
+      MAILER_EMAIL: ${MAILER_EMAIL}
 
     restart: unless-stopped
 
@@ -64,10 +67,12 @@ services:
       - "${PAYMENT_WEBHOOK_PORT}:${PAYMENT_WEBHOOK_PORT}" # Stripe webhook
 
     environment:
+      DB_DSN: ${DB_DSN}
+
       GRPC_PORT: ${PAYMENT_GRPC_PORT}
       WEBHOOK_PORT: ${PAYMENT_WEBHOOK_PORT}
+      GRPC_ADDR_NOTIFICATION: notification-service:${NOTIFICATION_GRPC_PORT}
 
-      DB_DSN: ${DB_DSN}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
@@ -92,6 +97,8 @@ services:
 
   redis:
     image: redis:alpine
+    ports:
+      - 6379:6379
     volumes:
       - "./healthchecks:/healthchecks"
     healthcheck:

@@ -48,7 +48,9 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 
 	var req CreatePaymentRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "body must have country_code, amount, and currency",
+		})
 	}
 
 	resp, err := h.paymentclient.CreatePayment(ctx,
@@ -90,7 +92,7 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 // @Failure      401 {object} ErrorResponse
 // @Failure      404 {object} ErrorResponse
 // @Failure      500 {object} ErrorResponse
-// @Router       /payments/{id}/checkout [get]
+// @Router       /payments/checkout/{id} [get]
 func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
 	defer cancel()
@@ -100,9 +102,15 @@ func (h *PaymentHandler) GetPaymentCheckoutURL(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
 
+	userId := c.Get("user_id").(string)
+	if userId == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "userId is required"})
+	}
+
 	resp, err := h.paymentclient.GetPaymentCheckoutURL(ctx,
 		&paymentv1.GetPaymentCheckoutURLRequest{
 			PaymentId: id,
+			UserId:    userId,
 		})
 	if err != nil {
 		return utils.MapGRPCError(c, err)
@@ -296,13 +304,13 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
+			"error": "body must have username and password",
 		})
 	}
 
 	if req.Username == "" || req.Password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "missing username or password",
+			"error": "missing username and/or password",
 		})
 	}
 
@@ -316,14 +324,6 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		return utils.MapGRPCError(c, err)
 	}
 
-	// return c.JSON(http.StatusCreated, map[string]interface{}{
-	// 	"message": resp.Message,
-	// 	"user": map[string]interface{}{
-	// 		"id":       resp.User.Id,
-	// 		"username": resp.User.Username,
-	// 	},
-	// })
-
 	return c.JSON(http.StatusCreated,
 		RegisterResponse{
 			Message: resp.Message,
@@ -336,6 +336,33 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			},
 		},
 	)
+}
+
+// ActivateUser godoc
+// @Summary      Activate user account using a link.
+// @Description  Activate the user account to be able to log in
+// @Tags         Auth
+// @Produce      json
+// @Success      200
+// @Failure      500 {object} ErrorResponse
+// @Router       /auth/activate/{key} [get]
+func (h *AuthHandler) ActivateUser(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 10*time.Second)
+	defer cancel()
+
+	activationKey := c.Param("key")
+	if activationKey == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "activation string required"})
+	}
+
+	resp, err := h.authclient.Activate(ctx,
+		&authenticatorv1.ActivateRequest{
+			Key: activationKey,
+		})
+	if err != nil {
+		return utils.MapGRPCError(c, err)
+	}
+	return c.JSON(http.StatusOK, resp)
 }
 
 type subscriptionHandler struct {
@@ -408,7 +435,7 @@ func (h *subscriptionHandler) CreateSub(c echo.Context) error {
 	var req CreateSubcriptionRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
+			"error": "body must have country_code (3 letter, ISO 3166-1 alpha-3 standard)",
 		})
 	}
 

@@ -18,7 +18,7 @@ import (
 
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("Successful Login", func(t *testing.T) {
-		mockServ := new(mockery.MockAuthFunc) // Your service-level mock
+		mockServ := new(mockery.MockAuthFunc) //
 		handler := NewHandService(mockServ)
 
 		ctx := context.Background()
@@ -28,7 +28,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		}
 
 		expectedToken := "valid-jwt-token"
-		mockServ.On("Login", req.Username, req.Password).Return(expectedToken, nil)
+		mockServ.On("Login", ctx, req.Username, req.Password).Return(expectedToken, nil)
 
 		res, err := handler.Login(ctx, req)
 
@@ -44,16 +44,16 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		req := &authenticatorv1.LoginRequest{Username: "user", Password: "pw"}
 
-		mockServ.On("Login", "user", "pw").Return("", errors.New("auth failed"))
+		mockServ.On("Login", context.Background(), "user", "pw").Return("", errors.New("auth failed"))
 
 		res, err := handler.Login(context.Background(), req)
 
 		assert.Error(t, err)
 		st, ok := status.FromError(err)
 		assert.True(t, ok)
-		assert.Equal(t, codes.Internal, st.Code())
+		assert.Equal(t, codes.Unauthenticated, st.Code())
 
-		assert.Equal(t, "Error loggin in", res.Message)
+		assert.Equal(t, "Error logging in", res.Message)
 	})
 }
 
@@ -73,12 +73,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			Role:     "user",
 		}
 
-		mockServ.On("Register", req.Username, req.Password).Return(returnedUser, nil)
+		mockServ.On("Register", context.Background(), req.Username, req.Password).Return(returnedUser, nil)
 
 		res, err := handler.Register(context.Background(), req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Success you are registered", res.Message)
+		assert.Equal(t, "Registration Complete", res.Message)
 		assert.Equal(t, returnedUser.Id.String(), res.User.Id)
 		assert.Equal(t, returnedUser.Username, res.User.Username)
 	})
@@ -89,7 +89,7 @@ func TestAuthHandler_Register(t *testing.T) {
 
 		req := &authenticatorv1.RegisterRequest{Username: "taken@test.com", Password: "123"}
 
-		mockServ.On("Register", req.Username, req.Password).
+		mockServ.On("Register", context.Background(), req.Username, req.Password).
 			Return(nil, gorm.ErrDuplicatedKey)
 
 		res, err := handler.Register(context.Background(), req)
@@ -106,7 +106,7 @@ func TestAuthHandler_Register(t *testing.T) {
 
 		req := &authenticatorv1.RegisterRequest{Username: "bad-email", Password: "123"}
 
-		mockServ.On("Register", req.Username, req.Password).
+		mockServ.On("Register", context.Background(), req.Username, req.Password).
 			Return(nil, service.ErrInvalidEmail)
 
 		res, err := handler.Register(context.Background(), req)
