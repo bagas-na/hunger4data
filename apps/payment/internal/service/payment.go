@@ -7,8 +7,11 @@ import (
 	"payment-service/internal/adapters/db"
 	"payment-service/internal/adapters/notification"
 	stripeAdapter "payment-service/internal/adapters/stripe"
+	"payment-service/internal/utils"
+	"strings"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type PaymentService interface {
@@ -71,9 +74,10 @@ func (s *paymentService) CreatePaymentAndCheckout(
 	amount int64,
 	currency string,
 ) (*db.Payment, string, error) {
+	code := strings.ToUpper(countryCode)
 
-	if amount <= 0 {
-		return nil, "", errors.New("amount must be positive")
+	if _, ok := utils.ISO3166Alpha3[code]; !ok {
+		return nil, "", gorm.ErrRecordNotFound
 	}
 
 	payment := &db.Payment{
