@@ -139,32 +139,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/countries": {
-            "get": {
-                "description": "Returns countries with food security data available.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Countries"
-                ],
-                "summary": "List available countries",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/service.GetCountriesResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/service.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/payments": {
             "get": {
                 "security": [
@@ -358,7 +332,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions": {
+        "/subscription": {
             "get": {
                 "security": [
                     {
@@ -438,7 +412,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/{id}": {
+        "/subscription/countries": {
+            "get": {
+                "description": "Returns countries with food security data available.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "List available countries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.GetCountriesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/service.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscription/{id}": {
             "delete": {
                 "security": [
                     {

@@ -7,14 +7,17 @@ import (
 	"github.com/stripe/stripe-go/v84"
 )
 
-type StripeAdapter struct {
+type StripeAdapter interface {
+	CreateCheckoutSession(ctx context.Context, input CreateCheckoutSessionInput) (*CheckoutSessionResult, error)
+	GetCheckoutSessionURL(ctx context.Context, sessionID string) (string, error)
+}
+
+type stripeAdapter struct {
 	client *stripe.Client
 }
 
-func NewStripeAdapter(secretKey string) *StripeAdapter {
-	return &StripeAdapter{
-		client: stripe.NewClient(secretKey),
-	}
+func NewStripeAdapterWithClient(client *stripe.Client) StripeAdapter {
+	return &stripeAdapter{client: client}
 }
 
 // type PaymentIntentResult struct {
@@ -23,7 +26,7 @@ func NewStripeAdapter(secretKey string) *StripeAdapter {
 // 	Status       string
 // }
 
-// func (a *StripeAdapter) CreatePaymentIntent(
+// func (a *stripeAdapter) CreatePaymentIntent(
 // 	ctx context.Context,
 // 	amount int64,
 // 	currency string,
@@ -62,7 +65,7 @@ type CheckoutSessionResult struct {
 	URL             string
 }
 
-func (a *StripeAdapter) CreateCheckoutSession(ctx context.Context, input CreateCheckoutSessionInput) (*CheckoutSessionResult, error) {
+func (a *stripeAdapter) CreateCheckoutSession(ctx context.Context, input CreateCheckoutSessionInput) (*CheckoutSessionResult, error) {
 	params := &stripe.CheckoutSessionCreateParams{
 		Mode:       stripe.String("payment"),
 		SuccessURL: stripe.String(input.SuccessURL),
@@ -108,7 +111,7 @@ func (a *StripeAdapter) CreateCheckoutSession(ctx context.Context, input CreateC
 	}, nil
 }
 
-func (a *StripeAdapter) GetCheckoutSessionURL(ctx context.Context, sessionID string) (string, error) {
+func (a *stripeAdapter) GetCheckoutSessionURL(ctx context.Context, sessionID string) (string, error) {
 	s, err := a.client.V1CheckoutSessions.Retrieve(ctx, sessionID, nil)
 	if err != nil {
 		return "", err

@@ -26,14 +26,14 @@ type PaymentService interface {
 }
 
 type paymentService struct {
-	repo       *db.PaymentRepo
-	stripe     *stripeAdapter.StripeAdapter
+	repo       db.PaymentRepo
+	stripe     stripeAdapter.StripeAdapter
 	mailer     notification.Mailer
 	successURL string
 	cancelURL  string
 }
 
-func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter, mailer notification.Mailer) PaymentService {
+func NewPaymentService(repo db.PaymentRepo, client stripeAdapter.StripeAdapter, mailer notification.Mailer) PaymentService {
 	return &paymentService{
 		repo:       repo,
 		stripe:     client,
@@ -42,30 +42,6 @@ func NewPaymentService(repo *db.PaymentRepo, client *stripeAdapter.StripeAdapter
 		mailer:     mailer,
 	}
 }
-
-// func (s *PaymentService) CreatePaymentDBOnly(
-// 	ctx context.Context,
-// 	userID uuid.UUID,
-// 	countryID uuid.UUID,
-// 	amount int64,
-// 	currency string,
-// ) (*db.Payment, error) {
-
-// 	if amount <= 0 {
-// 		return nil, errors.New("amount must be positive")
-// 	}
-
-// 	payment := &db.Payment{
-// 		UserID:          userID,
-// 		CountryID:       countryID,
-// 		TransactionType: "payment",
-// 		Amount:          amount,
-// 		Currency:        currency,
-// 		Provider:        "internal",
-// 	}
-
-// 	return s.repo.CreatePayment(ctx, payment)
-// }
 
 func (s *paymentService) CreatePaymentAndCheckout(
 	ctx context.Context,
@@ -111,9 +87,9 @@ func (s *paymentService) CreatePaymentAndCheckout(
 
 	paymentWithUser, err := s.repo.FindPaymentByID(ctx, newPayment.ID)
 
-	fmt.Println("=== Data to be sent to notification service ===")
-	fmt.Printf("payment (with user data): %#v\n", paymentWithUser)
-	fmt.Printf("checkout URL: %#v\n", session.URL)
+	// fmt.Println("=== Data to be sent to notification service ===")
+	// fmt.Printf("payment (with user data): %#v\n", paymentWithUser)
+	// fmt.Printf("checkout URL: %#v\n", session.URL)
 
 	err = s.mailer.SendCheckoutURL(ctx, paymentWithUser, session.URL)
 	if err != nil {

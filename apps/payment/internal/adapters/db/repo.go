@@ -8,17 +8,26 @@ import (
 	"gorm.io/gorm"
 )
 
-type PaymentRepo struct {
+type PaymentRepo interface {
+	CreatePayment(ctx context.Context, p *Payment) (*Payment, error)
+	FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payment, error)
+	FindUserPaymentByID(ctx context.Context, userId uuid.UUID, paymentId uuid.UUID) (*Payment, error)
+	ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error)
+	ListPendingByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error)
+	UpdatePayment(ctx context.Context, id uuid.UUID, status PaymentStatus, eventType PaymentEventType, sessionID string, source string, providerEventID string) (*Payment, error)
+}
+
+type paymentRepo struct {
 	db *gorm.DB
 }
 
-func NewPaymentRepo(db *gorm.DB) *PaymentRepo {
-	return &PaymentRepo{
+func NewPaymentRepo(db *gorm.DB) PaymentRepo {
+	return &paymentRepo{
 		db: db,
 	}
 }
 
-func (r *PaymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payment, error) {
+func (r *paymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payment, error) {
 	var payment Payment
 
 	err := r.db.WithContext(ctx).
@@ -28,7 +37,7 @@ func (r *PaymentRepo) FindPaymentByID(ctx context.Context, id uuid.UUID) (*Payme
 	return &payment, err
 }
 
-func (r *PaymentRepo) FindUserPaymentByID(ctx context.Context, userId, paymentId uuid.UUID) (*Payment, error) {
+func (r *paymentRepo) FindUserPaymentByID(ctx context.Context, userId, paymentId uuid.UUID) (*Payment, error) {
 	var payment Payment
 
 	err := r.db.WithContext(ctx).
@@ -38,7 +47,7 @@ func (r *PaymentRepo) FindUserPaymentByID(ctx context.Context, userId, paymentId
 	return &payment, err
 }
 
-func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, error) {
+func (r *paymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, error) {
 	paymentID := uuid.New()
 	eventID := uuid.New()
 
@@ -74,7 +83,7 @@ func (r *PaymentRepo) CreatePayment(ctx context.Context, p *Payment) (*Payment, 
 	return &newPayment, nil
 }
 
-func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
+func (r *paymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
 	var payments []Payment
 	err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
@@ -83,7 +92,7 @@ func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]Payme
 	return payments, err
 }
 
-func (r *PaymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
+func (r *paymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
 	var payments []Payment
 	err := r.db.WithContext(ctx).
 		Where("user_id = ? AND status = ?", userID, "pending").
@@ -92,7 +101,7 @@ func (r *PaymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) (
 	return payments, err
 }
 
-// func (r *PaymentRepo) UpdatePaymentProviderObject(ctx context.Context, id uuid.UUID, providerObjectID string) (*Payment, error) {
+// func (r *paymentRepo) UpdatePaymentProviderObject(ctx context.Context, id uuid.UUID, providerObjectID string) (*Payment, error) {
 
 // 	payment, err := r.updatePayment(
 // 		ctx,
@@ -106,7 +115,7 @@ func (r *PaymentRepo) ListPendingByUser(ctx context.Context, userID uuid.UUID) (
 // 	return payment, err
 // }
 
-func (r *PaymentRepo) UpdatePayment(
+func (r *paymentRepo) UpdatePayment(
 	ctx context.Context,
 	id uuid.UUID,
 	status PaymentStatus,
